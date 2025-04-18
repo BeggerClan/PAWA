@@ -14,12 +14,19 @@ import lombok.Data;
 public class Staff {
 @Id
     private int staff_id;
+    
     private String staff_usename;
+
     private int staff_nationID;
+
     private String staff_firstname;
+
     private String staff_lastname;
+
     private String staff_email;
+
     private String staff_password;
+    
     private String staff_phone;
     private String staff_address;
     private String staff_role;
