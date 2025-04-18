@@ -31,8 +31,4 @@ public class Staff {
     private String staff_address;
     private String staff_role;
     private LocalDate staff_birthday; 
-
-
-
-    
 }
