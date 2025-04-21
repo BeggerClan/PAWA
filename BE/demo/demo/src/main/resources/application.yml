@@ -1,0 +1,7 @@
+spring:
+  data:
+    mongodb:
+      uri: mongodb+srv://beggars:N6D8uhjyyQ5oUgSR@dba-cluster.wog0o99.mongodb.net/
+      database: MetroSystemPAWA
+server:
+  port: 8080
