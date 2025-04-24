@@ -30,6 +30,16 @@ public class SuspensionController {
         return suspensionRepo.findByLineId(lineId);
     }
 
+    @GetMapping("/trip/{tripId}")
+    public List<Suspension> getSuspensionsByTrip(@PathVariable String tripId) {
+        return suspensionRepo.findByTripId(tripId);
+    }
+
+    @GetMapping("/notification/{notificationId}")
+    public List<Suspension> getSuspensionsByNotification(@PathVariable String notificationId) {
+        return suspensionRepo.findByNotificationIdsContaining(notificationId);
+    }
+
     @PostMapping
     public Suspension createSuspension(@RequestBody Suspension suspension) {
         return suspensionRepo.save(suspension);

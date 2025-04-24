@@ -18,9 +18,9 @@ public class Suspension {
     private String reason;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
-    private List<Notification> notifications;
+    private List<String> notificationIds;
     
     public Suspension() {
-        this.notifications = new ArrayList<>();
+        this.notificationIds = new ArrayList<>();
     }
 }

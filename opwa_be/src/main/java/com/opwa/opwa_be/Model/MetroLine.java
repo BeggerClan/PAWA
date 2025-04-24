@@ -4,6 +4,8 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.index.Indexed;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 import lombok.Data;
 
@@ -20,11 +22,15 @@ public class MetroLine {
     private boolean status;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    private List<Station> stations;
+    private List<String> stationIds;
     private List<String> tripIds;
+    private LocalTime firstDepartureTime;
+    private int frequencyMinutes;
     
     public MetroLine() {
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
+        this.stationIds = new ArrayList<>();
+        this.tripIds = new ArrayList<>();
     }
 }

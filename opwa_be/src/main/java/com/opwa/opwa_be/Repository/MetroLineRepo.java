@@ -7,4 +7,5 @@ import java.util.List;
 public interface MetroLineRepo extends MongoRepository<MetroLine, String> {
     List<MetroLine> findByStatus(boolean status);
     MetroLine findByLineName(String lineName);
+    List<MetroLine> findByStationIdsContaining(String stationId);
 }
