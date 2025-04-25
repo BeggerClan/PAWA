@@ -1,4 +1,4 @@
-package com.begger.pawa.demo;
+package com.begger.pawa.demo.TicketPurchase;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
