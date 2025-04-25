@@ -1,5 +1,6 @@
 package com.begger.pawa.demo.Configuration;
 
+import io.jsonwebtoken.security.Keys;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -11,6 +12,7 @@ import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.web.SecurityFilterChain;
 
+import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
 
@@ -45,8 +47,9 @@ public class SecurityConfig {
 
     @Bean
     public JwtDecoder jwtDecoder(JwtProperties props) {
-        byte[] keyBytes = props.getSecret().getBytes(StandardCharsets.UTF_8);
-        SecretKeySpec key = new SecretKeySpec(keyBytes, "HmacSHA256");
+        SecretKey key = Keys.hmacShaKeyFor(
+                props.getSecret().getBytes(StandardCharsets.UTF_8)
+        );
         return NimbusJwtDecoder.withSecretKey(key).build();
     }
 }
