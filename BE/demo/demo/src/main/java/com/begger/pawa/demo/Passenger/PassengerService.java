@@ -67,6 +67,7 @@ public class PassengerService {
 
         // set default for missing attribute
         Instant now = Instant.now();
+        p.setPasswordChangedAt(now);
         p.setCreatedAt(now);
         p.setUpdatedAt(now);
         p.setVerified(false);

@@ -8,5 +8,4 @@ public interface PassengerRepository extends MongoRepository<Passenger, String> 
 
     Optional<Passenger> findByEmail(String email);
     Optional<Passenger> findByNationalId(String nationalId);
-
 }

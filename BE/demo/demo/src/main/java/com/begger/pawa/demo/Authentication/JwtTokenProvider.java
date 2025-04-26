@@ -55,6 +55,7 @@ public class JwtTokenProvider {
         claims.put("revolutionaryStatus", p.getRevolutionaryStatus());
         claims.put("verified", p.getVerified());
         claims.put("guest", p.getGuest());
+        claims.put("pwdChangedAt", p.getPasswordChangedAt().toString());
 
         // build 256 bit key from utf 8 secret
         SecretKey key = Keys.hmacShaKeyFor(
