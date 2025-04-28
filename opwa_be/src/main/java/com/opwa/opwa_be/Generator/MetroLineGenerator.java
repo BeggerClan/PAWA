@@ -46,7 +46,5 @@ public class MetroLineGenerator implements CommandLineRunner {
             "ST019", "ST020", "ST021", "ST022", "ST023"
         ));
         metroLineRepo.save(line2);
-
-        // Add more lines as needed...
     }
 }
