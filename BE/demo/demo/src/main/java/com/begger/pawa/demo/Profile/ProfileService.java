@@ -53,6 +53,7 @@ public class ProfileService {
                     }
             );
             p.setEmail(req.getEmail());
+            p.setPasswordChangedAt(Instant.now());
         }
 
         // update for address and phone
