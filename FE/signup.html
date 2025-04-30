@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PAWA - Sign Up</title>
+    <link rel="stylesheet" href="css/signup.css">
+</head>
+<body>
+    <div class="container">
+        <div class="left-panel">
+            <img src="assets/hcmc-metro-logo.png" alt="HCMC Metro Logo" class="metro-logo">
+        </div>
+        
+        <div class="right-panel">
+            <div class="form-container">
+                <h1 class="form-title">Sign Up</h1>
+                <p class="form-subtitle">Create your HCMC Metro account</p>
+                
+                <div id="responseMessage"></div>
+                
+                <form id="signupForm">
+                    <div class="form-row">
+                        <div class="form-group half">
+                            <input type="text" id="firstName" name="firstName" placeholder="First Name" required>
+                        </div>
+                        <div class="form-group half">
+                            <input type="text" id="lastName" name="lastName" placeholder="Last Name" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <input type="text" id="middleName" name="middleName" placeholder="Middle Name (optional)">
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group half">
+                            <input type="text" id="nationalId" name="nationalId" placeholder="National ID" required>
+                        </div>
+                        <div class="form-group half date-input">
+                            <input type="text" id="dob" name="dob" placeholder="dd/mm/yyyy, --:--" required>
+                            <span class="date-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                    <line x1="16" y1="2" x2="16" y2="6"></line>
+                                    <line x1="8" y1="2" x2="8" y2="6"></line>
+                                    <line x1="3" y1="10" x2="21" y2="10"></line>
+                                </svg>
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <input type="text" id="residenceAddress" name="residenceAddress" placeholder="Residence Address" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <input type="text" id="phoneNumber" name="phoneNumber" placeholder="Phone Number" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <input type="text" id="studentId" name="studentId" placeholder="Student ID (optional)">
+                    </div>
+                    
+                    <div class="form-group">
+                        <input type="email" id="email" name="email" placeholder="Email Address" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <input type="password" id="password" name="password" placeholder="Password" required>
+                    </div>
+                    
+                    <div class="form-row radio-groups">
+                        <div class="form-group half radio-group">
+                            <label>Disability Status</label>
+                            <div class="radio-options">
+                                <label class="radio-label">
+                                    <input type="radio" name="disabilityStatus" value="true" required>
+                                    <span class="radio-custom"></span>
+                                    Yes
+                                </label>
+                                <label class="radio-label">
+                                    <input type="radio" name="disabilityStatus" value="false" checked required>
+                                    <span class="radio-custom"></span>
+                                    No
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group half radio-group">
+                            <label>Revolutionary Status</label>
+                            <div class="radio-options">
+                                <label class="radio-label">
+                                    <input type="radio" name="revolutionaryStatus" value="true" required>
+                                    <span class="radio-custom"></span>
+                                    Yes
+                                </label>
+                                <label class="radio-label">
+                                    <input type="radio" name="revolutionaryStatus" value="false" checked required>
+                                    <span class="radio-custom"></span>
+                                    No
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn-primary">Create Account</button>
+                </form>
+                
+                <div class="form-footer">
+                    <p>Already have an account? <a href="signin.html">Sign In</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/auth-utils.js"></script>
+    <script src="js/signup.js"></script>
+</body>
+</html>
