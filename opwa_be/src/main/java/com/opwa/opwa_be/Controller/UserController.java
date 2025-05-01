@@ -33,7 +33,7 @@ public class UserController {
         List<String> roles = jwtService.extractRoles(token);
         System.out.println("Roles extracted: " + roles); // Debugging
 
-        if (roles.contains("ADMIN")) {
+        if (roles.contains("ROLE_ADMIN")) {
             var user = User.builder()
                     .firstName(request.getFirstName())
                     .lastName(request.getLastName())

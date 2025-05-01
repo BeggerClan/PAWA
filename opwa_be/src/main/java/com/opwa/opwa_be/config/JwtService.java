@@ -27,18 +27,13 @@ public class JwtService {
 
     public String generateTokenWithRoles(UserDetails userDetails, List<String> roles) {
         Map<String, Object> extraClaims = new HashMap<>();
-    
-        
-        // extraClaims.put("roles", roles.stream().map(role -> "ROLE_" + role).toList());
-    
-      
-        extraClaims.put("roles", roles);
-    
+        // Prefix roles with "ROLE_"
+        extraClaims.put("roles", roles.stream().map(role -> role.startsWith("ROLE_") ? role : "ROLE_" + role).toList());
         return Jwts.builder()
                 .setClaims(extraClaims)
                 .setSubject(userDetails.getUsername())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 24)) // 24-hour expiry
+                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 24))
                 .signWith(getSignInKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
