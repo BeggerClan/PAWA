@@ -8,6 +8,7 @@ import java.time.Instant;
 @Document(collection = "tickets")
 public class Ticket {
 
+
     @MongoId
     private ObjectId ticketId; // Mongo ObjectId
 

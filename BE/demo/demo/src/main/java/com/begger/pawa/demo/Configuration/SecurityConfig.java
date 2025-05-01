@@ -8,13 +8,22 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+<<<<<<< Updated upstream
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.OAuth2TokenValidator;
+=======
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.jwt.Jwt;
+>>>>>>> Stashed changes
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtValidators;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
+import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -26,14 +35,18 @@ import org.springframework.security.oauth2.core.OAuth2TokenValidator;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
-import java.util.Arrays;
-
 import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
+<<<<<<< Updated upstream
 import java.util.List;
 import java.util.stream.Collectors;
 
+=======
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
+>>>>>>> Stashed changes
 
 @Configuration
 public class SecurityConfig {
@@ -43,10 +56,10 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-    //permit to call POST
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
+<<<<<<< Updated upstream
                 .cors(Customizer.withDefaults()) // Enable CORS with the corsConfigurationSource bean
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
@@ -69,17 +82,35 @@ public class SecurityConfig {
                         .jwt(jwt -> jwt
                                 .jwtAuthenticationConverter(jwtAuthConverter()))
                 );
+=======
+            .cors(Customizer.withDefaults())
+            .csrf(csrf -> csrf.disable())
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers(
+                    HttpMethod.POST,
+                    "/api/passengers/register",
+                    "/api/auth/login"
+                ).permitAll()
+                .requestMatchers("/error").permitAll()
+                .requestMatchers("/api/cart/**", "/api/tickets/**", "/api/wallet/**").hasRole("PASSENGER")
+                .anyRequest().authenticated()
+            )
+            .oauth2ResourceServer(oauth -> oauth
+                .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter()))
+            );
+>>>>>>> Stashed changes
 
         return http.build();
     }
-     @Bean
+
+    @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(Arrays.asList("http://127.0.0.1:5500"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setAllowCredentials(true);
-        
+
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
@@ -102,11 +133,9 @@ public class SecurityConfig {
 
     @Bean
     public JwtDecoder jwtDecoder(JwtProperties props, PassengerRepository passengerRepo) {
-        SecretKey key = Keys.hmacShaKeyFor(
-                props.getSecret().getBytes(StandardCharsets.UTF_8)
-        );
-
+        SecretKey key = Keys.hmacShaKeyFor(props.getSecret().getBytes(StandardCharsets.UTF_8));
         NimbusJwtDecoder decoder = NimbusJwtDecoder.withSecretKey(key).build();
+<<<<<<< Updated upstream
 
         // default validator to check exp
         OAuth2TokenValidator<Jwt> defaultValidator = JwtValidators.createDefault();
@@ -120,6 +149,24 @@ public class SecurityConfig {
 
         decoder.setJwtValidator(combined);
 
+=======
+        decoder.setJwtValidator(new PasswordTimestampValidator(passengerRepo));
+>>>>>>> Stashed changes
         return decoder;
+    }
+
+    @Bean
+    public JwtAuthenticationConverter jwtAuthenticationConverter() {
+        JwtAuthenticationConverter converter = new JwtAuthenticationConverter();
+
+        converter.setJwtGrantedAuthoritiesConverter(jwt -> {
+            String role = jwt.getClaimAsString("role");
+            if (role != null) {
+                return List.of(new SimpleGrantedAuthority("ROLE_" + role.toUpperCase()));
+            }
+            return Collections.emptyList();
+        });
+
+        return converter;
     }
 }
