@@ -1,0 +1,296 @@
+/* signup.css */
+:root {
+  --primary-color: #00e5bb;
+  --primary-hover: #00c9a5;
+  --dark-bg: #171e27;
+  --light-text: #ffffff;
+  --secondary-text: #b0b8c1;
+  --input-bg: #212a39;
+  --border-radius: 8px;
+  --box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  --transition: all 0.3s ease;
+  --blue-accent: #0057b8;
+  --gradient-start: #00e5bb;
+  --gradient-end: #00a1e5;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Segoe UI', Arial, sans-serif;
+}
+
+body {
+  background: var(--dark-bg);
+  color: var(--light-text);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.container {
+  width: 100%;
+  height: 100vh;
+  display: flex;
+}
+
+.left-panel {
+  flex: 1;
+  background: linear-gradient(135deg, var(--gradient-start) 0%, var(--gradient-end) 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.metro-logo {
+  width: 60%;
+  max-width: 300px;
+  height: auto;
+}
+
+.right-panel {
+  flex: 1;
+  background-color: var(--dark-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.form-container {
+  width: 100%;
+  max-width: 500px;
+  padding: 20px;
+}
+
+.form-title {
+  font-size: 34px;
+  font-weight: 600;
+  margin-bottom: 5px;
+  color: var(--light-text);
+}
+
+.form-subtitle {
+  color: var(--secondary-text);
+  margin-bottom: 25px;
+  font-size: 15px;
+}
+
+.form-group {
+  margin-bottom: 15px;
+  width: 100%;
+  position: relative;
+}
+
+.form-row {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 0;
+}
+
+.half {
+  flex: 1;
+}
+
+input {
+  width: 100%;
+  padding: 14px;
+  background-color: var(--input-bg);
+  border: none;
+  border-radius: var(--border-radius);
+  color: var(--light-text);
+  font-size: 15px;
+  transition: var(--transition);
+}
+
+input:focus {
+  outline: 2px solid var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(0, 229, 187, 0.3);
+}
+
+input::placeholder {
+  color: var(--secondary-text);
+}
+
+.date-input {
+  position: relative;
+}
+
+.date-icon {
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--secondary-text);
+  pointer-events: none;
+}
+
+.radio-groups {
+  margin-top: 5px;
+  margin-bottom: 15px;
+}
+
+.radio-group label {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--light-text);
+  font-size: 15px;
+}
+
+.radio-options {
+  display: flex;
+  gap: 20px;
+}
+
+.radio-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  color: var(--secondary-text);
+  font-size: 14px;
+}
+
+/* Custom radio buttons */
+input[type="radio"] {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.radio-custom {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid var(--secondary-text);
+  position: relative;
+}
+
+input[type="radio"]:checked + .radio-custom::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: var(--primary-color);
+}
+
+input[type="radio"]:focus + .radio-custom {
+  box-shadow: 0 0 0 3px rgba(0, 229, 187, 0.3);
+}
+
+.btn-primary {
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: var(--border-radius);
+  background-color: var(--primary-color);
+  color: var(--dark-bg);
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  margin-top: 5px;
+}
+
+.btn-primary:hover {
+  background-color: var(--primary-hover);
+  transform: translateY(-2px);
+}
+
+.form-footer {
+  margin-top: 15px;
+  text-align: center;
+  color: var(--secondary-text);
+  font-size: 14px;
+}
+
+.form-footer a {
+  color: var(--primary-color);
+  text-decoration: none;
+  font-weight: 600;
+  transition: var(--transition);
+}
+
+.form-footer a:hover {
+  text-decoration: underline;
+}
+
+.alert {
+  padding: 15px;
+  border-radius: var(--border-radius);
+  margin-bottom: 20px;
+  font-size: 14px;
+}
+
+.alert-success {
+  background-color: rgba(76, 175, 80, 0.2);
+  color: #4caf50;
+  border: 1px solid rgba(76, 175, 80, 0.5);
+}
+
+.alert-danger {
+  background-color: rgba(220, 53, 69, 0.2);
+  color: #ff6b81;
+  border: 1px solid rgba(220, 53, 69, 0.5);
+}
+
+/* Animation for errors */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+  20%, 40%, 60%, 80% { transform: translateX(5px); }
+}
+
+.shake {
+  animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+}
+
+/* Responsive styles */
+@media (max-width: 992px) {
+  .container {
+      flex-direction: column;
+  }
+  
+  .left-panel {
+      height: 180px;
+  }
+  
+  .metro-logo {
+      width: 50%;
+      max-width: 200px;
+  }
+  
+  .right-panel {
+      padding: 20px 15px;
+  }
+  
+  .form-row {
+      flex-direction: column;
+      gap: 15px;
+  }
+}
+
+@media (max-width: 576px) {
+  .left-panel {
+      height: 150px;
+  }
+  
+  .form-container {
+      padding: 10px;
+  }
+  
+  .form-title {
+      font-size: 28px;
+  }
+}

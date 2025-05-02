@@ -1,0 +1,257 @@
+/* signin.css */
+:root {
+    --primary-color: #00e5bb;
+    --primary-hover: #00c9a5;
+    --dark-bg: #171e27;
+    --light-text: #ffffff;
+    --secondary-text: #b0b8c1;
+    --input-bg: #212a39;
+    --border-radius: 8px;
+    --box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    --transition: all 0.3s ease;
+    --blue-accent: #0057b8;
+    --gradient-start: #00e5bb;
+    --gradient-end: #00a1e5;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Arial, sans-serif;
+}
+
+body {
+    background: var(--dark-bg);
+    color: var(--light-text);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.container {
+    width: 100%;
+    height: 100vh;
+    display: flex;
+}
+
+.left-panel {
+    flex: 1;
+    background: linear-gradient(135deg, var(--gradient-start) 0%, var(--gradient-end) 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.metro-logo {
+    width: 80%;
+    max-width: 400px;
+    height: auto;
+}
+
+.right-panel {
+    flex: 1;
+    background-color: var(--dark-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+}
+
+.form-container {
+    width: 100%;
+    max-width: 400px;
+    padding: 20px;
+}
+
+.form-title {
+    font-size: 36px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    color: var(--light-text);
+}
+
+.form-subtitle {
+    color: var(--secondary-text);
+    margin-bottom: 30px;
+    font-size: 16px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+input {
+    width: 100%;
+    padding: 15px;
+    background-color: var(--input-bg);
+    border: none;
+    border-radius: var(--border-radius);
+    color: var(--light-text);
+    font-size: 16px;
+    transition: var(--transition);
+}
+
+input:focus {
+    outline: 2px solid var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(0, 229, 187, 0.3);
+}
+
+input::placeholder {
+    color: var(--secondary-text);
+}
+
+.btn-primary {
+    width: 100%;
+    padding: 15px;
+    border: none;
+    border-radius: var(--border-radius);
+    background-color: var(--primary-color);
+    color: var(--dark-bg);
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    margin-top: 10px;
+    text-align: center;
+}
+
+.btn-primary:hover {
+    background-color: var(--primary-hover);
+    transform: translateY(-2px);
+}
+
+.btn-google {
+    width: 100%;
+    padding: 15px;
+    border: 1px solid var(--secondary-text);
+    border-radius: var(--border-radius);
+    background-color: transparent;
+    color: var(--light-text);
+    font-size: 16px;
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.btn-google:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.btn-google img {
+    width: 20px;
+    height: 20px;
+}
+
+.separator {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    margin: 30px 0;
+}
+
+.separator::before,
+.separator::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid var(--secondary-text);
+}
+
+.separator span {
+    padding: 0 15px;
+    color: var(--secondary-text);
+    font-size: 14px;
+}
+
+.form-footer {
+    margin-top: 20px;
+    text-align: center;
+    color: var(--secondary-text);
+}
+
+.form-footer a {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 600;
+    transition: var(--transition);
+}
+
+.form-footer a:hover {
+    text-decoration: underline;
+}
+
+.alert {
+    padding: 15px;
+    border-radius: var(--border-radius);
+    margin-bottom: 20px;
+    font-size: 14px;
+}
+
+.alert-danger {
+    background-color: rgba(220, 53, 69, 0.2);
+    color: #ff6b81;
+    border: 1px solid rgba(220, 53, 69, 0.5);
+}
+
+/* Animation for errors */
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+    20%, 40%, 60%, 80% { transform: translateX(5px); }
+}
+
+.shake {
+    animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+}
+
+/* Animation for success */
+@keyframes success-pulse {
+    0% { box-shadow: 0 0 0 0 rgba(0, 229, 187, 0.7); }
+    70% { box-shadow: 0 0 0 15px rgba(0, 229, 187, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(0, 229, 187, 0); }
+}
+
+.login-success .btn-primary {
+    animation: success-pulse 0.75s;
+}
+
+/* Responsive styles */
+@media (max-width: 992px) {
+    .container {
+        flex-direction: column;
+    }
+    
+    .left-panel {
+        height: 200px;
+    }
+    
+    .metro-logo {
+        width: 60%;
+        max-width: 250px;
+    }
+    
+    .right-panel {
+        padding: 30px 20px;
+    }
+}
+
+@media (max-width: 576px) {
+    .left-panel {
+        height: 150px;
+    }
+    
+    .form-container {
+        padding: 10px;
+    }
+    
+    .form-title {
+        font-size: 28px;
+    }
+}

@@ -4,6 +4,8 @@ import com.begger.pawa.demo.Passenger.Passenger;
 import com.begger.pawa.demo.Passenger.PassengerRegistrationRequest;
 import com.begger.pawa.demo.Passenger.PassengerRepository;
 
+import com.begger.pawa.demo.Wallet.PassengerWallet;
+import com.begger.pawa.demo.Wallet.WalletRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -18,10 +20,12 @@ public class PassengerService {
 
     private final PassengerRepository repo;
     private final PasswordEncoder passwordEncoder;
+    private final WalletRepository walletRepo;
 
-    public PassengerService(PassengerRepository repo, PasswordEncoder passwordEncoder) {
+    public PassengerService(PassengerRepository repo, PasswordEncoder passwordEncoder, WalletRepository walletRepo) {
         this.repo = repo;
         this.passwordEncoder = passwordEncoder;
+        this.walletRepo = walletRepo;
     }
 
     /**
@@ -63,13 +67,26 @@ public class PassengerService {
 
         // set default for missing attribute
         Instant now = Instant.now();
+        p.setPasswordChangedAt(now);
         p.setCreatedAt(now);
         p.setUpdatedAt(now);
         p.setVerified(false);
         p.setGuest(false);
 
-        // google account and tickID is null for now
+        // save passenger
+        Passenger saved = repo.save(p);
 
-        return repo.save(p);
+        // create wallet with zero balance
+        PassengerWallet wallet = new PassengerWallet();
+        wallet.setPassengerId(saved.getPassengerId());
+        wallet.setBalance(0L);
+        wallet.setCreatedAt(now);
+        wallet.setUpdatedAt(now);
+
+        walletRepo.save(wallet);
+
+        return saved;
+
+
     }
 }

@@ -1,27 +1,15 @@
-package com.begger.pawa.demo.Passenger;
+package com.begger.pawa.demo.Profile;
+import com.begger.pawa.demo.Passenger.Passenger;
 
-import lombok.Data;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
 import java.time.Instant;
 import java.time.LocalDateTime;
 
-@Data
-@Document("Passenger")
-public class Passenger {
-
-    //UUID
-    @Id
+public class ProfileResponse {
     private String passengerId;
-
-    // password need to be harsh
     private String email;
-    private String password;
-
     private String firstName;
     private String middleName;
     private String lastName;
-
     private String nationalId;
     private LocalDateTime dob;
     private String residenceAddress;
@@ -29,25 +17,28 @@ public class Passenger {
     private String studentId;
     private Boolean disabilityStatus;
     private Boolean revolutionaryStatus;
-
-
     private Instant createdAt;
     private Instant updatedAt;
-    private String googleAccountId;
-    private Boolean isGoogleLinked;
-    private String ticketId;
-    private Boolean isVerified;
-    private Boolean isGuest;
+    private long walletBalance;
 
-    // track for when system change email or password
-    private Instant passwordChangedAt;
-
-    public Instant getPasswordChangedAt() {
-        return passwordChangedAt;
-    }
-
-    public void setPasswordChangedAt(Instant passwordChangedAt) {
-        this.passwordChangedAt = passwordChangedAt;
+    public static ProfileResponse fromEntities(Passenger p, long balance) {
+        ProfileResponse dto = new ProfileResponse();
+        dto.passengerId = p.getPassengerId();
+        dto.email = p.getEmail();
+        dto.firstName = p.getFirstName();
+        dto.middleName = p.getMiddleName();
+        dto.lastName = p.getLastName();
+        dto.nationalId = p.getNationalId();
+        dto.dob = p.getDob();
+        dto.residenceAddress = p.getResidenceAddress();
+        dto.phoneNumber = p.getPhoneNumber();
+        dto.studentId = p.getStudentId();
+        dto.disabilityStatus = p.getDisabilityStatus();
+        dto.revolutionaryStatus = p.getRevolutionaryStatus();
+        dto.createdAt = p.getCreatedAt();
+        dto.updatedAt = p.getUpdatedAt();
+        dto.walletBalance = balance;
+        return dto;
     }
 
     public String getPassengerId() {
@@ -64,14 +55,6 @@ public class Passenger {
 
     public void setEmail(String email) {
         this.email = email;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
     }
 
     public String getFirstName() {
@@ -170,43 +153,11 @@ public class Passenger {
         this.updatedAt = updatedAt;
     }
 
-    public String getGoogleAccountId() {
-        return googleAccountId;
+    public long getWalletBalance() {
+        return walletBalance;
     }
 
-    public void setGoogleAccountId(String googleAccountId) {
-        this.googleAccountId = googleAccountId;
-    }
-
-    public Boolean getGoogleLinked() {
-        return isGoogleLinked;
-    }
-
-    public void setGoogleLinked(Boolean googleLinked) {
-        isGoogleLinked = googleLinked;
-    }
-
-    public String getTicketId() {
-        return ticketId;
-    }
-
-    public void setTicketId(String ticketId) {
-        this.ticketId = ticketId;
-    }
-
-    public Boolean getVerified() {
-        return isVerified;
-    }
-
-    public void setVerified(Boolean verified) {
-        isVerified = verified;
-    }
-
-    public Boolean getGuest() {
-        return isGuest;
-    }
-
-    public void setGuest(Boolean guest) {
-        isGuest = guest;
+    public void setWalletBalance(long walletBalance) {
+        this.walletBalance = walletBalance;
     }
 }
