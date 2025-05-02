@@ -1,5 +1,8 @@
 package com.begger.pawa.demo.Configuration;
 
+import com.begger.pawa.demo.Authentication.PasswordTimestampValidator;
+import com.begger.pawa.demo.Passenger.PassengerRepository;
+import io.jsonwebtoken.security.Keys;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -16,6 +19,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Arrays;
 
+import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
 
@@ -63,9 +67,16 @@ public class SecurityConfig {
     }
 
     @Bean
-    public JwtDecoder jwtDecoder(JwtProperties props) {
-        byte[] keyBytes = props.getSecret().getBytes(StandardCharsets.UTF_8);
-        SecretKeySpec key = new SecretKeySpec(keyBytes, "HmacSHA256");
-        return NimbusJwtDecoder.withSecretKey(key).build();
+    public JwtDecoder jwtDecoder(JwtProperties props, PassengerRepository passengerRepo) {
+        SecretKey key = Keys.hmacShaKeyFor(
+                props.getSecret().getBytes(StandardCharsets.UTF_8)
+        );
+
+        NimbusJwtDecoder decoder = NimbusJwtDecoder.withSecretKey(key).build();
+
+
+        decoder.setJwtValidator(new PasswordTimestampValidator(passengerRepo));
+
+        return decoder;
     }
 }

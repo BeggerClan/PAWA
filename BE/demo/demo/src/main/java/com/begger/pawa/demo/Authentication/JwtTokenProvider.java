@@ -5,9 +5,12 @@ import com.begger.pawa.demo.Configuration.JwtProperties;
 import com.begger.pawa.demo.Passenger.PassengerRepository;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.security.Keys;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Component;
 
+import javax.crypto.SecretKey;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -52,15 +55,23 @@ public class JwtTokenProvider {
         claims.put("revolutionaryStatus", p.getRevolutionaryStatus());
         claims.put("verified", p.getVerified());
         claims.put("guest", p.getGuest());
+        claims.put("pwdChangedAt", p.getPasswordChangedAt().toString());
+
+        // build 256 bit key from utf 8 secret
+        SecretKey key = Keys.hmacShaKeyFor(
+                props.getSecret().getBytes(StandardCharsets.UTF_8)
+        );
 
         // create and sign the jwt
         return Jwts.builder()
-                .setSubject(p.getEmail())
+                .setSubject(p.getPassengerId())
                 .setIssuedAt(now)
                 .setExpiration(expiry)
                 .addClaims(claims)
-                .signWith(SignatureAlgorithm.HS256, props.getSecret())
+                .signWith(key ,SignatureAlgorithm.HS256)
                 .compact();
+
+
     }
 
 }
