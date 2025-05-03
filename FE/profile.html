@@ -3,47 +3,48 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PAWA - Passenger Profile</title>
-    <link rel="stylesheet" href="CSS/dashboard.css">
-    <link rel="stylesheet" href="CSS/profile.css">
-    <!-- Add Font Awesome for better icons -->
+    <title>HCMC Metro - Passenger Profile</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="CSS/home.css">
+    <link rel="stylesheet" href="CSS/profile.css">
 </head>
 <body>
-    <nav class="navbar">
-        <div class="container">
-            <a class="navbar-brand" href="index.html">
-                <img src="assets/hcmc-metro-logo.png" alt="HCMC Metro" height="40">
+    <!-- Navbar matching homepage -->
+    <nav class="navbar navbar-expand-lg navbar-dark custom-navbar fixed-top px-4">
+        <div class="container-fluid position-relative w-100">
+            <!-- Logo aligned left -->
+            <a class="logo-left d-flex align-items-center" href="home.html">
+                <img src="assets/hcmc-metro-logo.png" alt="Logo" height="40">
             </a>
-            <button class="navbar-toggler" id="navbar-toggle">
-                <i class="fas fa-bars"></i>
+            
+            <!-- Centered Brand Text -->
+            <div class="brand-center-text text-white fw-bold">HCMC METRO</div>
+            
+            <!-- Right-side nav links -->
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
             </button>
             
-            <div class="navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto">
+            <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item"><a class="nav-link nav-hover" href="home.html">Home</a></li>
+                    <li class="nav-item"><a class="nav-link nav-hover" href="metro-lines.html">Metro Lines</a></li>
+                    <li class="nav-item"><a class="nav-link nav-hover" href="my-tickets.html">My Tickets</a></li>
+                    <li class="nav-item"><a class="nav-link nav-hover active" href="profile.html">Profile</a></li>
                     <li class="nav-item">
-                        <a class="nav-link" href="index.html"><i class="fas fa-home"></i> Home</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#"><i class="fas fa-subway"></i> Metro Lines</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#"><i class="fas fa-ticket-alt"></i> My Tickets</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#"><i class="fas fa-wallet"></i> Wallet</a>
+                        <button id="logout-btn" class="btn btn-outline-light btn-sm">Sign Out</button>
                     </li>
                 </ul>
-                
-                <div class="d-flex">
-                    <button id="profile-btn" class="btn btn-light me-2 active"><i class="fas fa-user"></i> Profile</button>
-                    <button id="logout-btn" class="btn btn-outline-light"><i class="fas fa-sign-out-alt"></i> Logout</button>
-                </div>
             </div>
         </div>
     </nav>
 
-    <div class="container mt-4 page-transition">
+    <!-- Main Content -->
+    <div class="container mt-5 pt-5">
         <div class="alert" id="alertMessage" style="display: none;"></div>
         
         <div class="row">
@@ -181,15 +182,15 @@
                     <div class="card-body">
                         <div class="quick-action-buttons">
                             <a href="#" class="btn btn-primary btn-block"><i class="fas fa-shopping-cart"></i> Buy New Ticket</a>
-                            <a href="#" class="btn btn-secondary btn-block"><i class="fas fa-ticket-alt"></i> My Tickets</a>
-                            <a href="#" class="btn btn-light btn-block"><i class="fas fa-route"></i> Plan Journey</a>
+                            <a href="my-tickets.html" class="btn btn-secondary btn-block"><i class="fas fa-ticket-alt"></i> My Tickets</a>
+                            <a href="metro-lines.html" class="btn btn-light btn-block"><i class="fas fa-route"></i> Plan Journey</a>
                         </div>
                     </div>
                 </div>
                 
                 <div class="card account-info-card">
                     <div class="card-header">
-                        <h3><i class="fas fa-info-circle"></i> Account Info</h3>
+                        <h3><i class="fas fa-info-circle"></i> Account Benefits</h3>
                     </div>
                     <div class="card-body">
                         <p>As a registered passenger, you have access to:</p>
@@ -215,46 +216,51 @@
         </div>
     </div>
 
-    <footer class="footer">
+    <!-- Footer Section -->
+    <footer class="container-fluid bg-dark text-white mt-5 py-4">
         <div class="container">
             <div class="row">
                 <div class="col-md-4">
-                    <h4>HCMC Metro</h4>
+                    <h5>HCMC Metro</h5>
                     <p>Your gateway to efficient, modern urban transportation in Ho Chi Minh City.</p>
-                    <div class="social-links">
-                        <a href="#" class="social-link"><i class="fab fa-facebook"></i></a>
-                        <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
-                        <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
+                    <div class="d-flex gap-3 mb-3">
+                        <a href="#" class="text-white"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="text-white"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="text-white"><i class="fab fa-instagram"></i></a>
                     </div>
                 </div>
                 
                 <div class="col-md-4">
-                    <h4>Quick Links</h4>
-                    <ul class="footer-links">
-                        <li><a href="#">Metro Lines</a></li>
-                        <li><a href="#">Ticket Information</a></li>
-                        <li><a href="#">Schedules</a></li>
-                        <li><a href="#">Service Updates</a></li>
-                        <li><a href="#">Help & Support</a></li>
+                    <h5>Quick Links</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="metro-lines.html" class="text-white text-decoration-none">Metro Lines</a></li>
+                        <li><a href="#" class="text-white text-decoration-none">Ticket Information</a></li>
+                        <li><a href="#" class="text-white text-decoration-none">Schedules</a></li>
+                        <li><a href="#" class="text-white text-decoration-none">Service Updates</a></li>
                     </ul>
                 </div>
                 
                 <div class="col-md-4">
-                    <h4>Contact</h4>
-                    <address>
-                        <p><i class="fas fa-map-marker-alt"></i> 123 Nguyen Hue Boulevard,<br>District 1, Ho Chi Minh City</p>
-                        <p><i class="fas fa-phone"></i> Customer Service: (028) 1234-5678</p>
-                        <p><i class="fas fa-envelope"></i> info@hcmcmetro.vn</p>
+                    <h5>Contact</h5>
+                    <address class="mb-0">
+                        <p class="mb-1"><i class="fas fa-map-marker-alt me-2"></i> 123 Nguyen Hue Boulevard, District 1, HCMC</p>
+                        <p class="mb-1"><i class="fas fa-phone me-2"></i> (028) 1234-5678</p>
+                        <p class="mb-1"><i class="fas fa-envelope me-2"></i> info@hcmcmetro.vn</p>
                     </address>
                 </div>
             </div>
             
-            <div class="footer-bottom">
-                <p>&copy; 2025 HCMC Metro. All rights reserved.</p>
+            <div class="row mt-3 pt-3 border-top border-secondary">
+                <div class="col-12 text-center">
+                    <p class="mb-0">&copy; 2025 HCMC Metro. All rights reserved.</p>
+                </div>
             </div>
         </div>
     </footer>
 
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom JS -->
     <script src="js/auth-utils.js"></script>
     <script src="js/profile.js"></script>
 </body>

@@ -1,44 +1,60 @@
-/* profile.css - Styles for the passenger profile page */
+/* updated profile.css - Matching homepage style */
 :root {
-    --primary-blue: #1a73e8;
-    --primary-blue-hover: #1557b0;
-    --accent-green: #00e5bb;
-    --accent-hover: #00c9a5;
+    --gradient-start: #00e5bb;
+    --gradient-end: #00a1e5;
     --dark-bg: #171e27;
     --light-text: #ffffff;
     --secondary-text: #b0b8c1;
-    --input-bg: #212a39;
+    --primary-color: #00e5bb;
+    --primary-hover: #00c9a5;
     --border-radius: 8px;
-    --box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
     --transition: all 0.3s ease;
+}
+
+body {
+    padding-top: 70px;
+    background-color: #f8f9fa;
+    color: #333;
+    font-family: 'Segoe UI', Arial, sans-serif;
 }
 
 /* Profile Card Styling */
 .profile-card {
     margin-bottom: 2rem;
+    border-radius: var(--border-radius);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     transition: var(--transition);
 }
 
+.profile-card:hover {
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px);
+}
+
 .profile-card .card-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+    padding: 1.25rem 1.5rem;
+    background: linear-gradient(to right, var(--gradient-start), var(--gradient-end));
+    color: white;
+    border-top-left-radius: var(--border-radius);
+    border-top-right-radius: var(--border-radius);
 }
 
 .profile-card .card-header h3 {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.75rem;
     margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
 }
 
 .profile-card .card-header h3 i {
-    color: var(--primary-blue);
+    font-size: 1.5rem;
 }
 
 /* Profile Info Styling */
 .profile-info {
-    padding: 1rem 0;
+    padding: 1.5rem;
 }
 
 .profile-section {
@@ -54,14 +70,15 @@
 }
 
 .profile-section h4 {
-    color: var(--primary-blue);
+    color: var(--primary-color);
     margin-bottom: 1rem;
     font-size: 1.1rem;
+    font-weight: 600;
 }
 
 .info-row {
     display: flex;
-    margin-bottom: 0.75rem;
+    margin-bottom: 1rem;
 }
 
 .info-label {
@@ -76,7 +93,7 @@
 
 /* Form Styling for Edit Profile */
 .edit-profile-form {
-    padding: 1rem 0;
+    padding: 1.5rem;
 }
 
 .form-section {
@@ -84,9 +101,10 @@
 }
 
 .form-section h4 {
-    color: var(--primary-blue);
+    color: var(--primary-color);
     margin-bottom: 1rem;
     font-size: 1.1rem;
+    font-weight: 600;
 }
 
 .form-group {
@@ -110,8 +128,8 @@
 }
 
 .form-group input:focus {
-    border-color: var(--primary-blue);
-    box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.2);
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(0, 229, 187, 0.2);
     outline: none;
 }
 
@@ -153,13 +171,13 @@
 
 /* Wallet Card enhancements */
 .wallet-card {
-    background: linear-gradient(135deg, var(--primary-blue) 0%, #0d47a1 100%);
+    background: linear-gradient(135deg, var(--gradient-start) 0%, var(--gradient-end) 100%);
     border-radius: var(--border-radius);
-    padding: 1.5rem;
+    padding: 2rem 1.5rem;
     color: white;
     margin-bottom: 1.5rem;
     text-align: center;
-    box-shadow: 0 4px 20px rgba(26, 115, 232, 0.3);
+    box-shadow: 0 4px 20px rgba(0, 229, 187, 0.3);
 }
 
 .wallet-icon {
@@ -175,7 +193,7 @@
 }
 
 .wallet-balance {
-    font-size: 2.5rem;
+    font-size: 2.25rem;
     font-weight: 700;
     margin: 1rem 0;
 }
@@ -183,7 +201,7 @@
 .wallet-actions {
     display: flex;
     gap: 1rem;
-    margin-top: 1rem;
+    margin-top: 1.5rem;
 }
 
 .wallet-btn {
@@ -208,10 +226,36 @@
 }
 
 /* Quick access card */
-.quick-access-card .card-body {
+.quick-access-card, .account-info-card {
+    border-radius: var(--border-radius);
+    margin-bottom: 1.5rem;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    transition: var(--transition);
+}
+
+.quick-access-card:hover, .account-info-card:hover {
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px);
+}
+
+.quick-access-card .card-header, .account-info-card .card-header {
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid #eee;
+    background-color: #f8f9fa;
+}
+
+.quick-access-card .card-header h3, .account-info-card .card-header h3 {
     display: flex;
-    flex-direction: column;
-    gap: 1rem;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #333;
+}
+
+.quick-access-card .card-body, .account-info-card .card-body {
+    padding: 1.5rem;
 }
 
 .btn-block {
@@ -220,25 +264,31 @@
     margin-bottom: 0.75rem;
     text-align: center;
     text-decoration: none;
+    padding: 0.75rem;
+    border-radius: var(--border-radius);
+    transition: var(--transition);
 }
 
 .btn-primary {
-    background-color: var(--primary-blue);
+    background-color: var(--primary-color);
     color: white;
+    border: none;
 }
 
 .btn-primary:hover {
-    background-color: var(--primary-blue-hover);
+    background-color: var(--primary-hover);
+    transform: translateY(-2px);
 }
 
 .btn-secondary {
     background-color: white;
-    color: var(--primary-blue);
-    border: 1px solid var(--primary-blue);
+    color: var(--primary-color);
+    border: 1px solid var(--primary-color);
 }
 
 .btn-secondary:hover {
-    background-color: rgba(26, 115, 232, 0.05);
+    background-color: rgba(0, 229, 187, 0.05);
+    transform: translateY(-2px);
 }
 
 .btn-light {
@@ -249,13 +299,10 @@
 
 .btn-light:hover {
     background-color: #e9ecef;
+    transform: translateY(-2px);
 }
 
 /* Account Info Card */
-.account-info-card .card-body p {
-    margin-bottom: 1rem;
-}
-
 .account-features {
     list-style: none;
     padding-left: 0;
@@ -267,10 +314,11 @@
     align-items: center;
     gap: 0.75rem;
     margin-bottom: 0.75rem;
+    color: #555;
 }
 
 .account-features li i {
-    color: var(--accent-green);
+    color: var(--primary-color);
 }
 
 .special-status {
@@ -300,6 +348,47 @@
     font-size: 0.9rem;
 }
 
+/* Navbar styling - from home.css but included here for consistency */
+.custom-navbar {
+    background: linear-gradient(to right, var(--gradient-start), var(--gradient-end));
+    z-index: 1030;
+}
+
+.fixed-top {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+}
+
+.logo-left {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    padding-left: 1rem;
+}
+
+.brand-center-text {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+.navbar-nav .nav-link.nav-hover {
+    transition: background-color 0.3s ease;
+    border-radius: 4px;
+    padding: 8px 12px;
+}
+
+.navbar-nav .nav-link.nav-hover:hover {
+    background-color: var(--dark-bg);
+    color: #ffffff !important;
+}
+
 /* Animations */
 @keyframes fadeIn {
     from {
@@ -312,8 +401,24 @@
     }
 }
 
-.page-loaded .page-transition {
+.page-loaded .profile-card,
+.page-loaded .wallet-card,
+.page-loaded .quick-access-card,
+.page-loaded .account-info-card {
     animation: fadeIn 0.3s ease-out forwards;
+    animation-delay: calc(var(--animation-order) * 0.1s);
+}
+
+.wallet-card {
+    --animation-order: 2;
+}
+
+.quick-access-card {
+    --animation-order: 3;
+}
+
+.account-info-card {
+    --animation-order: 4;
 }
 
 /* Responsive adjustments */
@@ -337,5 +442,9 @@
     
     .form-actions button {
         width: 100%;
+    }
+
+    .brand-center-text {
+        font-size: 1.2rem;
     }
 }

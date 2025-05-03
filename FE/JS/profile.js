@@ -5,32 +5,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (!isLoggedIn()) {
         window.location.href = 'signin.html';
         return;
-    
-// Function to format currency
-function formatCurrency(amount) {
-    return new Intl.NumberFormat('vi-VN', {
-        style: 'currency',
-        currency: 'VND',
-        maximumFractionDigits: 0
-    }).format(amount);
-}
-
-// Function to show alert message
-function showAlert(message, type) {
-    const alertElement = document.getElementById('alertMessage');
-    
-    if (alertElement) {
-        alertElement.className = `alert alert-${type}`;
-        alertElement.textContent = message;
-        alertElement.style.display = 'block';
-        
-        // Auto-hide after 5 seconds
-        setTimeout(() => {
-            alertElement.style.display = 'none';
-        }, 5000);
     }
-}
-}
     
     // Add loading class to body for animations
     document.body.classList.add('page-loaded');
@@ -78,16 +53,6 @@ function showAlert(message, type) {
         });
     }
     
-    // Navbar toggle functionality
-    const navbarToggle = document.getElementById('navbar-toggle');
-    const navbarCollapse = document.getElementById('navbarNav');
-    
-    if (navbarToggle) {
-        navbarToggle.addEventListener('click', function() {
-            navbarCollapse.classList.toggle('show');
-        });
-    }
-    
     // Logout button
     const logoutBtn = document.getElementById('logout-btn');
     if (logoutBtn) {
@@ -97,9 +62,40 @@ function showAlert(message, type) {
     }
 });
 
+// Function to format currency
+function formatCurrency(amount) {
+    return new Intl.NumberFormat('vi-VN', {
+        style: 'currency',
+        currency: 'VND',
+        maximumFractionDigits: 0
+    }).format(amount);
+}
+
+// Function to show alert message
+function showAlert(message, type) {
+    const alertElement = document.getElementById('alertMessage');
+    
+    if (alertElement) {
+        alertElement.className = `alert alert-${type}`;
+        alertElement.textContent = message;
+        alertElement.style.display = 'block';
+        
+        // Auto-hide after 5 seconds
+        setTimeout(() => {
+            alertElement.style.display = 'none';
+        }, 5000);
+    }
+}
+
 // Function to load profile data from API
 async function loadProfileData() {
     try {
+        // Show loading indicators
+        const loadingElements = document.querySelectorAll('.info-value');
+        loadingElements.forEach(el => {
+            el.innerHTML = '<div class="spinner-border spinner-border-sm text-primary" role="status"><span class="visually-hidden">Loading...</span></div>';
+        });
+        
         // Get profile data from API
         const response = await fetch('http://localhost:8080/api/passengers/profile', {
             method: 'GET',
@@ -194,10 +190,16 @@ function displayProfileData(data) {
 
 // Function to update profile
 async function updateProfile() {
+    // Show loading state
+    const submitBtn = document.querySelector('#profileUpdateForm button[type="submit"]');
+    const originalBtnText = submitBtn.innerHTML;
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Updating...';
+    
     // Get form data
-    const email = document.getElementById('updateEmail').value;
-    const phoneNumber = document.getElementById('updatePhoneNumber').value;
-    const residenceAddress = document.getElementById('updateResidenceAddress').value;
+    const email = document.getElementById('updateEmail').value.trim();
+    const phoneNumber = document.getElementById('updatePhoneNumber').value.trim();
+    const residenceAddress = document.getElementById('updateResidenceAddress').value.trim();
     const currentPassword = document.getElementById('currentPassword').value;
     const newPassword = document.getElementById('newPassword').value;
     
@@ -214,12 +216,16 @@ async function updateProfile() {
     // If no fields to update, show error
     if (Object.keys(updateData).length === 0) {
         showAlert('No changes to update.', 'danger');
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalBtnText;
         return;
     }
     
     // If new password provided without current password, show error
     if (newPassword && !currentPassword) {
         showAlert('Please enter your current password to change to a new password.', 'danger');
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalBtnText;
         return;
     }
     
@@ -241,28 +247,49 @@ async function updateProfile() {
         
         const updatedProfile = await response.json();
         
-        // Hide form and show profile
-        document.getElementById('editProfileForm').style.display = 'none';
-        document.querySelector('.profile-info').style.display = 'block';
+        // Check if email or password was changed
+        const passwordChanged = newPassword && currentPassword;
+        const emailChanged = email && email !== getUserInfo().email;
         
-        // Show success message
-        showAlert('Profile updated successfully!', 'success');
-        
-        // Reload profile data
-        displayProfileData(updatedProfile);
+        if (passwordChanged || emailChanged) {
+            // Show success message and redirect to signin page
+            showAlert('Profile updated successfully! Please sign in again with your new credentials.', 'success');
+            
+            // Clear authentication data
+            setTimeout(() => {
+                // Clear token data
+                sessionStorage.removeItem('jwtToken');
+                sessionStorage.removeItem('tokenExpiry');
+                
+                // Redirect to signin page
+                window.location.href = 'signin.html';
+            }, 1500);
+        } else {
+            // Hide form and show profile for regular updates
+            document.getElementById('editProfileForm').style.display = 'none';
+            document.querySelector('.profile-info').style.display = 'block';
+            
+            // Show success message
+            showAlert('Profile updated successfully!', 'success');
+            
+            // Reload profile data
+            displayProfileData(updatedProfile);
+            
+            // Reset submit button
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalBtnText;
+        }
         
         // Clear password fields
         document.getElementById('currentPassword').value = '';
         document.getElementById('newPassword').value = '';
         
-        // If email was changed, update the token
-        if (email && email !== getUserInfo().email) {
-            // The server should have issued a new token with the response
-            // In a real-world scenario, you might need to handle re-login
-            showAlert('Email was changed. You may need to sign in again with your new email on next visit.', 'success');
-        }
     } catch (error) {
         console.error('Error updating profile:', error);
         showAlert(error.message || 'Failed to update profile. Please try again.', 'danger');
+        
+        // Reset button state
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalBtnText;
     }
 }
