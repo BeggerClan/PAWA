@@ -1,0 +1,171 @@
+/* ===============================
+   ROOT VARIABLES
+================================= */
+:root {
+    --gradient-start: #00e5bb;
+    --gradient-end: #00a1e5;
+    --dark-bg: #171e27;
+    --light-text: #ffffff;
+    --secondary-text: #b0b8c1;
+    --primary-color: #00e5bb;
+    --primary-hover: #00c9a5;
+    --border-radius: 8px;
+    --transition: all 0.3s ease;
+  }
+  
+  /* ===============================
+     BASE STYLES
+  ================================= */
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  
+  body {
+    background-color: var(--dark-bg);
+    color: var(--light-text);
+    font-family: 'Segoe UI', sans-serif;
+    padding-top: 70px; /* adjust to match fixed navbar height */
+  }
+  
+  /* ===============================
+     NAVBAR
+  ================================= */
+  .custom-navbar {
+    background: linear-gradient(to right, var(--gradient-start), var(--gradient-end));
+    z-index: 1030;
+  }
+  
+  .fixed-top {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+  }
+  
+  .logo-left {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    padding-left: 1rem;
+  }
+  
+  .brand-center-text {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 1.5rem;
+    font-weight: bold;
+  }
+  
+  .navbar-nav .nav-link.nav-hover {
+    transition: background-color 0.3s ease;
+    border-radius: 4px;
+    padding: 8px 12px;
+  }
+  
+  .navbar-nav .nav-link.nav-hover:hover {
+    background-color: var(--dark-bg);
+    color: #ffffff !important;
+  }
+  
+  /* ===============================
+     CAROUSEL
+  ================================= */
+  .carousel-wrapper {
+    padding: 40px 20px 20px;
+    display: flex;
+    justify-content: center;
+  }
+  
+  #metroCarousel {
+    width: 100%;
+    max-width: 960px;
+    height: 500px;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+    margin-bottom: 0;
+  }
+  
+  .carousel-item img {
+    height: 100%;
+    width: 100%;
+    object-fit: cover;
+    object-position: center;
+  }
+  
+  /* ===============================
+     HERO SECTION
+  ================================= */
+  .hero {
+    padding: 20px 20px 40px;
+    text-align: center;
+  }
+  
+  .hero h1 {
+    font-size: 3rem;
+    font-weight: 700;
+    margin-bottom: 20px;
+  }
+  
+  .hero p {
+    color: var(--secondary-text);
+    max-width: 600px;
+    margin: 0 auto 30px;
+    font-size: 1.1rem;
+  }
+  
+  .hero .btn {
+    font-size: 16px;
+    padding: 12px;
+    transition: var(--transition);
+    border-radius: var(--border-radius);
+  }
+  
+  .hero .btn:hover {
+    transform: translateY(-2px);
+  }
+  
+  /* ===============================
+     BUTTON VARIANTS
+  ================================= */
+  .btn-primary {
+    background-color: var(--primary-color);
+    color: var(--dark-bg);
+    border: none;
+  }
+  
+  .btn-primary:hover {
+    background-color: var(--primary-hover);
+  }
+  
+  .btn-outline-light:hover {
+    background-color: var(--light-text);
+    color: var(--dark-bg);
+  }
+  
+  /* ===============================
+     RESPONSIVE DESIGN
+  ================================= */
+  @media (max-width: 768px) {
+    .hero h1 {
+      font-size: 2rem;
+    }
+  
+    .hero .btn {
+      font-size: 14px;
+      margin-bottom: 10px;
+    }
+  
+    .brand-center-text {
+      font-size: 1.2rem;
+    }
+  
+    .logo-left img {
+      height: 30px;
+    }
+  }
