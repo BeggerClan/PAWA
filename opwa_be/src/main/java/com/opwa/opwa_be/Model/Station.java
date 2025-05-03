@@ -3,8 +3,13 @@ package com.opwa.opwa_be.Model;
 import lombok.Data;
 import java.time.LocalDateTime;
 
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+
+@Document(collection = "stations")
 @Data
 public class Station {
+    @Id
     private String stationId;
     private String stationName;
     private double latitude;

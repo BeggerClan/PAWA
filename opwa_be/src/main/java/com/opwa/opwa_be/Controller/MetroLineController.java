@@ -1,14 +1,13 @@
 package com.opwa.opwa_be.Controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
 import com.opwa.opwa_be.Model.MetroLine;
-import com.opwa.opwa_be.Model.Station;
 import com.opwa.opwa_be.Repository.MetroLineRepo;
-import com.opwa.opwa_be.Repository.StationRepo;
+import com.opwa.opwa_be.Services.MetroLineService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
-import java.util.Collections;
 import java.util.List;
 
 @RestController
@@ -16,61 +15,38 @@ import java.util.List;
 public class MetroLineController {
 
     @Autowired
-    private MetroLineRepo metroLineRepo;
-
-    @Autowired
-    private StationRepo stationRepo;
+    private MetroLineService metroLineService;
 
     @GetMapping
-    public List<MetroLine> getAllMetroLines() {
-        return metroLineRepo.findAll();
+    public ResponseEntity<List<MetroLine>> getAllLines() {
+        return ResponseEntity.ok(metroLineService.findAllWithStations());
     }
 
     @GetMapping("/{id}")
-    public MetroLine getMetroLineById(@PathVariable String id) {
-        return metroLineRepo.findById(id).orElse(null);
+    public ResponseEntity<MetroLine> getLineById(@PathVariable String id) {
+        return ResponseEntity.ok(metroLineService.findLineByIdWithStations(id));
     }
 
     @GetMapping("/active")
-    public List<MetroLine> getActiveMetroLines() {
-        return metroLineRepo.findByStatus(true);
+    public ResponseEntity<List<MetroLine>> getActiveLines() {
+        return ResponseEntity.ok(metroLineService.findByActiveStatus(true));
     }
 
-    @GetMapping("/name/{name}")
-    public MetroLine getMetroLineByName(@PathVariable String name) {
-        return metroLineRepo.findByLineName(name);
-    }
-
-    @GetMapping("/station/{stationId}")
-    public List<MetroLine> getMetroLinesByStation(@PathVariable String stationId) {
-        return metroLineRepo.findByStationIdsContaining(stationId);
+    @GetMapping("/inactive")
+    public ResponseEntity<List<MetroLine>> getInactiveLines() {
+        return ResponseEntity.ok(metroLineService.findByActiveStatus(false));
     }
 
     @PostMapping
-    public MetroLine createMetroLine(@RequestBody MetroLine metroLine) {
-        metroLine.setCreatedAt(LocalDateTime.now());
-        metroLine.setUpdatedAt(LocalDateTime.now());
-        return metroLineRepo.save(metroLine);
+    public ResponseEntity<MetroLine> createLine(@RequestBody MetroLine metroLine) {
+        metroLine.setCreatedAt(LocalDateTime.now()); // Set creation timestamp
+        return ResponseEntity.ok(metroLineService.createMetroLine(metroLine));
     }
 
-    @PutMapping("/{id}")
-    public MetroLine updateMetroLine(@PathVariable String id, @RequestBody MetroLine metroLine) {
-        metroLine.setLineId(id);
-        metroLine.setUpdatedAt(LocalDateTime.now());
-        return metroLineRepo.save(metroLine);
-    }
-
-    @DeleteMapping("/{id}")
-    public void deleteMetroLine(@PathVariable String id) {
-        metroLineRepo.deleteById(id);
-    }
-
-    @GetMapping("/{id}/stations")
-    public List<Station> getStationsForMetroLine(@PathVariable String id) {
-        MetroLine metroLine = metroLineRepo.findById(id).orElse(null);
-        if (metroLine == null) {
-            return Collections.emptyList();
-        }
-        return stationRepo.findAllById(metroLine.getStationIds());
+    @PatchMapping("/{id}/status")
+    public ResponseEntity<MetroLine> updateStatus(
+            @PathVariable String id,
+            @RequestParam boolean isActive) {
+        return ResponseEntity.ok(metroLineService.updateLineStatus(id, isActive));
     }
 }

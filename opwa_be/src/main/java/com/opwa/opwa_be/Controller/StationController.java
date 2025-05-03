@@ -1,11 +1,13 @@
 package com.opwa.opwa_be.Controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.opwa.opwa_be.Model.Station;
 import com.opwa.opwa_be.Repository.StationRepo;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/stations")
@@ -15,8 +17,13 @@ public class StationController {
     private StationRepo stationRepo;
 
     @GetMapping
-    public List<Station> getAllStations() {
-        return stationRepo.findAll();
+    public ResponseEntity<List<Station>> getAllStations() {
+        List<Station> stations = stationRepo.findAll();
+        
+        if (stations.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(stations);
     }
 
     @GetMapping("/{id}")
@@ -36,6 +43,14 @@ public class StationController {
 
     @PostMapping
     public Station createStation(@RequestBody Station station) {
+        // Find the maximum existing ID number
+        int maxNumber = stationRepo.findAll().stream()
+            .map(s -> s.getStationId().substring(2)) // Remove "ST" prefix
+            .mapToInt(Integer::parseInt)
+            .max()
+            .orElse(0); // Default to 0 if no stations exist
+        
+        station.setStationId(String.format("ST%d", maxNumber + 1));
         station.setCreatedAt(LocalDateTime.now());
         station.setUpdatedAt(LocalDateTime.now());
         return stationRepo.save(station);

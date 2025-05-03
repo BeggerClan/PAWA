@@ -7,4 +7,5 @@ import java.util.List;
 public interface StationRepo extends MongoRepository<Station, String> {
     List<Station> findByStationNameContainingIgnoreCase(String name);
     List<Station> findByMapMarker(String marker);
+    Station findTopByOrderByStationIdDesc();
 }
