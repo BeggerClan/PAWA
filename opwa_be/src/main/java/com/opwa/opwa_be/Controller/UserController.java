@@ -47,27 +47,28 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Access denied.");
         }
     }
-
     @PutMapping("/update/{userId}")
     public ResponseEntity<String> updateUser(@PathVariable String userId, @RequestBody AddUserRequest request, HttpServletRequest httpServletRequest) {
         String authHeader = httpServletRequest.getHeader("Authorization");
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Authorization header missing or invalid.");
         }
-
+    
         String token = authHeader.substring(7);
         List<String> roles = jwtService.extractRoles(token);
-
-        if (roles.contains("ADMIN")) {
+    
+        if (roles.contains("ROLE_ADMIN")) {
             var user = userRepo.findById(userId).orElseThrow(() -> new RuntimeException("User not found."));
             user.setFirstName(request.getFirstName());
             user.setLastName(request.getLastName());
             user.setEmail(request.getEmail());
             user.setPassword(passwordEncoder.encode(request.getPassword()));
+            user.setRole(request.getRole()); // Optional
             userRepo.save(user);
             return ResponseEntity.ok("User updated successfully.");
         } else {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Access denied.");
         }
     }
+    
 }
