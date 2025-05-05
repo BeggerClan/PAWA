@@ -54,12 +54,16 @@ public class SecurityConfig {
                         .requestMatchers(
                                 HttpMethod.POST,
                                 "/api/passengers/register",
-                                "/api/auth/login"
+                                "/api/auth/login",
+                                "/api/payments/tickets"
                         ).permitAll()
                         .requestMatchers("/error").permitAll()
+                        // direct purchase ticket endpoint for all
 
                         // endpoint for passenger
-                        .requestMatchers("/api/passengers/profile/**","/api/wallet/**"
+                        .requestMatchers("/api/passengers/profile/**",
+                                "/api/wallet/**",
+                                "/api/payments/tickets/wallet/top-up/credit-card"
 
                         ).hasRole("PASSENGER")
 
