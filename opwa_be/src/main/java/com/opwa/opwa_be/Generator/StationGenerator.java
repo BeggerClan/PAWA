@@ -7,7 +7,6 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
-import java.util.Optional;
 
 @Component
 public class StationGenerator implements CommandLineRunner {
@@ -35,6 +34,8 @@ public class StationGenerator implements CommandLineRunner {
             createStation("Bien Hoa", 10.8294, 106.7565, "red");
             createStation("Binh Duong", 10.8339, 106.7617, "red");
             createStation("Suoi Tien", 10.8384, 106.7669, "red");
+            
+            // Blue line stations
             createStation("Ben Thanh", 10.7796, 106.6993, "blue");
             createStation("Tao Dan", 10.7741, 106.6941, "blue");
             createStation("Dakao", 10.7686, 106.6889, "blue");
@@ -44,15 +45,18 @@ public class StationGenerator implements CommandLineRunner {
             createStation("Phu Lam", 10.7466, 106.6681, "blue");
             createStation("Binh Chanh", 10.7411, 106.6629, "blue");
             createStation("Tham Luong", 10.7356, 106.6577, "blue");
+            
+            // Green line stations (for future expansion)
+            createStation("District 1 Center", 10.7732, 106.6964, "green");
+            createStation("District 3 Hub", 10.7823, 106.6841, "green");
+            createStation("District 5 Crossing", 10.7543, 106.6692, "green");
+            createStation("District 7 Terminal", 10.7321, 106.7265, "green");
         }
     }
 
     private void createStation(String name, double lat, double lng, String marker) {
-        // Find the next available number
-        int nextNumber = (int) stationRepo.count() + 1;
-        
         Station station = new Station();
-        station.setStationId(String.format("ST%d", nextNumber));
+        station.setStationId("ST" + (stationRepo.count() + 1));
         station.setStationName(name);
         station.setLatitude(lat);
         station.setLongitude(lng);

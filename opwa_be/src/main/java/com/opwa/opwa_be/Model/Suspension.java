@@ -1,26 +1,31 @@
 package com.opwa.opwa_be.Model;
 
+import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
-import lombok.Data;
 
 @Document(collection = "suspensions")
 @Data
 public class Suspension {
     @Id
     private String suspensionId;
-    private String lineId;
-    private String tripId;
-    private String scheduleId;
-    private String reason;
+    private String metroLineId;
+    private String lineName;
+    private List<String> affectedStationIds;
+    private String reason; // "EMERGENCY" or "MAINTENANCE"
+    private String description;
     private LocalDateTime startTime;
-    private LocalDateTime endTime;
-    private List<String> notificationIds;
-    
+    private LocalDateTime expectedEndTime;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
+    private boolean isActive;
+
     public Suspension() {
-        this.notificationIds = new ArrayList<>();
+        this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
+        this.isActive = true;
     }
 }

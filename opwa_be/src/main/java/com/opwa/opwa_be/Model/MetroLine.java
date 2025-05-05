@@ -21,6 +21,12 @@ public class MetroLine {
     private LocalDateTime firstDeparture;
     private String frequencyMinutes;
     
+    // Suspension fields
+    private boolean isSuspended;
+    private String suspensionReason;
+    private LocalDateTime suspensionStartTime;
+    private LocalDateTime suspensionEndTime;
+    
     // Store station IDs
     private List<String> stationIds;
     
@@ -31,5 +37,7 @@ public class MetroLine {
     public MetroLine() {
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
+        this.isActive = true;
+        this.isSuspended = false;
     }
 }

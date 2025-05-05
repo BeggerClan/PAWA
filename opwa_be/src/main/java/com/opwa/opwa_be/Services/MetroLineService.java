@@ -2,8 +2,11 @@ package com.opwa.opwa_be.Services;
 
 import com.opwa.opwa_be.Model.MetroLine;
 import com.opwa.opwa_be.Model.Station;
+import com.opwa.opwa_be.Model.Suspension;
 import com.opwa.opwa_be.Repository.MetroLineRepo;
 import com.opwa.opwa_be.Repository.StationRepo;
+import com.opwa.opwa_be.Repository.SuspensionRepo;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -22,11 +25,20 @@ public class MetroLineService {
     @Autowired
     private StationRepo stationRepo;
 
+    @Autowired
+    private SuspensionRepo suspensionRepo;
+
     public MetroLine findLineByIdWithStations(String id) {
         MetroLine line = metroLineRepo.findById(id)
             .orElseThrow(() -> new RuntimeException("Metro line not found with id: " + id));
         populateStations(line);
         return line;
+    }
+
+    public String getLineName(String lineId) {
+        return metroLineRepo.findById(lineId)
+            .map(MetroLine::getLineName)
+            .orElseThrow(() -> new RuntimeException("Metro line not found with id: " + lineId));
     }
 
     public void deleteAllLines() {
@@ -119,5 +131,50 @@ public class MetroLineService {
                 .collect(Collectors.toList());
             metroLine.setStations(stations);
         }
+    }
+
+    public Suspension createSuspension(Suspension suspension) {
+        metroLineRepo.findById(suspension.getMetroLineId()).ifPresent(line -> {
+            line.setSuspended(true);
+            line.setSuspensionReason(suspension.getReason());
+            line.setSuspensionStartTime(suspension.getStartTime());
+            line.setSuspensionEndTime(suspension.getExpectedEndTime());
+            metroLineRepo.save(line);
+        });
+        return suspensionRepo.save(suspension);
+    }
+
+    public void resolveSuspension(String suspensionId) {
+        suspensionRepo.findById(suspensionId).ifPresent(suspension -> {
+            suspension.setActive(false);
+            suspension.setUpdatedAt(LocalDateTime.now());
+            suspensionRepo.save(suspension);
+            
+            metroLineRepo.findById(suspension.getMetroLineId()).ifPresent(line -> {
+                line.setSuspended(false);
+                line.setSuspensionReason(null);
+                line.setSuspensionStartTime(null);
+                line.setSuspensionEndTime(null);
+                metroLineRepo.save(line);
+            });
+        });
+    }
+
+    public List<Suspension> getActiveSuspensions() {
+        return suspensionRepo.findByIsActive(true);
+    }
+
+    public List<Suspension> getSuspensionsForLine(String lineId) {
+        return suspensionRepo.findByMetroLineId(lineId);
+    }
+
+    public List<Suspension> getSuspensionsForStation(String stationId) {
+        return suspensionRepo.findByAffectedStationIdsContaining(stationId);
+    }
+
+    public List<String> getAffectedStations(String lineId) {
+        return metroLineRepo.findById(lineId)
+            .map(MetroLine::getStationIds)
+            .orElseThrow(() -> new RuntimeException("Line not found"));
     }
 }

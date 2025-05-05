@@ -22,11 +22,12 @@ public class MetroLineGenerator implements CommandLineRunner {
     public void run(String... args) throws Exception {
         metroLineService.deleteAllLines();
         
-        // Get some station IDs
+        // Define station IDs for each line
         List<String> redLineStations = List.of("ST1", "ST2", "ST3", "ST14");
         List<String> blueLineStations = List.of("ST14", "ST15", "ST16", "ST1");
+        List<String> greenLineStations = List.of("ST17", "ST18", "ST19", "ST20");
 
-        // Create Red Line
+        // Create Red Line (active, not suspended)
         MetroLine redLine = new MetroLine();
         redLine.setLineName("Red Line");
         redLine.setStationIds(redLineStations);
@@ -36,14 +37,31 @@ public class MetroLineGenerator implements CommandLineRunner {
         redLine.setFrequencyMinutes("10");
         metroLineService.createMetroLine(redLine);
 
-        // Create Blue Line
+        // Create Blue Line (active BUT suspended)
         MetroLine blueLine = new MetroLine();
         blueLine.setLineName("Blue Line");
         blueLine.setStationIds(blueLineStations);
         blueLine.setTotalDuration(25);
-        blueLine.setActive(false);
+        blueLine.setActive(true);
         blueLine.setFirstDeparture(LocalDateTime.now().with(LocalTime.of(6, 0)));
         blueLine.setFrequencyMinutes("15");
+        
+        // Set suspension properties
+        blueLine.setSuspended(true);
+        blueLine.setSuspensionReason("Emergency maintenance");
+        blueLine.setSuspensionStartTime(LocalDateTime.now().minusHours(2));
+        blueLine.setSuspensionEndTime(LocalDateTime.now().plusHours(6));
+        
         metroLineService.createMetroLine(blueLine);
+
+        // Create Green Line (active, not suspended)
+        MetroLine greenLine = new MetroLine();
+        greenLine.setLineName("Green Line");
+        greenLine.setStationIds(greenLineStations);
+        greenLine.setTotalDuration(35);
+        greenLine.setActive(true);
+        greenLine.setFirstDeparture(LocalDateTime.now().with(LocalTime.of(5, 45)));
+        greenLine.setFrequencyMinutes("12");
+        metroLineService.createMetroLine(greenLine);
     }
 }
