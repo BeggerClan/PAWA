@@ -7,4 +7,5 @@ import java.util.List;
 public interface MetroLineRepo extends MongoRepository<MetroLine, String> {
     List<MetroLine> findByIsActive(boolean isActive);
     List<MetroLine> findByLineNameContainingIgnoreCase(String name);
+    List<MetroLine> findByStationIdsContaining(String stationId);
 }

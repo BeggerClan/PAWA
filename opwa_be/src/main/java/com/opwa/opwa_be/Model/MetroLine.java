@@ -4,15 +4,15 @@ import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.data.mongodb.core.mapping.Field;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @Document(collection = "metro_lines")
 public class MetroLine {
     @Id
-    private String lineId; // Will be auto-generated as LN1, LN2, etc.
+    private String lineId;
     private String lineName;
     private int totalDuration;
     private boolean isActive;
@@ -20,20 +20,13 @@ public class MetroLine {
     private LocalDateTime updatedAt;
     private LocalDateTime firstDeparture;
     private String frequencyMinutes;
-
-    // Store only IDs (shows directly in Compass)
-    @Field("startStationId")
-    private String startStationId;
-
-    @Field("endStationId")
-    private String endStationId;
-
-    // Transient fields for populated data (not stored in DB)
+    
+    // Store station IDs
+    private List<String> stationIds;
+    
+    // Transient field for populated stations
     @Transient
-    private Station startStation;
-
-    @Transient
-    private Station endStation;
+    private List<Station> stations;
 
     public MetroLine() {
         this.createdAt = LocalDateTime.now();

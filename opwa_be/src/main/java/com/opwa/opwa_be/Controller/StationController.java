@@ -3,7 +3,10 @@ package com.opwa.opwa_be.Controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import com.opwa.opwa_be.Model.MetroLine;
 import com.opwa.opwa_be.Model.Station;
+import com.opwa.opwa_be.Repository.MetroLineRepo;
 import com.opwa.opwa_be.Repository.StationRepo;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -15,6 +18,9 @@ public class StationController {
     
     @Autowired
     private StationRepo stationRepo;
+
+    @Autowired
+    private MetroLineRepo metroLineRepo;
 
     @GetMapping
     public ResponseEntity<List<Station>> getAllStations() {
@@ -64,7 +70,19 @@ public class StationController {
     }
 
     @DeleteMapping("/{id}")
-    public void deleteStation(@PathVariable String id) {
-        stationRepo.deleteById(id);
-    }
+public ResponseEntity<?> deleteStation(@PathVariable String id) {
+    // First find all metro lines containing this station
+    List<MetroLine> affectedLines = metroLineRepo.findByStationIdsContaining(id);
+    
+    // Remove station from all metro lines
+    affectedLines.forEach(line -> {
+        line.getStationIds().remove(id);
+        metroLineRepo.save(line);
+    });
+    
+    // Now delete the station
+    stationRepo.deleteById(id);
+    
+    return ResponseEntity.ok().build();
+}
 }
