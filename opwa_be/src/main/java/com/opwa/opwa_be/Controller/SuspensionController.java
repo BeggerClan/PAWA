@@ -1,8 +1,9 @@
 package com.opwa.opwa_be.Controller;
 
 import com.opwa.opwa_be.Model.Suspension;
-import com.opwa.opwa_be.Services.MetroLineService;
-import com.opwa.opwa_be.Services.SuspensionService;
+import com.opwa.opwa_be.Service.MetroLineService;
+import com.opwa.opwa_be.Service.SuspensionService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

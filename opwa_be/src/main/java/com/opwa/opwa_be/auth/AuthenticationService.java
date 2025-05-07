@@ -1,9 +1,10 @@
 package com.opwa.opwa_be.auth;
 
 import com.opwa.opwa_be.config.JwtService;
-import com.opwa.opwa_be.model.Role;
-import com.opwa.opwa_be.model.User;
-import com.opwa.opwa_be.repo.UserRepo;
+import com.opwa.opwa_be.Model.Role;
+import com.opwa.opwa_be.Model.User;
+import com.opwa.opwa_be.Repository.UserRepo;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;

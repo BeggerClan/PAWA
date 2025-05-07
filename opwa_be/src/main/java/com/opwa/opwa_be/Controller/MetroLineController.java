@@ -2,7 +2,8 @@ package com.opwa.opwa_be.Controller;
 
 import com.opwa.opwa_be.Model.MetroLine;
 import com.opwa.opwa_be.Model.Station;
-import com.opwa.opwa_be.Services.MetroLineService;
+import com.opwa.opwa_be.Service.MetroLineService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

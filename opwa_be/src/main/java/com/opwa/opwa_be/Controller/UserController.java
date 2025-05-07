@@ -1,9 +1,9 @@
 package com.opwa.opwa_be.Controller;
 
+import com.opwa.opwa_be.Repository.UserRepo;
 import com.opwa.opwa_be.auth.AddUserRequest;
-import com.opwa.opwa_be.model.Role;
-import com.opwa.opwa_be.model.User;
-import com.opwa.opwa_be.repo.UserRepo;
+import com.opwa.opwa_be.Model.Role;
+import com.opwa.opwa_be.Model.User;
 import com.opwa.opwa_be.config.JwtService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

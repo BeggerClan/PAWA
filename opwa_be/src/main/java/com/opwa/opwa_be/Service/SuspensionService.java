@@ -1,4 +1,4 @@
-package com.opwa.opwa_be.Services;
+package com.opwa.opwa_be.Service;
 
 import com.opwa.opwa_be.Model.MetroLine;
 import com.opwa.opwa_be.Model.Suspension;

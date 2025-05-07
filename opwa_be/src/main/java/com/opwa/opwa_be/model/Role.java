@@ -1,4 +1,4 @@
-package com.opwa.opwa_be.model;
+package com.opwa.opwa_be.Model;
 
 public enum Role {
 ADMIN,

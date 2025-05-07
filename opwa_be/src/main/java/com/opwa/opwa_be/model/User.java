@@ -1,4 +1,4 @@
-package com.opwa.opwa_be.model;
+package com.opwa.opwa_be.Model;
 
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
