@@ -1,7 +1,9 @@
 package com.opwa.opwa_be.Repository;
 
-import com.opwa.opwa_be.Model.MetroLine;
 import org.springframework.data.mongodb.repository.MongoRepository;
+
+import com.opwa.opwa_be.model.MetroLine;
+
 import java.util.List;
 
 public interface MetroLineRepo extends MongoRepository<MetroLine, String> {

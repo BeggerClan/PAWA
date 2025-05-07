@@ -9,8 +9,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
-import com.opwa.opwa_be.Model.Staff;
 import com.opwa.opwa_be.Repository.StaffRepo;
+import com.opwa.opwa_be.model.Staff;
+
 import org.springframework.web.bind.annotation.PutMapping;
 
 

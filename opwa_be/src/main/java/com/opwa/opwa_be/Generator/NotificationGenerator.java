@@ -1,9 +1,10 @@
 package com.opwa.opwa_be.Generator;
 
-import com.opwa.opwa_be.Model.Notification;
-import com.opwa.opwa_be.Model.Suspension;
 import com.opwa.opwa_be.Repository.NotificationRepo;
 import com.opwa.opwa_be.Repository.SuspensionRepo;
+import com.opwa.opwa_be.model.Notification;
+import com.opwa.opwa_be.model.Suspension;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;

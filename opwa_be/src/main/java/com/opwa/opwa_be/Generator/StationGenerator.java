@@ -1,7 +1,8 @@
 package com.opwa.opwa_be.Generator;
 
-import com.opwa.opwa_be.Model.Station;
 import com.opwa.opwa_be.Repository.StationRepo;
+import com.opwa.opwa_be.model.Station;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;

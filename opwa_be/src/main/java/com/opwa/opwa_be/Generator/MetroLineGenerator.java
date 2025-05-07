@@ -1,9 +1,9 @@
 package com.opwa.opwa_be.Generator;
 
-import com.opwa.opwa_be.Model.MetroLine;
 import com.opwa.opwa_be.Repository.MetroLineRepo;
 import com.opwa.opwa_be.Repository.StationRepo;
 import com.opwa.opwa_be.Service.MetroLineService;
+import com.opwa.opwa_be.model.MetroLine;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;

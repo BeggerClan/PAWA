@@ -1,7 +1,8 @@
 package com.opwa.opwa_be.Repository;
 
-import com.opwa.opwa_be.Model.User;
 import org.springframework.data.mongodb.repository.MongoRepository;
+
+import com.opwa.opwa_be.model.User;
 
 import java.util.Optional;
 

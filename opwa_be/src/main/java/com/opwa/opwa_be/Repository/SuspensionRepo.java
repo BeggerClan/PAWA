@@ -1,7 +1,9 @@
 package com.opwa.opwa_be.Repository;
 
-import com.opwa.opwa_be.Model.Suspension;
 import org.springframework.data.mongodb.repository.MongoRepository;
+
+import com.opwa.opwa_be.model.Suspension;
+
 import java.util.List;
 
 public interface SuspensionRepo extends MongoRepository<Suspension, String> {

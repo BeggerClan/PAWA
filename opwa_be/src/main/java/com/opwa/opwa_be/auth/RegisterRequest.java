@@ -1,6 +1,7 @@
 package com.opwa.opwa_be.auth;
 
-import com.opwa.opwa_be.Model.Role;
+import com.opwa.opwa_be.model.Role;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

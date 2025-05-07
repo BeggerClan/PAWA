@@ -1,4 +1,4 @@
-package com.opwa.opwa_be.Model;
+package com.opwa.opwa_be.model;
 
 import lombok.Data;
 import java.time.LocalDateTime;

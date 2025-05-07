@@ -1,9 +1,10 @@
 package com.opwa.opwa_be.Service;
 
-import com.opwa.opwa_be.Model.MetroLine;
-import com.opwa.opwa_be.Model.Suspension;
 import com.opwa.opwa_be.Repository.MetroLineRepo;
 import com.opwa.opwa_be.Repository.SuspensionRepo;
+import com.opwa.opwa_be.model.MetroLine;
+import com.opwa.opwa_be.model.Suspension;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

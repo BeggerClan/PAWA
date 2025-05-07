@@ -4,10 +4,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import com.opwa.opwa_be.Model.MetroLine;
-import com.opwa.opwa_be.Model.Station;
 import com.opwa.opwa_be.Repository.MetroLineRepo;
 import com.opwa.opwa_be.Repository.StationRepo;
+import com.opwa.opwa_be.model.MetroLine;
+import com.opwa.opwa_be.model.Station;
+
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;

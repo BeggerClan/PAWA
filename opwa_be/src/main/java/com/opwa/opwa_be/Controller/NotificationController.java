@@ -2,8 +2,10 @@ package com.opwa.opwa_be.Controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import com.opwa.opwa_be.Model.Notification;
+
 import com.opwa.opwa_be.Repository.NotificationRepo;
+import com.opwa.opwa_be.model.Notification;
+
 import java.util.List;
 
 @RestController
