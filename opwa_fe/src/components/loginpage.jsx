@@ -97,14 +97,7 @@ const LoginPage = () => {
             </button>
           </form>
 
-          <div className="text-center mt-4">
-            <small className="text-muted">
-              Don’t have an account?{" "}
-              <a href="#" className="text-primary text-decoration-none">
-                Sign up
-              </a>
-            </small>
-          </div>
+          
         </div>
       </div>
 
