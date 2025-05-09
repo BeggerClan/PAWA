@@ -42,24 +42,25 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            .cors(Customizer.withDefaults())
-            .csrf(csrf -> csrf.disable())
-            .authorizeHttpRequests(auth -> auth
-                // Open endpoints
-                .requestMatchers(
-                    HttpMethod.POST,
-                    "/api/passengers/register",
-                    "/api/auth/login"
-                ).permitAll()
-                .requestMatchers("/error").permitAll()
+                .cors(Customizer.withDefaults()) // Enable CORS with the corsConfigurationSource bean
+                .csrf(csrf -> csrf.disable())
+                .authorizeHttpRequests(auth -> auth
+                        // open endpoint for guest
+                        .requestMatchers(
+                                HttpMethod.POST,
+                                "/api/passengers/register",
+                                "/api/auth/login",
+                                "/api/payments/tickets"
+                        ).permitAll()
+                        .requestMatchers("/error").permitAll()
+                        // direct purchase ticket endpoint for all
 
-                // Protected endpoints for passengers only
-                .requestMatchers(
-                    "/api/passengers/profile/**",
-                    "/api/wallet/**",
-                    "/api/cart/**",
-                    "/api/tickets/**"
-                ).hasRole("PASSENGER")
+                        // endpoint for passenger
+                        .requestMatchers("/api/passengers/profile/**",
+                                "/api/wallet/**",
+                                "/api/payments/tickets/wallet/top-up/credit-card"
+
+                        ).hasRole("PASSENGER")
 
                 .anyRequest().authenticated()
             )
