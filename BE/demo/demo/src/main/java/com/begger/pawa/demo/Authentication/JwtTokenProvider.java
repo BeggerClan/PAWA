@@ -13,6 +13,7 @@ import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 
@@ -56,6 +57,7 @@ public class JwtTokenProvider {
         claims.put("verified", p.getVerified());
         claims.put("guest", p.getGuest());
         claims.put("pwdChangedAt", p.getPasswordChangedAt().toString());
+        claims.put("roles", List.of("PASSENGER"));
 
         // build 256 bit key from utf 8 secret
         SecretKey key = Keys.hmacShaKeyFor(
