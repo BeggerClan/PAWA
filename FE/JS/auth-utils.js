@@ -27,7 +27,7 @@ function logout() {
     setTimeout(() => {
         sessionStorage.removeItem('jwtToken');
         sessionStorage.removeItem('tokenExpiry');
-        window.location.href = 'signin.html';
+        window.location.href = 'home.html';
     }, 300);
 }
 
@@ -83,26 +83,54 @@ function setupAjaxHeaders() {
     }
 }
 
+// Function to handle authenticated navigation - important for preventing logout issues
+function setupAuthNavigation() {
+    // Select all navigation links in the navbar
+    const navLinks = document.querySelectorAll('.navbar a.nav-link');
+    
+    // Add click event to maintain auth state when navigating
+    navLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+            // Allow normal navigation without interfering with auth state
+            // We don't prevent default or modify URLs as token is in sessionStorage
+        });
+    });
+}
+
+// Handle the display of auth-dependent UI elements
+function updateAuthUI() {
+    const isAuth = isLoggedIn();
+    
+    // For a simpler approach in the finished pages, we won't hide/show elements
+    // We'll just leave the appropriate nav elements visible based on page type
+    
+    // On pages that require auth (profile, my tickets, etc)
+    const currentPath = window.location.pathname;
+    if (currentPath.includes('profile.html') || 
+        currentPath.includes('my-tickets.html')) {
+        if (!isAuth) {
+            // Redirect to login if not authenticated
+            window.location.href = 'signin.html';
+        }
+    }
+    
+    // For home page, we don't redirect but update UI based on auth status
+    if (currentPath.includes('home.html') || currentPath === '/' || currentPath.endsWith('/')) {
+        const authLinks = document.querySelectorAll('.auth-required');
+        const noAuthLinks = document.querySelectorAll('.no-auth');
+        
+        if (authLinks.length && noAuthLinks.length) {
+            authLinks.forEach(el => el.classList.toggle('d-none', !isAuth));
+            noAuthLinks.forEach(el => el.classList.toggle('d-none', isAuth));
+        }
+    }
+}
+
 // Initialize auth - call this on every page
 function initAuth() {
     setupAjaxHeaders();
-    
-    // Check if this is a protected page
-    const isProtectedPage = !window.location.pathname.includes('signin.html') && 
-                           !window.location.pathname.includes('signup.html') &&
-                           !window.location.pathname.endsWith('/');
-    
-    if (isProtectedPage) {
-        requireAuth();
-    }
-    
-    // Update UI based on authentication status
-    const isAuth = isLoggedIn();
-    const authElements = document.querySelectorAll('.auth-required');
-    const noAuthElements = document.querySelectorAll('.no-auth');
-    
-    authElements.forEach(el => el.classList.toggle('d-none', !isAuth));
-    noAuthElements.forEach(el => el.classList.toggle('d-none', isAuth));
+    setupAuthNavigation();
+    updateAuthUI();
     
     // Set up logout buttons
     const logoutBtns = document.querySelectorAll('.logout-btn, #logout-btn');
@@ -112,7 +140,7 @@ function initAuth() {
         }
     });
     
-    return isAuth;
+    return isLoggedIn();
 }
 
 // Initialize on DOMContentLoaded

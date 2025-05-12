@@ -1,0 +1,392 @@
+/* metro-lines.css - Styles for the metro lines page */
+:root {
+    --gradient-start: #00e5bb;
+    --gradient-end: #00a1e5;
+    --dark-bg: #171e27;
+    --light-text: #ffffff;
+    --secondary-text: #b0b8c1;
+    --primary-color: #00e5bb;
+    --primary-hover: #00c9a5;
+    --primary-blue: #1a73e8;
+    --primary-blue-hover: #1557b0;
+    --border-radius: 8px;
+    --transition: all 0.3s ease;
+}
+
+body {
+    padding-top: 70px;
+    background-color: #f8f9fa;
+    color: #333;
+    font-family: 'Segoe UI', Arial, sans-serif;
+}
+
+/* Header Styling */
+.metro-header {
+    padding: 1.5rem 0;
+}
+
+.metro-header h1 {
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 0.5rem;
+}
+
+.metro-header p {
+    color: #666;
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+/* Search Card */
+.search-card {
+    border-radius: var(--border-radius);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    margin-bottom: 2rem;
+    transition: var(--transition);
+    border: none;
+}
+
+.search-card:hover {
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px);
+}
+
+.search-card .card-body {
+    padding: 1.5rem;
+}
+
+.search-card .card-title {
+    color: var(--primary-blue);
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+}
+
+.search-card .form-label {
+    font-weight: 500;
+    color: #555;
+}
+
+.search-card .form-select,
+.search-card .form-control {
+    padding: 0.75rem;
+    border-radius: var(--border-radius);
+    border: 1px solid #ddd;
+    transition: var(--transition);
+}
+
+.search-card .form-select:focus,
+.search-card .form-control:focus {
+    border-color: var(--primary-blue);
+    box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.2);
+}
+
+.search-card .btn-primary {
+    background: linear-gradient(135deg, var(--gradient-start) 0%, var(--gradient-end) 100%);
+    border: none;
+    font-weight: 500;
+    transition: var(--transition);
+}
+
+.search-card .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 229, 187, 0.3);
+}
+
+/* Metro Line Card */
+.card {
+    border: none;
+    border-radius: var(--border-radius);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    margin-bottom: 2rem;
+    transition: var(--transition);
+}
+
+.card:hover {
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px);
+}
+
+.card-header {
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+}
+
+.card-header.bg-primary {
+    background: linear-gradient(135deg, var(--gradient-start) 0%, var(--gradient-end) 100%) !important;
+}
+
+.card-header.bg-danger {
+    background: linear-gradient(135deg, #ff6b6b 0%, #cc0000 100%) !important;
+}
+
+.card-header h3 {
+    display: flex;
+    align-items: center;
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+.card-body {
+    padding: 1.5rem;
+}
+
+/* Metro Map Styling */
+.metro-map {
+    margin-top: 1.5rem;
+}
+
+.metro-map h5 {
+    color: var(--primary-blue);
+    margin-bottom: 1rem;
+    font-weight: 600;
+}
+
+.station-route {
+    position: relative;
+    padding: 1rem 0;
+}
+
+.station-list {
+    position: relative;
+    padding-left: 20px;
+}
+
+.station-list::before {
+    content: "";
+    position: absolute;
+    left: 8px;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: linear-gradient(to bottom, var(--gradient-start), var(--gradient-end));
+    border-radius: 2px;
+}
+
+.station {
+    position: relative;
+    padding: 1rem 0 1rem 2rem;
+    display: flex;
+    align-items: center;
+}
+
+.station-marker {
+    position: absolute;
+    left: 0;
+    background-color: white;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 4px solid var(--primary-color);
+    z-index: 1;
+}
+
+.start-station .station-marker,
+.end-station .station-marker {
+    background-color: var(--primary-color);
+    border: 4px solid white;
+    width: 24px;
+    height: 24px;
+}
+
+.station-info {
+    flex: 1;
+}
+
+.station-name {
+    font-weight: 600;
+    color: #333;
+}
+
+.station-time {
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.start-station .station-name,
+.end-station .station-name {
+    font-weight: 700;
+    color: var(--primary-blue);
+    font-size: 1.05rem;
+}
+
+/* Schedule Information */
+.schedule-info {
+    margin-top: 2rem;
+}
+
+.schedule-info h5 {
+    color: var(--primary-blue);
+    margin-bottom: 1rem;
+    font-weight: 600;
+}
+
+.schedule-info .table {
+    margin-bottom: 0;
+}
+
+.schedule-info th {
+    background-color: #f8f9fa;
+    color: #333;
+    font-weight: 600;
+}
+
+/* Upcoming Trips */
+.upcoming-trips {
+    margin-top: 2rem;
+}
+
+.upcoming-trips h5 {
+    color: var(--primary-blue);
+    margin-bottom: 1rem;
+    font-weight: 600;
+}
+
+.trip-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.trip-card {
+    display: flex;
+    align-items: center;
+    background-color: #f8f9fa;
+    border-radius: var(--border-radius);
+    padding: 1rem;
+    transition: var(--transition);
+}
+
+.trip-card:hover {
+    background-color: #e9ecef;
+    transform: translateX(5px);
+}
+
+.departure-time {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--primary-blue);
+    margin-right: 1.5rem;
+    min-width: 80px;
+}
+
+.trip-info {
+    flex: 1;
+}
+
+/* Ticket Types */
+.ticket-type {
+    margin-bottom: 1.5rem;
+}
+
+.ticket-type:last-child {
+    margin-bottom: 0;
+}
+
+.ticket-type h5 {
+    color: var(--primary-blue);
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+}
+
+.ticket-type p {
+    color: #666;
+    font-size: 0.9rem;
+    margin-bottom: 0.75rem;
+}
+
+.pricing {
+    color: #333;
+    font-size: 0.9rem;
+}
+
+/* System Alerts */
+.alert-item {
+    margin-bottom: 1.5rem;
+}
+
+.alert-item:last-child {
+    margin-bottom: 0;
+}
+
+.alert-time {
+    color: #666;
+    font-size: 0.8rem;
+    margin-bottom: 0.25rem;
+}
+
+.alert-title {
+    color: #d32f2f;
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+}
+
+.alert-item p {
+    color: #333;
+    font-size: 0.9rem;
+    margin-bottom: 0;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 992px) {
+    .trip-cards {
+        flex-direction: column;
+    }
+    
+    .trip-card {
+        width: 100%;
+    }
+}
+
+@media (max-width: 576px) {
+    .metro-header h1 {
+        font-size: 2rem;
+    }
+    
+    .departure-time {
+        font-size: 1.1rem;
+        min-width: 70px;
+    }
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.search-card,
+.card {
+    animation: fadeIn 0.5s ease forwards;
+}
+
+.station {
+    opacity: 0;
+    animation: fadeIn 0.3s ease forwards;
+}
+
+.station:nth-child(1) { animation-delay: 0.1s; }
+.station:nth-child(2) { animation-delay: 0.15s; }
+.station:nth-child(3) { animation-delay: 0.2s; }
+.station:nth-child(4) { animation-delay: 0.25s; }
+.station:nth-child(5) { animation-delay: 0.3s; }
+.station:nth-child(6) { animation-delay: 0.35s; }
+.station:nth-child(7) { animation-delay: 0.4s; }
+.station:nth-child(8) { animation-delay: 0.45s; }
+.station:nth-child(9) { animation-delay: 0.5s; }
+.station:nth-child(10) { animation-delay: 0.55s; }
+.station:nth-child(11) { animation-delay: 0.6s; }
+.station:nth-child(12) { animation-delay: 0.65s; }
+.station:nth-child(13) { animation-delay: 0.7s; }
+.station:nth-child(14) { animation-delay: 0.75s; }

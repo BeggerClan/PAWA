@@ -51,7 +51,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Redirect to index.html after a short delay
             setTimeout(() => {
-                window.location.href = 'index.html';
+                window.location.href = 'profile.html';
             }, 800);
             
         } catch (error) {
