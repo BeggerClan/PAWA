@@ -35,4 +35,10 @@ public class CartService {
         cart.setItems(List.of());
         repo.save(cart);
     }
+
+    public Cart getCart(String passengerId) {
+        return repo.findByPassengerId(passengerId)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Cart not found"));
+    }
+    
 }

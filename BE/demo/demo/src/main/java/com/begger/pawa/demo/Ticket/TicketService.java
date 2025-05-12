@@ -1,5 +1,8 @@
 package com.begger.pawa.demo.Ticket;
 
+import com.begger.pawa.demo.Cart.Cart;
+import com.begger.pawa.demo.Cart.CartRequest;
+import com.begger.pawa.demo.Cart.CartRequest.CartItem;
 import com.begger.pawa.demo.Cart.CartResponse;
 import com.begger.pawa.demo.Cart.CartService;
 import com.begger.pawa.demo.Transaction.TransactionService;
@@ -13,6 +16,8 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class TicketService {
@@ -89,11 +94,12 @@ public class TicketService {
         );
 
 
-        // 3. Create Tickets (dummy ticket creation logic)
-        generateTickets(passengerId);
+        Cart cart = cartService.getCart(passengerId); // ✅ Requires you to implement getCart()
 
-        // 4. Create Ticket History (dummy logic)
-        saveTicketHistory(passengerId, transactionId, totalFare);
+        List<CartRequest.CartItem> cartItems = cart.getItems(); // From Cart object, not CartResponse
+        List<Ticket> generatedTickets = generateTickets(passengerId, cartItems);
+        saveTicketHistory(passengerId, transactionId, generatedTickets, totalFare);
+        
 
         // 5. Clear the Cart
         cartService.clearCart(passengerId);
@@ -101,31 +107,45 @@ public class TicketService {
         return true;
     }
 
-    private void generateTickets(String passengerId) {
-        // Dummy ticket creation logic: Generate one ticket for demonstration.
-        Ticket ticket = new Ticket();
-        // Assuming passengerId can be converted to ObjectId. Adjust if necessary.
-        ticket.setPassengerId(new ObjectId(passengerId));
-        // Set a dummy ticketTypeId (you can adjust this part)
-        ticket.setTicketTypeId(new ObjectId());
-        ticket.setFromStation("DefaultFrom");
-        ticket.setToStation("DefaultTo");
-        ticketRepo.save(ticket);
+    private List<Ticket> generateTickets(String passengerId, List<CartRequest.CartItem> items) {
+    List<Ticket> createdTickets = new ArrayList<>();
+    ObjectId passengerObjectId = new ObjectId(passengerId);
+
+    for (CartRequest.CartItem item : items) {
+        for (int i = 0; i < item.getQuantity(); i++) {
+            Ticket ticket = new Ticket();
+            ticket.setPassengerId(passengerObjectId);
+            ticket.setTicketTypeId(item.getTicketType());
+            ticket.setFromStation(item.getFromStation());
+            ticket.setToStation(item.getToStation());
+            ticket.setActive(true);
+            ticket.setExpired(false);
+            ticket.setPurchaseTime(Instant.now());
+
+            ticketRepo.save(ticket);
+            createdTickets.add(ticket);
+        }
     }
 
-    private void saveTicketHistory(String passengerId, ObjectId transactionId, long totalFare) {
+    return createdTickets;
+}
+
+
+    private void saveTicketHistory(String passengerId, ObjectId transactionId, List<Ticket> tickets, long totalFare) {
+        if (tickets.isEmpty()) return;
+
         TicketHistory history = new TicketHistory();
         history.setTicketHistoryId(new ObjectId());
-        // For demonstration: link the first ticket generated to history.
-        // In real scenarios, you might aggregate multiple tickets.
-        history.setTicketId(new ObjectId());
+        history.setTicketId(tickets.get(0).getTicketId()); // optionally use the first ticket
         history.setPassengerId(new ObjectId(passengerId));
         history.setTransactionId(transactionId);
-        history.setTicketTypeId(new ObjectId());
+        history.setTicketTypeId(tickets.get(0).getTicketTypeId()); // assuming all are same type
         history.setTotalPurchasesPassenger(totalFare);
-        history.setTotalQuantityTicketSold(1); // dummy value
+        history.setTotalQuantityTicketSold(tickets.size());
         history.setTotalAmountTicket(totalFare);
 
         ticketHistoryRepo.save(history);
     }
+
+
 }

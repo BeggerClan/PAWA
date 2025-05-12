@@ -13,7 +13,7 @@ public class TicketHistory {
     private ObjectId ticketId;
     private ObjectId passengerId;
     private ObjectId transactionId;
-    private ObjectId ticketTypeId;
+    private String ticketTypeId;
     private double totalPurchasesPassenger;
     private int totalQuantityTicketSold;
     private double totalAmountTicket;
@@ -50,11 +50,11 @@ public class TicketHistory {
         this.transactionId = transactionId;
     }
 
-    public ObjectId getTicketTypeId() {
+    public String getTicketTypeId() {
         return ticketTypeId;
     }
 
-    public void setTicketTypeId(ObjectId ticketTypeId) {
+    public void setTicketTypeId(String ticketTypeId) {
         this.ticketTypeId = ticketTypeId;
     }
 

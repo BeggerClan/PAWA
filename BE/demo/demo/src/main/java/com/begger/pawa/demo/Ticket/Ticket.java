@@ -13,7 +13,7 @@ public class Ticket {
     private ObjectId ticketId; // Mongo ObjectId
 
     private ObjectId passengerId; // Change to ObjectId if passengerId is an ObjectId; otherwise adjust
-    private ObjectId ticketTypeId; // for now, a reference to ticket type if applicable
+    private String ticketTypeId;
     private Instant purchaseTime;
     private Instant activationTime;
     private String fromStation;
@@ -28,6 +28,12 @@ public class Ticket {
         this.isExpired = false;
     }
 
+
+    public void setPurchaseTime(Instant purchaseTime) {
+        this.purchaseTime = purchaseTime;
+    }
+    
+
     public ObjectId getTicketId() {
         return ticketId;
     }
@@ -40,11 +46,11 @@ public class Ticket {
         this.passengerId = passengerId;
     }
 
-    public ObjectId getTicketTypeId() {
+    public String getTicketTypeId() {
         return ticketTypeId;
     }
 
-    public void setTicketTypeId(ObjectId ticketTypeId) {
+    public void setTicketTypeId(String ticketTypeId) {
         this.ticketTypeId = ticketTypeId;
     }
 
@@ -90,5 +96,11 @@ public class Ticket {
 
     public void setExpired(boolean expired) {
         isExpired = expired;
+    }
+
+
+    public void setTicketTypeId(ObjectId objectId) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'setTicketTypeId'");
     }
 }
