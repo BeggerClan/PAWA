@@ -2,6 +2,7 @@ package com.begger.pawa.demo.Profile;
 import com.begger.pawa.demo.Passenger.Passenger;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 public class ProfileResponse {
@@ -11,7 +12,7 @@ public class ProfileResponse {
     private String middleName;
     private String lastName;
     private String nationalId;
-    private LocalDateTime dob;
+    private LocalDate dob;
     private String residenceAddress;
     private String phoneNumber;
     private String studentId;
@@ -89,11 +90,11 @@ public class ProfileResponse {
         this.nationalId = nationalId;
     }
 
-    public LocalDateTime getDob() {
+    public LocalDate getDob() {
         return dob;
     }
 
-    public void setDob(LocalDateTime dob) {
+    public void setDob(LocalDate dob) {
         this.dob = dob;
     }
 
