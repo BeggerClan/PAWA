@@ -14,23 +14,31 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfiguration {
-    private final JWTAuthenticationFilter jwtAuthFilter;
-    private final AuthenticationProvider authenticationProvider;
+        private final JWTAuthenticationFilter jwtAuthFilter;
+        private final AuthenticationProvider authenticationProvider;
 
-    @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        return http
-                .csrf(csrf -> csrf.disable())
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/v1/auth/**", "/api/data-generator/**", "/api/metro-lines/get-all-metro-lines").permitAll()
-                        .requestMatchers("/api/v1/user/add", "/api/v1/user/update/**").hasRole("ADMIN")
-                        .anyRequest().authenticated()
-                )
-                .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                )
-                .authenticationProvider(authenticationProvider)
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
-                .build();
-    }
+        @Bean
+        public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+                return http
+                                .csrf(csrf -> csrf.disable())
+                                .authorizeHttpRequests(auth -> auth
+                                                .requestMatchers("/api/v1/auth/**", "/api/data-generator/**",
+                                                                "/api/metro-lines/get-all-metro-lines",
+                                                                "/api/metro-lines/**",
+                                                                "/api/metro-lines/{id}", "/api/metro-lines/{id}/**",
+                                                                "/api/metro-lines/{id}/trips",
+                                                                "/api/stations/get-all-stations",
+                                                                "/api/stations/{id}",
+                                                                "/api/metro-lines/{lineId}/stations/{stationId}",
+                                                                "/{lineId}/stations/{stationId}/trips")
+                                                .permitAll()
+                                                .requestMatchers("/api/v1/user/add", "/api/v1/user/update/**")
+                                                .hasRole("ADMIN")
+                                                .anyRequest().authenticated())
+                                .sessionManagement(session -> session
+                                                .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                                .authenticationProvider(authenticationProvider)
+                                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+                                .build();
+        }
 }

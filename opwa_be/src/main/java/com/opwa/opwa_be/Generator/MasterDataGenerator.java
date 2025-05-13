@@ -10,14 +10,12 @@ import lombok.RequiredArgsConstructor;
 public class MasterDataGenerator {
     private final MetroLineGenerator metroLineGenerator;
     private final StationGenerator stationGenerator;
-    private final NotificationGenerator notificationGenerator;
 
     public void generateAll() {
         try {
             System.out.println("⚡ Starting data generation...");
             metroLineGenerator.run();
             stationGenerator.run();
-            notificationGenerator.run();
             System.out.println("✅ All data generated successfully!");
         } catch (Exception e) {
             System.err.println("❌ Data generation failed: " + e.getMessage());
