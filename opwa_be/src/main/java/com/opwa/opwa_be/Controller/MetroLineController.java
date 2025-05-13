@@ -18,7 +18,7 @@ public class MetroLineController {
     @Autowired
     private MetroLineService metroLineService;
 
-    @GetMapping
+    @GetMapping("/get-all-metro-lines")
     public ResponseEntity<List<MetroLine>> getAllLines() {
         return ResponseEntity.ok(metroLineService.findAllWithStations());
     }

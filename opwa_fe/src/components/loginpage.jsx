@@ -1,9 +1,11 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const navigate = useNavigate();
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -12,13 +14,13 @@ const LoginPage = () => {
       return;
     }
     setError("");
-    alert(`Logged in as: ${email}`);
+    // Simulate login success, then navigate to dashboard
+    navigate("/dashboard");
   };
 
   return (
     <div
       style={{
-      
         display: "flex",
         overflow: "hidden",
       }}
@@ -28,7 +30,6 @@ const LoginPage = () => {
         style={{
           width: "30vw",
           height: "100vh",
-         
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -39,9 +40,6 @@ const LoginPage = () => {
           style={{
             maxWidth: 800,
             width: "1000%",
-          
-           
-           
           }}
         >
           <div className="text-center mb-4">
@@ -49,7 +47,9 @@ const LoginPage = () => {
             <p className="text-muted">Please login to your account</p>
           </div>
 
-          {error && <div className="alert alert-danger text-center">{error}</div>}
+          {error && (
+            <div className="alert alert-danger text-center">{error}</div>
+          )}
 
           <form onSubmit={handleSubmit}>
             <div className="mb-3">
@@ -96,8 +96,6 @@ const LoginPage = () => {
               Login
             </button>
           </form>
-
-          
         </div>
       </div>
 
