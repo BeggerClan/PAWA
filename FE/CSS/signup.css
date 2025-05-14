@@ -18,7 +18,7 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: 'Segoe UI', Arial, sans-serif;
+  font-family: "Segoe UI", Arial, sans-serif;
 }
 
 body {
@@ -38,7 +38,11 @@ body {
 
 .left-panel {
   flex: 1;
-  background: linear-gradient(135deg, var(--gradient-start) 0%, var(--gradient-end) 100%);
+  background: linear-gradient(
+    135deg,
+    var(--gradient-start) 0%,
+    var(--gradient-end) 100%
+  );
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -247,50 +251,75 @@ input[type="radio"]:focus + .radio-custom {
 
 /* Animation for errors */
 @keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
-  20%, 40%, 60%, 80% { transform: translateX(5px); }
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  10%,
+  30%,
+  50%,
+  70%,
+  90% {
+    transform: translateX(-5px);
+  }
+  20%,
+  40%,
+  60%,
+  80% {
+    transform: translateX(5px);
+  }
+}
+/*small CSS addition for styling error messages*/
+.shake {
+  animation: shake 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
 }
 
-.shake {
-  animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+.field-error {
+  color: #ff6b81;
+  font-size: 0.85rem;
+  margin-top: 0.25rem;
+  display: block;
+}
+
+.is-invalid {
+  border-color: #ff6b81 !important;
 }
 
 /* Responsive styles */
 @media (max-width: 992px) {
   .container {
-      flex-direction: column;
+    flex-direction: column;
   }
-  
+
   .left-panel {
-      height: 180px;
+    height: 180px;
   }
-  
+
   .metro-logo {
-      width: 50%;
-      max-width: 200px;
+    width: 50%;
+    max-width: 200px;
   }
-  
+
   .right-panel {
-      padding: 20px 15px;
+    padding: 20px 15px;
   }
-  
+
   .form-row {
-      flex-direction: column;
-      gap: 15px;
+    flex-direction: column;
+    gap: 15px;
   }
 }
 
 @media (max-width: 576px) {
   .left-panel {
-      height: 150px;
+    height: 150px;
   }
-  
+
   .form-container {
-      padding: 10px;
+    padding: 10px;
   }
-  
+
   .form-title {
-      font-size: 28px;
+    font-size: 28px;
   }
 }
