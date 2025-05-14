@@ -1,21 +1,46 @@
 // src/routes/AppRoutes.jsx
+import { useState } from "react";
 import { Routes, Route } from "react-router-dom";
+import { Box } from "@mui/material";
+
 import LoginPage from "../components/loginpage";
 import Dashboard from "../scenes/dashboard";
 import Topbar from "../scenes/global/Topbar";
-import Sidebar from "../scenes/global/SideBar"; // Add this import
+import Sidebar from "../scenes/global/SideBar";
+import Team from "../team";
+
+const SIDEBAR_WIDTH = 250;
+const SIDEBAR_COLLAPSED_WIDTH = 80;
+const TOPBAR_HEIGHT = 64;
 
 function DashboardLayout({ children }) {
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [selected, setSelected] = useState("Dashboard"); // <-- add this
+
+  const sidebarWidth = isSidebarCollapsed
+    ? SIDEBAR_COLLAPSED_WIDTH
+    : SIDEBAR_WIDTH;
+
   return (
-    <div className="app" style={{ display: "flex" }}>
-      <Sidebar />
-      <div style={{ flex: 1 }}>
-        <Topbar />
-        <main className="content" style={{ marginTop: 64 }}>
-          {children}
-        </main>
-      </div>
-    </div>
+    <>
+      <Topbar isSidebarCollapsed={isSidebarCollapsed} />
+      <Sidebar
+        isCollapsed={isSidebarCollapsed}
+        onToggleCollapse={() => setIsSidebarCollapsed((prev) => !prev)}
+        selected={selected} // <-- pass down
+        setSelected={setSelected} // <-- pass down
+      />
+      <Box
+        sx={{
+          marginLeft: `${sidebarWidth}px`,
+          marginTop: `${TOPBAR_HEIGHT}px`,
+          p: 2,
+          transition: "margin-left 0.3s",
+        }}
+      >
+        {children}
+      </Box>
+    </>
   );
 }
 
@@ -23,15 +48,14 @@ export default function AppRoutes() {
   return (
     <Routes>
       <Route path="/" element={<LoginPage />} />
-
       <Route
         path="/dashboard/*"
         element={
           <DashboardLayout>
             <Routes>
               <Route index element={<Dashboard />} />
-              {/* Bạn có thể mở lại các routes dưới đây nếu đã tạo component tương ứng */}
-              {/* <Route path="team" element={<Team />} /> */}
+              <Route path="dashboard" element={<Dashboard />} />
+              <Route path="team" element={<Team />} />
               {/* <Route path="contacts" element={<Contacts />} /> */}
             </Routes>
           </DashboardLayout>

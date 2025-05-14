@@ -9,10 +9,12 @@ import SettingsIcon from "@mui/icons-material/Settings";
 import PersonIcon from "@mui/icons-material/Person";
 import SearchIcon from "@mui/icons-material/Search";
 
-const Topbar = () => {
+const Topbar = ({ isSidebarCollapsed }) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const colorMode = useContext(ColorModeContext);
+
+  const sidebarWidth = isSidebarCollapsed ? 80 : 250;
 
   return (
     <Box
@@ -23,10 +25,12 @@ const Topbar = () => {
       sx={{
         position: "fixed",
         top: 0,
-        left: 0,
-        width: "100%",
+        left: `${sidebarWidth}px`,
+        width: `calc(100% - ${sidebarWidth}px)`,
         backgroundColor: colors.primary[400],
-        zIndex: 1000,
+        zIndex: 1200,
+        height: "64px",
+        transition: "left 0.3s, width 0.3s",
       }}
     >
       {/* SEARCH BAR */}

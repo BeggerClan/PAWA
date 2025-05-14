@@ -1,4 +1,3 @@
-import { useState } from "react";
 import {
   Sidebar as ProSidebar,
   Menu,
@@ -7,7 +6,6 @@ import {
 } from "react-pro-sidebar";
 import { Box, IconButton, Typography, useTheme } from "@mui/material";
 import { Link } from "react-router-dom";
-
 import { tokens } from "../../theme";
 import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
 import PeopleOutlinedIcon from "@mui/icons-material/PeopleOutlined";
@@ -40,52 +38,35 @@ const Item = ({ title, to, icon, selected, setSelected }) => {
   );
 };
 
-const Sidebar = () => {
+const Sidebar = ({ isCollapsed, onToggleCollapse, selected, setSelected }) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
-  const [isCollapsed, setIsCollapsed] = useState(false);
-  const [selected, setSelected] = useState("Dashboard");
 
   return (
     <ProSidebarProvider>
       <Box
         sx={{
-          "& .pro-sidebar-inner": {
-            background: `${colors.primary[400]} !important`,
-          },
-          "& .pro-sidebar": {
-            background: `${colors.primary[400]} !important`,
-            color: `${colors.grey[100]} !important`,
-            minHeight: "100vh",
-          },
-          "& .pro-icon-wrapper": {
-            backgroundColor: "transparent !important",
-          },
-          "& .pro-inner-item": {
-            padding: "5px 35px 5px 20px !important",
-            color: `${colors.grey[100]} !important`,
-          },
-          "& .pro-inner-item:hover": {
-            color: "#868dfb !important",
-          },
-          "& .pro-menu-item.active": {
-            color: "#6870fa !important",
-          },
+          position: "fixed",
+          left: 0,
+          top: 0, // Topbar will be offset, so Sidebar starts at top
+          height: "100vh",
+          zIndex: 1100,
+          width: isCollapsed ? "80px" : "250px",
+          transition: "width 0.3s",
+          background: colors.primary[400],
         }}
       >
-        <ProSidebar
-          collapsed={isCollapsed}
-          rootStyles={{
-            background: colors.primary[400],
-            color: colors.grey[100],
-            minHeight: "100vh",
-          }}
-        >
+        <ProSidebar collapsed={isCollapsed}>
           <Menu iconShape="square">
             {/* LOGO AND MENU ICON */}
             <MenuItem
-              onClick={() => setIsCollapsed(!isCollapsed)}
-              icon={isCollapsed ? <MenuOutlinedIcon /> : undefined}
+              icon={
+                isCollapsed ? (
+                  <IconButton onClick={onToggleCollapse}>
+                    <MenuOutlinedIcon />
+                  </IconButton>
+                ) : undefined
+              }
               style={{
                 margin: "10px 0 20px 0",
                 color: colors.grey[100],
@@ -101,44 +82,17 @@ const Sidebar = () => {
                   <Typography variant="h3" color={colors.grey[100]}>
                     ADMINIS
                   </Typography>
-                  <IconButton onClick={() => setIsCollapsed(!isCollapsed)}>
+                  <IconButton onClick={onToggleCollapse}>
                     <MenuOutlinedIcon />
                   </IconButton>
                 </Box>
               )}
             </MenuItem>
 
-            {!isCollapsed && (
-              <Box mb="25px">
-                <Box display="flex" justifyContent="center" alignItems="center">
-                  <img
-                    alt="profile-user"
-                    width="100px"
-                    height="100px"
-                    src={`../../assets/user.png`}
-                    style={{ cursor: "pointer", borderRadius: "50%" }}
-                  />
-                </Box>
-                <Box textAlign="center">
-                  <Typography
-                    variant="h2"
-                    color={colors.grey[100]}
-                    fontWeight="bold"
-                    sx={{ m: "10px 0 0 0" }}
-                  >
-                    Ed Roh
-                  </Typography>
-                  <Typography variant="h5" color={colors.greenAccent[500]}>
-                    VP Fancy Admin
-                  </Typography>
-                </Box>
-              </Box>
-            )}
-
             <Box paddingLeft={isCollapsed ? undefined : "10%"}>
               <Item
                 title="Dashboard"
-                to="/"
+                to="/dashboard"
                 icon={<HomeOutlinedIcon />}
                 selected={selected}
                 setSelected={setSelected}
@@ -153,7 +107,7 @@ const Sidebar = () => {
               </Typography>
               <Item
                 title="Manage Team"
-                to="/team"
+                to="/dashboard/team"
                 icon={<PeopleOutlinedIcon />}
                 selected={selected}
                 setSelected={setSelected}
