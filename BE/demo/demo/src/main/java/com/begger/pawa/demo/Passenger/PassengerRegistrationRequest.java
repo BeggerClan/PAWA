@@ -1,6 +1,8 @@
 package com.begger.pawa.demo.Passenger;
 
 import jakarta.validation.constraints.*;
+
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 public class PassengerRegistrationRequest {
@@ -111,11 +113,11 @@ public class PassengerRegistrationRequest {
         this.nationalId = nationalId;
     }
 
-    public @NotNull LocalDateTime getDob() {
+    public @NotNull LocalDate getDob() {
         return dob;
     }
 
-    public void setDob(@NotNull LocalDateTime dob) {
+    public void setDob(@NotNull LocalDate dob) {
         this.dob = dob;
     }
 

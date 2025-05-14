@@ -1,24 +1,30 @@
 package com.begger.pawa.demo.Ticket;
 
+import com.begger.pawa.demo.TicketType.TicketType;
+import com.begger.pawa.demo.TicketType.ValidFrom;
 import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.MongoId;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 
 @Document(collection = "tickets")
 public class Ticket {
 
+
     @MongoId
     private ObjectId ticketId; // Mongo ObjectId
 
+
     private ObjectId passengerId; // Change to ObjectId if passengerId is an ObjectId; otherwise adjust
-    private ObjectId ticketTypeId; // for now, a reference to ticket type if applicable
+    private String ticketTypeId;
     private Instant purchaseTime;
     private Instant activationTime;
     private String fromStation;
     private String toStation;
     private boolean isActive;
     private boolean isExpired;
+    private Instant expiryTime;
 
     public Ticket() {
         this.ticketId = new ObjectId();
@@ -26,6 +32,38 @@ public class Ticket {
         this.isActive = true;
         this.isExpired = false;
     }
+
+    public static Ticket createOnPurchase(
+            TicketType type,
+            ObjectId passengerId,
+            String fromStation,
+            String toStation,
+            boolean freeRide
+    ) {
+        Ticket ticket = new Ticket();
+        ticket.setPassengerId(passengerId);
+        // use the TicketType code as the ticketTypeId
+        ticket.setTicketTypeId(type.getCode());
+        ticket.setFromStation(fromStation);
+        ticket.setToStation(toStation);
+
+        Instant now = Instant.now();
+        ticket.setPurchaseTime(now);
+
+        // for types that expire from purchase (e.g. one-way)
+        if (type.getValidFrom() == ValidFrom.PURCHASE) {
+            ticket.setExpiryTime(now.plus(type.getValidityDurationHours(), ChronoUnit.HOURS));
+        }
+        // leave activationTime null; it will be set on activation
+
+        return ticket;
+    }
+
+
+    public void setPurchaseTime(Instant purchaseTime) {
+        this.purchaseTime = purchaseTime;
+    }
+    
 
     public ObjectId getTicketId() {
         return ticketId;
@@ -39,11 +77,11 @@ public class Ticket {
         this.passengerId = passengerId;
     }
 
-    public ObjectId getTicketTypeId() {
+    public String getTicketTypeId() {
         return ticketTypeId;
     }
 
-    public void setTicketTypeId(ObjectId ticketTypeId) {
+    public void setTicketTypeId(String ticketTypeId) {
         this.ticketTypeId = ticketTypeId;
     }
 
@@ -89,5 +127,17 @@ public class Ticket {
 
     public void setExpired(boolean expired) {
         isExpired = expired;
+    }
+
+    public void setTicketId(ObjectId ticketId) {
+        this.ticketId = ticketId;
+    }
+
+    public Instant getExpiryTime() {
+        return expiryTime;
+    }
+
+    public void setExpiryTime(Instant expiryTime) {
+        this.expiryTime = expiryTime;
     }
 }

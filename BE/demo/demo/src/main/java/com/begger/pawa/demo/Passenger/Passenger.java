@@ -3,7 +3,11 @@ package com.begger.pawa.demo.Passenger;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+
+import jakarta.validation.constraints.NotNull;
+
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Data
@@ -23,7 +27,7 @@ public class Passenger {
     private String lastName;
 
     private String nationalId;
-    private LocalDateTime dob;
+    private LocalDate dob;
     private String residenceAddress;
     private String phoneNumber;
     private String studentId;
@@ -38,6 +42,15 @@ public class Passenger {
     private String ticketId;
     private Boolean isVerified;
     private Boolean isGuest;
+    private Boolean eligibleFreeTicket;
+
+    public Boolean getEligibleFreeTicket() {
+        return eligibleFreeTicket;
+    }
+
+    public void setEligibleFreeTicket(Boolean eligibleFreeTicket) {
+        this.eligibleFreeTicket = eligibleFreeTicket;
+    }
 
     // track for when system change email or password
     private Instant passwordChangedAt;
@@ -106,11 +119,11 @@ public class Passenger {
         this.nationalId = nationalId;
     }
 
-    public LocalDateTime getDob() {
+    public LocalDate getDob() {
         return dob;
     }
 
-    public void setDob(LocalDateTime dob) {
+    public void setDob(LocalDate dob) {
         this.dob = dob;
     }
 

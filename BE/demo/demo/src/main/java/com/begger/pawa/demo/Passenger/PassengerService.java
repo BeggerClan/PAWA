@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Period;
 
@@ -151,7 +152,15 @@ public class PassengerService {
         p.setVerified(false);
         p.setGuest(false);
 
-        // Save passenger
+        LocalDate today = LocalDate.now();
+        boolean age60OrAbove    = req.getDob().isBefore(today.minusYears(60));
+        boolean age6OrBelow     = req.getDob().isAfter(today.minusYears(6));
+        boolean hasDisability   = req.getDisabilityStatus();
+        boolean isRevolutionary = req.getRevolutionaryStatus();
+
+        p.setEligibleFreeTicket(age60OrAbove || age6OrBelow || hasDisability || isRevolutionary);
+
+        // save passenger
         Passenger saved = repo.save(p);
 
         // Create wallet with zero balance

@@ -15,6 +15,12 @@ public class WalletController {
         this.service = service;
     }
 
+    @GetMapping("/balance")
+    public long getBalance(Principal principal) {
+        return service.getWallet(principal.getName()).getBalance();
+    }
+
+
     // return current wallet from the logged in passenger
     @GetMapping
     public WalletResponse getWallet (Principal principal){
