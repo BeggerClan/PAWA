@@ -34,7 +34,7 @@ public class UserController {
         List<String> roles = jwtService.extractRoles(token);
         System.out.println("Roles extracted: " + roles); // Debugging
 
-        if (roles.contains("ROLE_ADMIN")) {
+        if (roles.contains("ROLE_ADMIN") || roles.contains("ROLE_OPERATOR")) {
             var user = User.builder()
                     .firstName(request.getFirstName())
                     .lastName(request.getLastName())
@@ -58,7 +58,7 @@ public class UserController {
         String token = authHeader.substring(7);
         List<String> roles = jwtService.extractRoles(token);
     
-        if (roles.contains("ROLE_ADMIN")) {
+        if (roles.contains("ROLE_ADMIN") || roles.contains("ROLE_OPERATOR")) {
             var user = userRepo.findById(userId).orElseThrow(() -> new RuntimeException("User not found."));
             user.setFirstName(request.getFirstName());
             user.setLastName(request.getLastName());
@@ -67,6 +67,40 @@ public class UserController {
             user.setRole(request.getRole()); // Optional
             userRepo.save(user);
             return ResponseEntity.ok("User updated successfully.");
+        } else {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Access denied.");
+        }
+    }
+    @GetMapping("/getAll")
+    public ResponseEntity<List<User>> getAllUsers(HttpServletRequest httpServletRequest) {
+        String authHeader = httpServletRequest.getHeader("Authorization");
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+        }
+
+        String token = authHeader.substring(7);
+        List<String> roles = jwtService.extractRoles(token);
+
+        if (roles.contains("ROLE_ADMIN") || roles.contains("ROLE_OPERATOR")) {
+            List<User> users = userRepo.findAll();
+            return ResponseEntity.ok(users);
+        } else {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+        }
+    }
+    @DeleteMapping ("/delete/{userId}")
+    public ResponseEntity<String> deleteUser(@PathVariable String userId, HttpServletRequest httpServletRequest) {
+        String authHeader = httpServletRequest.getHeader("Authorization");
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Authorization header missing or invalid.");
+        }
+
+        String token = authHeader.substring(7);
+        List<String> roles = jwtService.extractRoles(token);
+
+        if (roles.contains("ROLE_ADMIN") || roles.contains("ROLE_OPERATOR")) {
+            userRepo.deleteById(userId);
+            return ResponseEntity.ok("User deleted successfully.");
         } else {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Access denied.");
         }
