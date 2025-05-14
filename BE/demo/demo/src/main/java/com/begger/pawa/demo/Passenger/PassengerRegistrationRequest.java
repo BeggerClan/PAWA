@@ -42,7 +42,7 @@ public class PassengerRegistrationRequest {
     private String nationalId;
 
     @NotNull(message = "Date of birth is required")
-    private LocalDateTime dob;    // maps to DATETIME
+    private @NotNull LocalDate dob;    // maps to DATETIME
 
     @NotBlank(message = "Residence address is required")
     @Pattern(regexp = "^[a-zA-Z0-9ÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơƯĂẠẢẤẦẨẪẬẮẰẲẴẶẸẺẼỀỀỂưăạảấầẩẫậắằẳẵặẹẻẽềềểỄỆỈỊỌỎỐỒỔỖỘỚỜỞỠỢỤỦỨỪễệỉịọỏốồổỗộớờởỡợụủứừỬỮỰỲỴÝỶỸửữựỳỵỷỹ\\s,./-]+$", 

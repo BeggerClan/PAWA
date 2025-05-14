@@ -94,7 +94,7 @@ public class PassengerService {
 
         // Date of birth validation - at least 6 years old
         if (req.getDob() != null) {
-            LocalDateTime minDob = LocalDateTime.now().minusYears(6);
+            LocalDate minDob = LocalDate.now().minusYears(6);
             if (req.getDob().isAfter(minDob)) {
                 throw new ResponseStatusException(
                         HttpStatus.BAD_REQUEST, 
