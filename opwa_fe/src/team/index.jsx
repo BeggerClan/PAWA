@@ -1,96 +1,164 @@
-import React from "react";
-import { Box, Typography } from "@mui/material";
+import { Box, IconButton, Typography, useTheme } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import { tokens } from "../theme";
-import { useTheme } from "@mui/material/styles";
-import AdminPanelSettingOutlinedIcon from "@mui/icons-material/AdminPanelSettingsOutlined";
+import { mockDataTeam } from "../data/mockData";
+import AdminPanelSettingsOutlinedIcon from "@mui/icons-material/AdminPanelSettingsOutlined";
 import LockOpenOutlinedIcon from "@mui/icons-material/LockOpenOutlined";
 import SecurityOutlinedIcon from "@mui/icons-material/SecurityOutlined";
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
 import Header from "../components/Header";
-import Sidebar from "../scenes/global/SideBar";
-import Topbar from "../scenes/global/Topbar";
-import { mockDataTeam } from "../data/mockData"; // <-- add this import
 
 const Team = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
+
+  const handleEdit = (id) => {
+    alert(`Edit user with ID: ${id}`);
+    // TODO: Navigate or open modal
+  };
+
+  const handleDelete = (id) => {
+    if (window.confirm("Are you sure you want to delete this user?")) {
+      alert(`Deleted user with ID: ${id}`);
+      // TODO: Delete logic
+    }
+  };
+
   const columns = [
-    { field: "id", headerName: "ID" },
+    { field: "id", headerName: "ID", width: 70 },
     {
       field: "name",
-      headerName: "Name",
-      flex: 1,
+      headerName: "Full Name",
+      width: 180,
       cellClassName: "name-column--cell",
     },
     {
       field: "age",
       headerName: "Age",
       type: "number",
-      headerAlign: "left",
-      align: "left",
+      width: 100,
     },
     {
       field: "phone",
-      headerName: "Phone Number",
-      flex: 1,
+      headerName: "Phone",
+      width: 150,
     },
     {
       field: "email",
       headerName: "Email",
-      flex: 1,
+      width: 220,
     },
     {
       field: "access",
       headerName: "Access Level",
-      flex: 1,
+      width: 180,
       renderCell: ({ row: { access } }) => {
+        const icon =
+          access === "admin" ? (
+            <AdminPanelSettingsOutlinedIcon />
+          ) : access === "manager" ? (
+            <SecurityOutlinedIcon />
+          ) : (
+            <LockOpenOutlinedIcon />
+          );
+
+        const bgColor =
+          access === "admin"
+            ? colors.greenAccent[600]
+            : colors.greenAccent[700];
+
         return (
           <Box
-            width="60%"
-            m="0 auto"
-            p="5px"
             display="flex"
+            alignItems="center"
             justifyContent="center"
-            backgroundColor={
-              access === "admin"
-                ? colors.greenAccent[600]
-                : colors.greenAccent[700]
-            }
+            gap={1}
+            padding="4px 8px"
             borderRadius="4px"
+            sx={{ backgroundColor: bgColor }}
           >
-            {access === "admin" && <AdminPanelSettingOutlinedIcon />}
-            {access === "manager" && <SecurityOutlinedIcon />}
-            {access === "user" && <LockOpenOutlinedIcon />}
-            <Typography color={colors.grey[100]} sx={{ ml: "5px" }}>
+            {icon}
+            <Typography color={colors.grey[100]} textTransform="capitalize">
               {access}
             </Typography>
           </Box>
         );
       },
     },
+    {
+      field: "actions",
+      headerName: "Actions",
+      width: 120,
+      sortable: false,
+      renderCell: ({ row }) => (
+        <Box>
+          <IconButton
+            onClick={() => handleEdit(row.id)}
+            sx={{ color: colors.blueAccent[300] }}
+          >
+            <EditIcon />
+          </IconButton>
+          <IconButton
+            onClick={() => handleDelete(row.id)}
+            sx={{ color: colors.redAccent ? colors.redAccent[400] : "red" }}
+          >
+            <DeleteIcon />
+          </IconButton>
+        </Box>
+      ),
+    },
   ];
 
   return (
-    <Box display="flex" height="100vh">
-      <Box flex={1} display="flex" flexDirection="column">
-        <Box m="20px">
-          <Header title="TEAM" subtitle="Managing the Team Members" />
-          <Box
-            m="40px 0 0 0"
-            width="100%"
-            height="75vh"
-            sx={{
-              "& .MuiDataGrid-root": {
-                border: "none",
-              },
-              "& .MuiDataGrid-cell": {
-                borderBottom: "none",
-              },
-            }}
-          >
-            <DataGrid rows={mockDataTeam} columns={columns} />
-          </Box>
-        </Box>
+    <Box m="20px">
+      <Header title="TEAM" subtitle="Manage your team members effectively" />
+      <Box
+        mt="40px"
+        sx={{
+          "& .MuiDataGrid-root": {
+            border: "none",
+            fontSize: 13,
+          },
+          "& .MuiDataGrid-cell": {
+            borderBottom: "none",
+          },
+          "& .name-column--cell": {
+            color: colors.greenAccent[300],
+            fontWeight: 500,
+          },
+          "& .MuiDataGrid-columnHeaders": {
+            backgroundColor: colors.blueAccent[700],
+            borderBottom: "none",
+            fontSize: 14,
+            fontWeight: "bold",
+          },
+          "& .MuiDataGrid-virtualScroller": {
+            backgroundColor: colors.primary[400],
+          },
+          "& .MuiDataGrid-footerContainer": {
+            borderTop: "none",
+            backgroundColor: colors.blueAccent[700],
+          },
+          "& .MuiCheckbox-root": {
+            color: `${colors.greenAccent[200]} !important`,
+          },
+          "& .MuiDataGrid-row:hover": {
+            backgroundColor: colors.primary[500],
+          },
+        }}
+      >
+        <DataGrid
+          autoHeight
+          checkboxSelection
+          rows={mockDataTeam}
+          columns={columns}
+          disableRowSelectionOnClick
+          pageSizeOptions={[5, 10]}
+          initialState={{
+            pagination: { paginationModel: { pageSize: 5, page: 0 } },
+          }}
+        />
       </Box>
     </Box>
   );
