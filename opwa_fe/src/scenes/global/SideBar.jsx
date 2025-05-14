@@ -103,39 +103,25 @@ const Sidebar = ({ isCollapsed, onToggleCollapse, selected, setSelected }) => {
                 color={colors.grey[300]}
                 sx={{ m: "15px 0 5px 20px" }}
               >
-                Data
+                Staff
               </Typography>
               <Item
-                title="Manage Team"
+                title="Manage Staff"
                 to="/dashboard/team"
                 icon={<PeopleOutlinedIcon />}
                 selected={selected}
                 setSelected={setSelected}
               />
-              <Item
-                title="Contacts Information"
-                to="/contacts"
-                icon={<ContactsOutlinedIcon />}
-                selected={selected}
-                setSelected={setSelected}
-              />
-              <Item
-                title="Invoices Balances"
-                to="/invoices"
-                icon={<ReceiptOutlinedIcon />}
-                selected={selected}
-                setSelected={setSelected}
-              />
-
+             
               <Typography
                 variant="h6"
                 color={colors.grey[300]}
                 sx={{ m: "15px 0 5px 20px" }}
               >
-                Pages
+               Ticket
               </Typography>
               <Item
-                title="Profile Form"
+                title="Ticket Form"
                 to="/form"
                 icon={<PersonOutlinedIcon />}
                 selected={selected}

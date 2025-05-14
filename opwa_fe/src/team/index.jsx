@@ -1,4 +1,4 @@
-import { Box, IconButton, Typography, useTheme } from "@mui/material";
+import { Box, IconButton, Typography, useTheme, Button } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import { tokens } from "../theme";
 import { mockDataTeam } from "../data/mockData";
@@ -8,14 +8,15 @@ import SecurityOutlinedIcon from "@mui/icons-material/SecurityOutlined";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import Header from "../components/Header";
+import { useNavigate } from "react-router-dom";
 
 const Team = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
+  const navigate = useNavigate();
 
   const handleEdit = (id) => {
-    alert(`Edit user with ID: ${id}`);
-    // TODO: Navigate or open modal
+    navigate(`/dashboard/team/updateStaff?id=${id}`);
   };
 
   const handleDelete = (id) => {
@@ -113,6 +114,15 @@ const Team = () => {
   return (
     <Box m="20px">
       <Header title="TEAM" subtitle="Manage your team members effectively" />
+      <Box mb={2}>
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={() => navigate("/dashboard/team/addStaff")}
+        >
+          Add Staff
+        </Button>
+      </Box>
       <Box
         mt="40px"
         sx={{

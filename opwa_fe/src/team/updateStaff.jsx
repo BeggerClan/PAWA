@@ -16,7 +16,7 @@ const roles = [
   { value: "OPERATOR", label: "Operator" },
 ];
 
-const AddStaff = () => {
+const UpdateStaff = () => {
   const [form, setForm] = useState({
     firstName: "",
     lastName: "",
@@ -35,7 +35,7 @@ const AddStaff = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // TODO: Replace alert with actual backend API
+    // TODO: Replace alert with actual backend API for updating staff
     alert(JSON.stringify(form, null, 2));
   };
 
@@ -72,7 +72,7 @@ const AddStaff = () => {
           textAlign="center"
           gutterBottom
         >
-          Add New Staff
+          Update Staff
         </Typography>
 
         <Divider sx={{ mb: 3 }} />
@@ -114,7 +114,6 @@ const AddStaff = () => {
             type="password"
             value={form.password}
             onChange={handleChange}
-            required
           />
           <TextField
             select
@@ -140,7 +139,7 @@ const AddStaff = () => {
             fullWidth
             sx={{ mt: 3, py: 1.3, fontWeight: "bold", borderRadius: 2 }}
           >
-            Add Staff
+            Update Staff
           </Button>
         </form>
       </Paper>
@@ -148,4 +147,4 @@ const AddStaff = () => {
   );
 };
 
-export default AddStaff;
+export default UpdateStaff;
