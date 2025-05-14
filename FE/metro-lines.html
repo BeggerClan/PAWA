@@ -36,7 +36,15 @@
                     <li class="nav-item"><a class="nav-link nav-hover active" href="metro-lines.html">Metro Lines</a></li>
                     <li class="nav-item"><a class="nav-link nav-hover" href="#">My Tickets</a></li>
                     <li class="nav-item"><a class="nav-link nav-hover" href="profile.html">Profile</a></li>
-                    <li class="nav-item">
+                    <li class="nav-item position-relative">
+                    <a class="nav-link nav-hover" href="cart.html">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span class="cart-count badge bg-danger rounded-circle position-absolute top-0 start-100 translate-middle">
+                        0
+                        </span>
+                    </a>
+                    </li>
+                    <li class="nav-item ms-4 d-flex align-items-center">
                         <button id="logout-btn" class="btn btn-outline-light btn-sm">Sign Out</button>
                     </li>
                 </ul>
@@ -336,7 +344,11 @@
                                     <div>Up to 8 stations: <strong>12,000đ</strong></div>
                                     <div>More than 8 stations: <strong>20,000đ</strong></div>
                                 </div>
-                                <button class="btn btn-sm btn-outline-primary select-ticket-btn">Select</button>
+                                <button class="btn btn-outline-primary add-to-cart"
+                                data-type="daily"
+                                data-price="40000">
+                                Select
+                                </button>
                             </div>
                         </div>
                         <hr>
@@ -347,7 +359,11 @@
                                 <div class="pricing">
                                     <div><strong>40,000đ</strong></div>
                                 </div>
-                                <button class="btn btn-sm btn-outline-primary select-ticket-btn">Select</button>
+                                <button class="btn btn-outline-primary add-to-cart"
+                                data-type="daily"
+                                data-price="40000">
+                                Select
+                                </button>                            
                             </div>
                         </div>
                         <hr>
@@ -358,7 +374,11 @@
                                 <div class="pricing">
                                     <div><strong>90,000đ</strong></div>
                                 </div>
-                                <button class="btn btn-sm btn-outline-primary select-ticket-btn">Select</button>
+                                <button class="btn btn-outline-primary add-to-cart"
+                                data-type="daily"
+                                data-price="40000">
+                                Select
+                                </button>                             
                             </div>
                         </div>
                         <hr>
@@ -370,7 +390,11 @@
                                     <div>Students: <strong>150,000đ</strong></div>
                                     <div>Adults: <strong>300,000đ</strong></div>
                                 </div>
-                                <button class="btn btn-sm btn-outline-primary select-ticket-btn">Select</button>
+                                <button class="btn btn-outline-primary add-to-cart"
+                                data-type="daily"
+                                data-price="40000">
+                                Select
+                                </button>                             
                             </div>
                         </div>
                     </div>

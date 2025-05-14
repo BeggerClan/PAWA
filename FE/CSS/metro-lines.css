@@ -390,3 +390,36 @@ body {
 .station:nth-child(12) { animation-delay: 0.65s; }
 .station:nth-child(13) { animation-delay: 0.7s; }
 .station:nth-child(14) { animation-delay: 0.75s; }
+
+/* Ensure cart button and sign-out button align */
+.navbar-nav .nav-item {
+  display: flex;
+  align-items: center;
+}
+
+.navbar-nav .btn {
+  vertical-align: middle;
+}
+
+/* Optional: cart icon button styling for better match */
+.cart-button {
+  background-color: #111;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 6px;
+  position: relative;
+  color: white;
+}
+
+/* Maintain vertical centering even with badge */
+.cart-count {
+  font-size: 0.65rem;
+  padding: 3px 6px;
+  min-width: 18px;
+  height: 18px;
+  line-height: 1;
+  text-align: center;
+  position: absolute;
+  top: -5px;
+  right: -5px;
+}

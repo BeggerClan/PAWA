@@ -6,6 +6,10 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Update UI based on authentication status
     updateNavigation(isAuthenticated);
+
+    if (isAuthenticated) {
+        updateCartBadge();
+    }
     
     // Set current date and time as default for travel time input
     const travelTimeInput = document.getElementById('travel-time');
@@ -124,3 +128,32 @@ function updateNavigation(isAuthenticated) {
         guestMenu.style.display = isAuthenticated ? 'none' : 'flex';
     }
 }
+
+// Demo: update cart count
+function updateCartBadge() {
+  const badge = document.querySelector('.cart-count');
+  const cart = JSON.parse(localStorage.getItem('guestCart') || '[]');
+  badge.textContent = cart.length;
+  badge.style.display = cart.length > 0 ? 'inline-block' : 'none';
+}
+
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.add-to-cart').forEach(button => {
+    button.addEventListener('click', () => {
+      const card = button.closest('.ticket-type');
+      const name = card.querySelector('h5').textContent.trim();
+      const details = card.querySelector('p')?.textContent.trim() || '';
+      const priceBlock = card.querySelector('.pricing')?.innerText.trim() || '';
+      const fullText = `${name}\n${details}\n${priceBlock}`;
+
+      // Store in localStorage cart
+      const cart = JSON.parse(localStorage.getItem('guestCart') || '[]');
+      cart.push({ description: fullText });
+      localStorage.setItem('guestCart', JSON.stringify(cart));
+
+      alert(`✅ "${name}" ticket added to your cart.`);
+      updateCartBadge();
+    });
+  });
+});
