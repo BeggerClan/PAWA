@@ -42,6 +42,15 @@ public class Passenger {
     private String ticketId;
     private Boolean isVerified;
     private Boolean isGuest;
+    private Boolean eligibleFreeTicket;
+
+    public Boolean getEligibleFreeTicket() {
+        return eligibleFreeTicket;
+    }
+
+    public void setEligibleFreeTicket(Boolean eligibleFreeTicket) {
+        this.eligibleFreeTicket = eligibleFreeTicket;
+    }
 
     // track for when system change email or password
     private Instant passwordChangedAt;
