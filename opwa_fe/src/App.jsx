@@ -4,7 +4,9 @@ import { ColorModeContext, useMode } from "./theme";
 import { CssBaseline, ThemeProvider } from "@mui/material";
 import Topbar from "./scenes/global/Topbar";
 import { Route, Routes, BrowserRouter } from "react-router-dom";
-import Dashboard from "./scenes/dashboard"; // Import your dashboard page
+import Dashboard from "./scenes/dashboard"; 
+import MetroLineGrid from "./components/MetroLineGrid.jsx";
+import SignUpPage from "./components/SignUpPage";
 
 function DashboardLayout({ children }) {
   return (
@@ -26,12 +28,14 @@ function App() {
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<LoginPage />} />
+            <Route path="/signup" element={<SignUpPage />} />
             <Route
               path="/dashboard/*"
               element={
                 <DashboardLayout>
                   <Routes>
                     <Route index element={<Dashboard />} />
+                    <Route path="metro-lines" element={<MetroLineGrid />} />
                   </Routes>
                 </DashboardLayout>
               }

@@ -8,11 +8,14 @@ import NotificationsIcon from "@mui/icons-material/Notifications";
 import SettingsIcon from "@mui/icons-material/Settings";
 import PersonIcon from "@mui/icons-material/Person";
 import SearchIcon from "@mui/icons-material/Search";
+import TrainIcon from "@mui/icons-material/Train";
+import { useNavigate } from "react-router-dom";
 
 const Topbar = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const colorMode = useContext(ColorModeContext);
+  const navigate = useNavigate();
 
   return (
     <Box
@@ -51,6 +54,10 @@ const Topbar = () => {
 
       {/* ICONS */}
       <Box display="flex" gap={1}>
+        {/* MetroLine navigation icon */}
+        <IconButton >
+          <TrainIcon />
+        </IconButton>
         <IconButton onClick={colorMode.toggleColorMode}>
           {theme.palette.mode === "dark" ? <DarkModeIcon /> : <LightModeIcon />}
         </IconButton>
