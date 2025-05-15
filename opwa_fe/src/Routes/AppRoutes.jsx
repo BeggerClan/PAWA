@@ -9,7 +9,10 @@ import Topbar from "../scenes/global/Topbar";
 import Sidebar from "../scenes/global/SideBar";
 import Team from "../team";
 import AddStaff from "../team/addStaff";
-import UpdateStaff from "../team/updateStaff"; // Add this import
+import UpdateStaff from "../team/updateStaff";
+import TicketPurchase from "../ticket";
+import Bar from "../scenes/bar";
+import Pie from "../scenes/pie";
 
 const SIDEBAR_WIDTH = 250;
 const SIDEBAR_COLLAPSED_WIDTH = 80;
@@ -60,6 +63,9 @@ export default function AppRoutes() {
               <Route path="team" element={<Team />} />
               <Route path="team/addStaff" element={<AddStaff />} />
               <Route path="team/updateStaff" element={<UpdateStaff />} />
+              <Route path="ticket" element={<TicketPurchase />} />
+              <Route path="bar" element={<Bar />} />
+              <Route path="pie" element={<Pie />} />
               {/* <Route path="contacts" element={<Contacts />} /> */}
             </Routes>
           </DashboardLayout>

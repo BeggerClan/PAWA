@@ -14,13 +14,12 @@ import ReceiptOutlinedIcon from "@mui/icons-material/ReceiptOutlined";
 import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
 import CalendarTodayOutlinedIcon from "@mui/icons-material/CalendarTodayOutlined";
 import HelpOutlineOutlinedIcon from "@mui/icons-material/HelpOutlineOutlined";
-import BarChartOutlinedIcon from "@mui/icons-material/BarChartOutlined";
 import PieChartOutlineOutlinedIcon from "@mui/icons-material/PieChartOutlineOutlined";
 import TimelineOutlinedIcon from "@mui/icons-material/TimelineOutlined";
 import MenuOutlinedIcon from "@mui/icons-material/MenuOutlined";
 import MapOutlinedIcon from "@mui/icons-material/MapOutlined";
-
-const Item = ({ title, to, icon, selected, setSelected }) => {
+import DirectionsTransitOutlinedIcon from '@mui/icons-material/DirectionsTransitOutlined';
+import BarChartOutlinedIcon from '@mui/icons-material/BarChartOutlined';const Item = ({ title, to, icon, selected, setSelected }) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   return (
@@ -121,52 +120,46 @@ const Sidebar = ({ isCollapsed, onToggleCollapse, selected, setSelected }) => {
                Ticket
               </Typography>
               <Item
-                title="Ticket Form"
-                to="/form"
-                icon={<PersonOutlinedIcon />}
+                title="Ticket Purchase"
+                to="/dashboard/ticket"
+                icon={<ReceiptOutlinedIcon />} // Changed to buying ticket icon
                 selected={selected}
                 setSelected={setSelected}
               />
-              <Item
-                title="Calendar"
-                to="/calendar"
-                icon={<CalendarTodayOutlinedIcon />}
-                selected={selected}
-                setSelected={setSelected}
-              />
-              <Item
-                title="FAQ Page"
-                to="/faq"
-                icon={<HelpOutlineOutlinedIcon />}
-                selected={selected}
-                setSelected={setSelected}
-              />
+        
 
               <Typography
                 variant="h6"
                 color={colors.grey[300]}
                 sx={{ m: "15px 0 5px 20px" }}
               >
-                Charts
+                Metro Line 
+              </Typography>
+              <Item
+                title="Metro Line"
+                to="/metroline"
+                icon={<DirectionsTransitOutlinedIcon/>}
+                selected={selected}
+                setSelected={setSelected}
+              />
+               <Typography
+                variant="h6"
+                color={colors.grey[300]}
+                sx={{ m: "15px 0 5px 20px" }}
+              >
+                Static Charts
               </Typography>
               <Item
                 title="Bar Chart"
-                to="/bar"
+                to="/dashboard/bar"
                 icon={<BarChartOutlinedIcon />}
                 selected={selected}
                 setSelected={setSelected}
               />
               <Item
                 title="Pie Chart"
-                to="/pie"
-                icon={<PieChartOutlineOutlinedIcon />}
-                selected={selected}
-                setSelected={setSelected}
-              />
-              <Item
-                title="Line Chart"
-                to="/line"
-                icon={<TimelineOutlinedIcon />}
+                to="/dashboard/pie"
+                 icon={<PieChartOutlineOutlinedIcon />}
                 selected={selected}
                 setSelected={setSelected}
               />
