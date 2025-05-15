@@ -13,6 +13,8 @@ import UpdateStaff from "../team/updateStaff";
 import TicketPurchase from "../ticket";
 import Bar from "../scenes/bar";
 import Pie from "../scenes/pie";
+import Line from "../scenes/line";
+import Geography from "../scenes/geography";
 
 const SIDEBAR_WIDTH = 250;
 const SIDEBAR_COLLAPSED_WIDTH = 80;
@@ -66,6 +68,8 @@ export default function AppRoutes() {
               <Route path="ticket" element={<TicketPurchase />} />
               <Route path="bar" element={<Bar />} />
               <Route path="pie" element={<Pie />} />
+              <Route path="line" element={<Line />} />
+              <Route path="geography" element={<Geography />} />
               {/* <Route path="contacts" element={<Contacts />} /> */}
             </Routes>
           </DashboardLayout>

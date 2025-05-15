@@ -165,8 +165,15 @@ const Sidebar = ({ isCollapsed, onToggleCollapse, selected, setSelected }) => {
               />
               <Item
                 title="Geography Chart"
-                to="/geography"
+                to="/dashboard/geography"
                 icon={<MapOutlinedIcon />}
+                selected={selected}
+                setSelected={setSelected}
+              />
+              <Item
+                title="Line Chart"
+                to="/dashboard/line"
+                icon={<TimelineOutlinedIcon />}
                 selected={selected}
                 setSelected={setSelected}
               />
