@@ -23,11 +23,10 @@ const SignUpPage = () => {
     setError("");
     setSuccess("");
     try {
-      const token = localStorage.getItem("token");
-      await signUp(form, token);
+      await signUp(form);
       setSuccess("User registered successfully!");
     } catch (err) {
-      setError("Registration failed. (Are you logged in as admin?)");
+      setError("Registration failed.");
     }
   };
 
@@ -125,8 +124,7 @@ const SignUpPage = () => {
         </button>
       </form>
       <div style={{ marginTop: 16, textAlign: "center" }}>
-        Already have an account?{" "}
-        <Link to="/">Login</Link>
+        Already have an account? <Link to="/">Login</Link>
       </div>
     </AuthLayout>
   );

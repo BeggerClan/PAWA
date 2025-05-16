@@ -78,8 +78,7 @@ const LoginPage = () => {
         </button>
       </form>
       <div style={{ marginTop: 16, textAlign: "center" }}>
-        Don't have an account?{" "}
-        <Link to="/signup">Sign Up</Link>
+        <Link to="/signup">Don't have an account? Sign Up</Link>
       </div>
     </AuthLayout>
   );

@@ -5,10 +5,6 @@ import { API_BASE_URL } from "../config";
 export const login = (email, password) =>
   axios.post(`${API_BASE_URL}/api/v1/auth/authenticate`, { email, password });
 
-// Sign Up API (requires admin token)
-export const signUp = (userData, token) =>
-  axios.post(
-    `${API_BASE_URL}/api/v1/user/add`,
-    userData,
-    { headers: { Authorization: `Bearer ${token}` } }
-  );
+// Sign Up API (open registration)
+export const signUp = (userData) =>
+  axios.post(`${API_BASE_URL}/api/v1/auth/register`, userData);
