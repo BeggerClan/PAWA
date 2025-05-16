@@ -1,54 +1,158 @@
 import React from "react";
-import { Box, Button, TextField, MenuItem } from "@mui/material";
+import {
+  Box,
+  Button,
+  TextField,
+  MenuItem,
+  FormControlLabel,
+  Switch,
+} from "@mui/material";
 import { Formik } from "formik";
 import * as yup from "yup";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import Header from "../../components/Header";
 import { useNavigate } from "react-router-dom";
+import { addUser } from "./teamapi";
 
 const roles = [
-  { value: "TICKET", label: "Ticket Agent" },
   { value: "ADMIN", label: "Admin" },
   { value: "OPERATOR", label: "Operator" },
+  { value: "TICKET", label: "Ticket Agent" },
 ];
 
-const phoneRegExp =
-  /^((\+[1-9]{1,4}[ -]?)|(\([0-9]{2,3}\)[ -]?)|([0-9]{2,4})[ -]?)*?[0-9]{3,4}[ -]?[0-9]{3,4}$/;
+const shifts = [
+  { value: "DAY", label: "Day" },
+  { value: "EVENING", label: "Evening" },
+  { value: "NIGHT", label: "Night" },
+];
 
 const checkoutSchema = yup.object().shape({
-  firstName: yup.string().required("required"),
-  lastName: yup.string().required("required"),
-  email: yup.string().email("invalid email").required("required"),
-  contact: yup
+  firstName: yup
     .string()
-    .matches(phoneRegExp, "Phone number is not valid")
-    .required("required"),
-  address1: yup.string().required("required"),
-  address2: yup.string().required("required"),
+    .matches(
+      /^[\p{L} .'-]{1,50}$/u,
+      "First name must only contain letters and be max 50 characters"
+    )
+    .required("Required"),
+  middleName: yup
+    .string()
+    .matches(
+      /^[\p{L} .'-]{0,50}$/u,
+      "Middle name must only contain letters and be max 50 characters"
+    ),
+  lastName: yup
+    .string()
+    .matches(
+      /^[\p{L} .'-]{1,50}$/u,
+      "Last name must only contain letters and be max 50 characters"
+    )
+    .required("Required"),
+  email: yup
+    .string()
+    .email("Invalid email")
+    .matches(/^[^\s@]+@[^\s@]+\.(com|vn)$/, "Email must end with .com or .vn")
+    .required("Required"),
   password: yup
     .string()
-    .min(6, "Password must be at least 6 characters")
-    .required("required"),
-  role: yup.string().required("required"),
+    .matches(
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@#$%]).{8,}$/,
+      "Password must be at least 8 characters, include uppercase, lowercase, digit, and special character"
+    )
+    .required("Required"),
+  nationalId: yup
+    .string()
+    .matches(/^\d{12}$/, "National ID must be exactly 12 digits")
+    .required("Required"),
+  dateOfBirth: yup
+    .string()
+    .matches(/^\d{2}\/\d{2}\/\d{4}$/, "Use 'dd/mm/yyyy' format")
+    .required("Required"),
+  addressNumber: yup
+    .string()
+    .matches(
+      /^[\w\s,.-]{1,100}$/,
+      "Address must not contain special symbols except , . -"
+    )
+    .required("Required"),
+  street: yup
+    .string()
+    .matches(
+      /^[\w\s,.-]{1,100}$/,
+      "Street must not contain special symbols except , . -"
+    )
+    .required("Required"),
+  ward: yup
+    .string()
+    .matches(
+      /^[\w\s,.-]{1,100}$/,
+      "Ward must not contain special symbols except , . -"
+    )
+    .required("Required"),
+  district: yup
+    .string()
+    .matches(
+      /^[\w\s,.-]{1,100}$/,
+      "District must not contain special symbols except , . -"
+    )
+    .required("Required"),
+  city: yup
+    .string()
+    .matches(
+      /^[\w\s,.-]{1,100}$/,
+      "City must not contain special symbols except , . -"
+    )
+    .required("Required"),
+  phone: yup
+    .string()
+    .matches(/^0\d{9}$/, "Phone number must be 10 digits and start with 0")
+    .required("Required"),
+  employed: yup.boolean().required("Required"),
+  role: yup
+    .string()
+    .oneOf(["ADMIN", "OPERATOR", "TICKET"])
+    .required("Required"),
+  shift: yup.string().oneOf(["DAY", "EVENING", "NIGHT"]).required("Required"),
 });
 
 const initialValues = {
   firstName: "",
+  middleName: "",
   lastName: "",
   email: "",
-  contact: "",
-  address1: "",
-  address2: "",
   password: "",
+  nationalId: "",
+  dateOfBirth: "",
+  addressNumber: "",
+  street: "",
+  ward: "",
+  district: "",
+  city: "",
+  phone: "",
+  employed: true,
   role: "",
+  shift: "",
 };
 
 const AddStaff = () => {
   const isNonMobile = useMediaQuery("(min-width:600px)");
   const navigate = useNavigate();
 
-  const handleFormSubmit = (values) => {
-    alert(JSON.stringify(values, null, 2));
+  const handleFormSubmit = async (values, { setSubmitting, resetForm }) => {
+    try {
+      // Convert role and shift to enum values
+      const payload = {
+        ...values,
+        role: values.role,
+        shift: values.shift,
+      };
+      await addUser(payload);
+      alert("Staff created successfully!");
+      resetForm();
+      navigate("/dashboard/team");
+    } catch (error) {
+      alert(error.message || "Failed to create staff");
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -84,10 +188,8 @@ const AddStaff = () => {
         <Header title="CREATE STAFF" subtitle="Create a New Staff Profile" />
 
         <Box
-          component="form"
-          onSubmit={handleFormSubmit}
           sx={{
-            width: { xs: "70%", md: "70%" }, // 70% width on medium+ screens, 100% on small
+            width: { xs: "70%", md: "70%" },
             px: 4,
             background: "white",
             borderRadius: 3,
@@ -107,6 +209,8 @@ const AddStaff = () => {
               handleBlur,
               handleChange,
               handleSubmit,
+              setFieldValue,
+              isSubmitting,
             }) => (
               <form onSubmit={handleSubmit}>
                 <Box
@@ -138,6 +242,19 @@ const AddStaff = () => {
                     fullWidth
                     variant="filled"
                     type="text"
+                    label="Middle Name"
+                    onBlur={handleBlur}
+                    onChange={handleChange}
+                    value={values.middleName}
+                    name="middleName"
+                    error={!!touched.middleName && !!errors.middleName}
+                    helperText={touched.middleName && errors.middleName}
+                    sx={{ gridColumn: "span 2" }}
+                  />
+                  <TextField
+                    fullWidth
+                    variant="filled"
+                    type="text"
                     label="Last Name"
                     onBlur={handleBlur}
                     onChange={handleChange}
@@ -158,46 +275,7 @@ const AddStaff = () => {
                     name="email"
                     error={!!touched.email && !!errors.email}
                     helperText={touched.email && errors.email}
-                    sx={{ gridColumn: "span 4" }}
-                  />
-                  <TextField
-                    fullWidth
-                    variant="filled"
-                    type="text"
-                    label="Contact Number"
-                    onBlur={handleBlur}
-                    onChange={handleChange}
-                    value={values.contact}
-                    name="contact"
-                    error={!!touched.contact && !!errors.contact}
-                    helperText={touched.contact && errors.contact}
                     sx={{ gridColumn: "span 2" }}
-                  />
-                  <TextField
-                    fullWidth
-                    variant="filled"
-                    type="text"
-                    label="Address 1"
-                    onBlur={handleBlur}
-                    onChange={handleChange}
-                    value={values.address1}
-                    name="address1"
-                    error={!!touched.address1 && !!errors.address1}
-                    helperText={touched.address1 && errors.address1}
-                    sx={{ gridColumn: "span 2" }}
-                  />
-                  <TextField
-                    fullWidth
-                    variant="filled"
-                    type="text"
-                    label="Address 2"
-                    onBlur={handleBlur}
-                    onChange={handleChange}
-                    value={values.address2}
-                    name="address2"
-                    error={!!touched.address2 && !!errors.address2}
-                    helperText={touched.address2 && errors.address2}
-                    sx={{ gridColumn: "span 4" }}
                   />
                   <TextField
                     fullWidth
@@ -210,6 +288,110 @@ const AddStaff = () => {
                     name="password"
                     error={!!touched.password && !!errors.password}
                     helperText={touched.password && errors.password}
+                    sx={{ gridColumn: "span 2" }}
+                  />
+                  <TextField
+                    fullWidth
+                    variant="filled"
+                    type="text"
+                    label="National ID"
+                    onBlur={handleBlur}
+                    onChange={handleChange}
+                    value={values.nationalId}
+                    name="nationalId"
+                    error={!!touched.nationalId && !!errors.nationalId}
+                    helperText={touched.nationalId && errors.nationalId}
+                    sx={{ gridColumn: "span 2" }}
+                  />
+                  <TextField
+                    fullWidth
+                    variant="filled"
+                    type="text"
+                    label="Date of Birth (dd/mm/yyyy)"
+                    onBlur={handleBlur}
+                    onChange={handleChange}
+                    value={values.dateOfBirth}
+                    name="dateOfBirth"
+                    error={!!touched.dateOfBirth && !!errors.dateOfBirth}
+                    helperText={touched.dateOfBirth && errors.dateOfBirth}
+                    sx={{ gridColumn: "span 2" }}
+                  />
+                  <TextField
+                    fullWidth
+                    variant="filled"
+                    type="text"
+                    label="Address Number"
+                    onBlur={handleBlur}
+                    onChange={handleChange}
+                    value={values.addressNumber}
+                    name="addressNumber"
+                    error={!!touched.addressNumber && !!errors.addressNumber}
+                    helperText={touched.addressNumber && errors.addressNumber}
+                    sx={{ gridColumn: "span 2" }}
+                  />
+                  <TextField
+                    fullWidth
+                    variant="filled"
+                    type="text"
+                    label="Street"
+                    onBlur={handleBlur}
+                    onChange={handleChange}
+                    value={values.street}
+                    name="street"
+                    error={!!touched.street && !!errors.street}
+                    helperText={touched.street && errors.street}
+                    sx={{ gridColumn: "span 2" }}
+                  />
+                  <TextField
+                    fullWidth
+                    variant="filled"
+                    type="text"
+                    label="Ward"
+                    onBlur={handleBlur}
+                    onChange={handleChange}
+                    value={values.ward}
+                    name="ward"
+                    error={!!touched.ward && !!errors.ward}
+                    helperText={touched.ward && errors.ward}
+                    sx={{ gridColumn: "span 2" }}
+                  />
+                  <TextField
+                    fullWidth
+                    variant="filled"
+                    type="text"
+                    label="District"
+                    onBlur={handleBlur}
+                    onChange={handleChange}
+                    value={values.district}
+                    name="district"
+                    error={!!touched.district && !!errors.district}
+                    helperText={touched.district && errors.district}
+                    sx={{ gridColumn: "span 2" }}
+                  />
+                  <TextField
+                    fullWidth
+                    variant="filled"
+                    type="text"
+                    label="City"
+                    onBlur={handleBlur}
+                    onChange={handleChange}
+                    value={values.city}
+                    name="city"
+                    error={!!touched.city && !!errors.city}
+                    helperText={touched.city && errors.city}
+                    sx={{ gridColumn: "span 2" }}
+                  />
+                  <TextField
+                    fullWidth
+                    variant="filled"
+                    type="text"
+                    label="Phone"
+                    onBlur={handleBlur}
+                    onChange={handleChange}
+                    value={values.phone}
+                    name="phone"
+                    error={!!touched.phone && !!errors.phone}
+                    helperText={touched.phone && errors.phone}
                     sx={{ gridColumn: "span 2" }}
                   />
                   <TextField
@@ -231,9 +413,47 @@ const AddStaff = () => {
                       </MenuItem>
                     ))}
                   </TextField>
+                  <TextField
+                    select
+                    fullWidth
+                    variant="filled"
+                    label="Shift"
+                    name="shift"
+                    value={values.shift}
+                    onBlur={handleBlur}
+                    onChange={handleChange}
+                    error={!!touched.shift && !!errors.shift}
+                    helperText={touched.shift && errors.shift}
+                    sx={{ gridColumn: "span 2" }}
+                  >
+                    {shifts.map((option) => (
+                      <MenuItem key={option.value} value={option.value}>
+                        {option.label}
+                      </MenuItem>
+                    ))}
+                  </TextField>
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        checked={values.employed}
+                        onChange={(e) =>
+                          setFieldValue("employed", e.target.checked)
+                        }
+                        name="employed"
+                        color="primary"
+                      />
+                    }
+                    label="Employed"
+                    sx={{ gridColumn: "span 2" }}
+                  />
                 </Box>
                 <Box display="flex" justifyContent="end" mt="20px">
-                  <Button type="submit" color="secondary" variant="contained">
+                  <Button
+                    type="submit"
+                    color="secondary"
+                    variant="contained"
+                    disabled={isSubmitting}
+                  >
                     Create New Staff
                   </Button>
                 </Box>

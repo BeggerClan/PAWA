@@ -57,7 +57,7 @@ public class UserController {
                     .shift(request.getShift())
                     .build();
             userRepo.save(user);
-            return ResponseEntity.ok("User added successfully.");
+            return ResponseEntity.ok("{ \"message\": \"User added successfully!\" }");
         } else {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Access denied.");
         }
