@@ -23,7 +23,7 @@ public class StationController {
     @Autowired
     private MetroLineRepo metroLineRepo;
 
-    @GetMapping
+    @GetMapping("/get-all-stations")
     public ResponseEntity<List<Station>> getAllStations() {
         List<Station> stations = stationRepo.findAll();
         

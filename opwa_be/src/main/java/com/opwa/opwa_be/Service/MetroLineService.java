@@ -3,14 +3,17 @@ package com.opwa.opwa_be.Service;
 import com.opwa.opwa_be.Repository.MetroLineRepo;
 import com.opwa.opwa_be.Repository.StationRepo;
 import com.opwa.opwa_be.Repository.SuspensionRepo;
+import com.opwa.opwa_be.Repository.TripRepo;
 import com.opwa.opwa_be.model.MetroLine;
 import com.opwa.opwa_be.model.Station;
 import com.opwa.opwa_be.model.Suspension;
+import com.opwa.opwa_be.model.Trip;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -27,6 +30,9 @@ public class MetroLineService {
 
     @Autowired
     private SuspensionRepo suspensionRepo;
+
+    @Autowired
+    private TripRepo tripRepo;
 
     public MetroLine findLineByIdWithStations(String id) {
         MetroLine line = metroLineRepo.findById(id)
@@ -176,5 +182,99 @@ public class MetroLineService {
         return metroLineRepo.findById(lineId)
             .map(MetroLine::getStationIds)
             .orElseThrow(() -> new RuntimeException("Line not found"));
+    }
+
+    public List<Trip> generateTripsForLine(MetroLine metroLine, LocalTime lastDeparture) {
+        tripRepo.deleteByLineId(metroLine.getLineId());
+
+        List<Trip> trips = new ArrayList<>();
+        LocalTime firstDeparture = metroLine.getFirstDeparture().toLocalTime();
+        String frequency = metroLine.getFrequencyMinutes();
+        int frequencyMinutes = parseFrequency(frequency);
+
+        LocalTime currentDeparture = firstDeparture;
+
+        while (!currentDeparture.isAfter(lastDeparture)) {
+            Trip forwardTrip = generateSingleTrip(metroLine, currentDeparture, false);
+            trips.add(forwardTrip);
+
+            if (!currentDeparture.plusMinutes(frequencyMinutes).isAfter(lastDeparture)) {
+                Trip returnTrip = generateSingleTrip(metroLine,
+                    forwardTrip.getArrivalTime().plusMinutes(10), // 10 min rest
+                    true);
+                trips.add(returnTrip);
+            }
+
+            currentDeparture = currentDeparture.plusMinutes(frequencyMinutes * 2);
+        }
+
+        return tripRepo.saveAll(trips);
+    }
+
+    public List<Trip> generateTripsForLine(MetroLine metroLine) {
+        // Default lastDeparture to 06:00 (6 AM)
+        return generateTripsForLine(metroLine, LocalTime.of(6, 0));
+    }
+
+    public List<Trip> generateTripsForAllLines() {
+        List<Trip> allTrips = new ArrayList<>();
+        List<MetroLine> lines = metroLineRepo.findAll();
+        for (MetroLine line : lines) {
+            allTrips.addAll(generateTripsForLine(line, LocalTime.of(6, 0)));
+        }
+        return allTrips;
+    }
+
+    private Trip generateSingleTrip(MetroLine metroLine, LocalTime startTime, boolean isReturnTrip) {
+        Trip trip = new Trip();
+        trip.setLineId(metroLine.getLineId());
+        trip.setTripId(generateTripId(metroLine.getLineId(), startTime, isReturnTrip));
+        trip.setDepartureTime(startTime);
+        trip.setReturnTrip(isReturnTrip);
+        
+        List<String> stationIds;
+        if (isReturnTrip) {
+            stationIds = new ArrayList<>(metroLine.getStationIds());
+            java.util.Collections.reverse(stationIds);
+        } else {
+            stationIds = metroLine.getStationIds();
+        }
+        
+        List<Trip.TripSegment> segments = new ArrayList<>();
+        LocalTime currentTime = startTime;
+        
+        // Calculate time between stations (assuming equal distribution for simplicity)
+        int totalStations = stationIds.size();
+        int segmentDuration = metroLine.getTotalDuration() / (totalStations - 1);
+        
+        for (int i = 0; i < totalStations - 1; i++) {
+            Trip.TripSegment segment = new Trip.TripSegment();
+            segment.setFromStationId(stationIds.get(i));
+            segment.setToStationId(stationIds.get(i + 1));
+            segment.setDepartureTime(currentTime);
+            segment.setArrivalTime(currentTime.plusMinutes(segmentDuration));
+            segment.setDurationMinutes(segmentDuration);
+            segments.add(segment);
+            currentTime = currentTime.plusMinutes(segmentDuration);
+        }
+        
+        trip.setSegments(segments);
+        trip.setArrivalTime(currentTime);
+        return trip;
+    }
+
+    private String generateTripId(String lineId, LocalTime time, boolean isReturnTrip) {
+        return String.format("%s-%s-%s", 
+            lineId, 
+            time.toString().replace(":", ""),
+            isReturnTrip ? "R" : "F");
+    }
+
+    private int parseFrequency(String frequency) {
+        try {
+            return Integer.parseInt(frequency.replaceAll("[^0-9]", ""));
+        } catch (NumberFormatException e) {
+            return 10; // default to 10 minutes if parsing fails
+        }
     }
 }
