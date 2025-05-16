@@ -15,7 +15,8 @@ import Bar from "../scenes/bar";
 import Pie from "../scenes/pie";
 import Line from "../scenes/line";
 import Geography from "../scenes/geography";
-import Metroline from "../metroline"; // <-- import Metroline
+import Metroline from "../metroline"; 
+import ProtectedRoute from "./ProtectedRoute"; 
 
 const SIDEBAR_WIDTH = 250;
 const SIDEBAR_COLLAPSED_WIDTH = 80;
@@ -59,22 +60,24 @@ export default function AppRoutes() {
       <Route
         path="/dashboard/*"
         element={
-          <DashboardLayout>
-            <Routes>
-              <Route index element={<Dashboard />} />
-              <Route path="dashboard" element={<Dashboard />} />
-              <Route path="team" element={<Team />} />
-              <Route path="team/addStaff" element={<AddStaff />} />
-              <Route path="team/updateStaff" element={<UpdateStaff />} />
-              <Route path="ticket" element={<TicketPurchase />} />
-              <Route path="bar" element={<Bar />} />
-              <Route path="pie" element={<Pie />} />
-              <Route path="line" element={<Line />} />
-              <Route path="geography" element={<Geography />} />
-              <Route path="metroline" element={<Metroline />} /> {/* <-- add this */}
-              {/* <Route path="contacts" element={<Contacts />} /> */}
-            </Routes>
-          </DashboardLayout>
+          <ProtectedRoute>
+            <DashboardLayout>
+              <Routes>
+                <Route index element={<Dashboard />} />
+                <Route path="dashboard" element={<Dashboard />} />
+                <Route path="team" element={<Team />} />
+                <Route path="team/addStaff" element={<AddStaff />} />
+                <Route path="team/updateStaff" element={<UpdateStaff />} />
+                <Route path="ticket" element={<TicketPurchase />} />
+                <Route path="bar" element={<Bar />} />
+                <Route path="pie" element={<Pie />} />
+                <Route path="line" element={<Line />} />
+                <Route path="geography" element={<Geography />} />
+                <Route path="metroline" element={<Metroline />} />
+                {/* <Route path="contacts" element={<Contacts />} /> */}
+              </Routes>
+            </DashboardLayout>
+          </ProtectedRoute>
         }
       />
     </Routes>

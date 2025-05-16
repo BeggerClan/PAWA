@@ -23,7 +23,7 @@ public class SecurityConfiguration {
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/v1/auth/**", "/api/data-generator/**", "/api/metro-lines/get-all-metro-lines").permitAll()
-                        .requestMatchers("/api/v1/user/add", "/api/v1/user/update/**").hasRole("ADMIN")
+                        .requestMatchers("/api/v1/user/add", "/api/v1/user/update/**").hasAnyRole("ADMIN", "OPERATOR")
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session
