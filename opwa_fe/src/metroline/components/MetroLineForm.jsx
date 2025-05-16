@@ -63,16 +63,6 @@ const MetroLineForm = ({
         />
         <TextField
           margin="dense"
-          name="totalDuration"
-          label="Total Duration (minutes)"
-          type="number"
-          fullWidth
-          variant="standard"
-          value={formData.totalDuration}
-          onChange={handleInputChange}
-        />
-        <TextField
-          margin="dense"
           name="frequencyMinutes"
           label="Frequency (minutes)"
           type="text"

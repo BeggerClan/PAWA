@@ -39,32 +39,32 @@ public class MetroLineGenerator implements CommandLineRunner {
             .stream().map(st -> st.getStationId()).toList();
         List<String> blueLineStations = stationRepo.findByMapMarker("blue")
             .stream().map(st -> st.getStationId()).toList();
-        List<String> greenLineStations = stationRepo.findByMapMarker("green")
-            .stream().map(st -> st.getStationId()).toList();
+        // List<String> greenLineStations = stationRepo.findByMapMarker("green")
+        //     .stream().map(st -> st.getStationId()).toList();
 
         // Create Red Line (active, not suspended)
         MetroLine redLine = new MetroLine();
         redLine.setLineName("Red Line");
         redLine.setStationIds(redLineStations);
-        redLine.setTotalDuration(30);
-        redLine.setActive(true);
-        redLine.setSuspended(false);
+        //redLine.setTotalDuration(30);
+        // redLine.setActive(true);
+        // redLine.setSuspended(false);
         redLine.setFirstDeparture(LocalDateTime.now().with(LocalTime.of(5, 30)));
-        redLine.setFrequencyMinutes("10");
+        redLine.setFrequencyMinutes("5");
         metroLineService.createMetroLine(redLine);
 
         // Create Blue Line (suspended, will be set inactive if 3+ stations are suspended)
         MetroLine blueLine = new MetroLine();
         blueLine.setLineName("Blue Line");
         blueLine.setStationIds(blueLineStations);
-        blueLine.setTotalDuration(25);
-        blueLine.setActive(true);
-        blueLine.setSuspended(true);
+        //blueLine.setTotalDuration(25);
+        // blueLine.setActive(true);
+        // blueLine.setSuspended(true);
         blueLine.setSuspensionReason("Emergency maintenance");
         blueLine.setSuspensionStartTime(LocalDateTime.now().minusHours(2));
         blueLine.setSuspensionEndTime(LocalDateTime.now().plusHours(6));
         blueLine.setFirstDeparture(LocalDateTime.now().with(LocalTime.of(6, 0)));
-        blueLine.setFrequencyMinutes("15");
+        blueLine.setFrequencyMinutes("4");
         metroLineService.createMetroLine(blueLine);
 
         // Create a suspension for Blue Line affecting only ST15 (adjust if needed)
@@ -80,14 +80,14 @@ public class MetroLineGenerator implements CommandLineRunner {
         suspensionService.createSuspension(suspension);
 
         // Create Green Line (active, not suspended)
-        MetroLine greenLine = new MetroLine();
-        greenLine.setLineName("Green Line");
-        greenLine.setStationIds(greenLineStations);
-        greenLine.setTotalDuration(35);
-        greenLine.setActive(true);
-        greenLine.setSuspended(false);
-        greenLine.setFirstDeparture(LocalDateTime.now().with(LocalTime.of(5, 45)));
-        greenLine.setFrequencyMinutes("12");
-        metroLineService.createMetroLine(greenLine);
+        // MetroLine greenLine = new MetroLine();
+        // greenLine.setLineName("Green Line");
+        // greenLine.setStationIds(greenLineStations);
+        // greenLine.setTotalDuration(35);
+        // greenLine.setActive(true);
+        // greenLine.setSuspended(false);
+        // greenLine.setFirstDeparture(LocalDateTime.now().with(LocalTime.of(5, 45)));
+        // greenLine.setFrequencyMinutes("12");
+        // metroLineService.createMetroLine(greenLine);
     }
 }

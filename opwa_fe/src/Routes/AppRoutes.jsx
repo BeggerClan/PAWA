@@ -16,6 +16,7 @@ import Pie from "../scenes/pie";
 import Line from "../scenes/line";
 import Geography from "../scenes/geography";
 import Metroline from "../metroline"; // <-- import Metroline
+import Station from "../station"; // <-- add this import
 
 const SIDEBAR_WIDTH = 250;
 const SIDEBAR_COLLAPSED_WIDTH = 80;
@@ -71,7 +72,8 @@ export default function AppRoutes() {
               <Route path="pie" element={<Pie />} />
               <Route path="line" element={<Line />} />
               <Route path="geography" element={<Geography />} />
-              <Route path="metroline" element={<Metroline />} /> {/* <-- add this */}
+              <Route path="metroline" element={<Metroline />} />
+              <Route path="station" element={<Station />} /> {/* <-- add this */}
               {/* <Route path="contacts" element={<Contacts />} /> */}
             </Routes>
           </DashboardLayout>

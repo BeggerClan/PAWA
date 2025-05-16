@@ -48,10 +48,10 @@ public class StationGenerator implements CommandLineRunner {
         createStation("Tan Binh", 10.828017960588946, 106.64305819030737, "blue");
 
         // Line 3 (Green)
-        createStation("District 1 Center", 10.7732, 106.6964, "green");
-        createStation("District 3 Hub", 10.7823, 106.6841, "green");
-        createStation("District 5 Crossing", 10.7543, 106.6692, "green");
-        createStation("District 7 Terminal", 10.7321, 106.7265, "green");
+        // createStation("Ben Thanh", 10.770814, 106.697489, "green");
+        // createStation("Nguyen Tri Phuong", 10.7625, 106.6775, "green");
+        // createStation("Ba Thang Hai", 10.7622, 106.6698, "green");
+        // createStation("Ly Thai To", 10.7620, 106.6630, "green");
     }
 
     private void createStation(String name, double lat, double lng, String marker) {

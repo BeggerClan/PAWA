@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { getStationsForLine } from "../services/metroLineApi";
+import { getStationsForLine } from "../../services/metroLineApi";
 import { Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Button, Typography } from "@mui/material";
 
 const MetroLineStations = ({ lineId, onBack }) => {
@@ -28,7 +28,6 @@ const MetroLineStations = ({ lineId, onBack }) => {
             <TableRow>
               <TableCell>Station ID</TableCell>
               <TableCell>Station Name</TableCell>
-              <TableCell>Map Marker</TableCell>
               <TableCell>Latitude</TableCell>
               <TableCell>Longitude</TableCell>
               <TableCell>Created At</TableCell>
@@ -41,7 +40,6 @@ const MetroLineStations = ({ lineId, onBack }) => {
                 <TableRow key={station.stationId}>
                   <TableCell>{station.stationId}</TableCell>
                   <TableCell>{station.stationName}</TableCell>
-                  <TableCell>{station.mapMarker}</TableCell>
                   <TableCell>{station.latitude}</TableCell>
                   <TableCell>{station.longitude}</TableCell>
                   <TableCell>

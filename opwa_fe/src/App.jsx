@@ -5,10 +5,10 @@ import { ColorModeContext, useMode } from "./theme";
 import AppRoutes from "./routes/AppRoutes";
 import Topbar from "./scenes/global/Topbar";
 import { Route, Routes, BrowserRouter } from "react-router-dom";
-import MetroLineGrid from "./metroline/MetroLineGrid.jsx";
+import MetroLineGrid from "./metroline/components/MetroLineGrid.jsx";
 import SignUpPage from "./components/SignUpPage";
 import LoginPage from "./components/loginpage";
-import MetroLineStations from "./metroline/MetroLineStations";
+import MetroLineStations from "./metroline/components/MetroLineStations.jsx";
 
 function App() {
   const [theme, colorMode] = useMode();

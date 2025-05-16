@@ -19,7 +19,9 @@ import TimelineOutlinedIcon from "@mui/icons-material/TimelineOutlined";
 import MenuOutlinedIcon from "@mui/icons-material/MenuOutlined";
 import MapOutlinedIcon from "@mui/icons-material/MapOutlined";
 import DirectionsTransitOutlinedIcon from '@mui/icons-material/DirectionsTransitOutlined';
-import BarChartOutlinedIcon from '@mui/icons-material/BarChartOutlined';const Item = ({ title, to, icon, selected, setSelected }) => {
+import BarChartOutlinedIcon from '@mui/icons-material/BarChartOutlined';
+import LocationOnOutlinedIcon from "@mui/icons-material/LocationOnOutlined"; // Add this import at the top
+const Item = ({ title, to, icon, selected, setSelected }) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   return (
@@ -133,12 +135,19 @@ const Sidebar = ({ isCollapsed, onToggleCollapse, selected, setSelected }) => {
                 color={colors.grey[300]}
                 sx={{ m: "15px 0 5px 20px" }}
               >
-                Metro Line 
+                HCMC Metro System 
               </Typography>
               <Item
                 title="Metro Line"
                 to="/dashboard/metroline"
                 icon={<DirectionsTransitOutlinedIcon/>}
+                selected={selected}
+                setSelected={setSelected}
+              />
+              <Item
+                title="Station"
+                to="/dashboard/station"
+                icon={<LocationOnOutlinedIcon />} // <-- Station icon here
                 selected={selected}
                 setSelected={setSelected}
               />

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getAllMetroLines, createMetroLine, updateMetroLine, deleteMetroLine, getStationsForLine } from '../services/metroLineApi';
+import { getAllMetroLines, createMetroLine, updateMetroLine, deleteMetroLine, getStationsForLine } from '../../services/metroLineApi';
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button, IconButton, Chip } from '@mui/material';
 import { Edit, Delete, Add } from '@mui/icons-material';
 import MetroLineForm from './MetroLineForm';

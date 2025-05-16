@@ -60,6 +60,8 @@ public class MetroLineService {
                 .orElse(0);
             metroLine.setLineId(String.format("LN%d", maxNumber + 1));
         }
+        // Automatically calculate totalDuration
+        metroLine.setTotalDuration(calculateTotalDuration(metroLine));
         metroLine.setUpdatedAt(LocalDateTime.now());
         return metroLineRepo.save(metroLine);
     }
@@ -292,8 +294,12 @@ public class MetroLineService {
             existing.setLineName(updatedLine.getLineName());
             changed = true;
         }
-        if (existing.getTotalDuration() != updatedLine.getTotalDuration()) {
-            existing.setTotalDuration(updatedLine.getTotalDuration());
+        if (!java.util.Objects.equals(existing.getFrequencyMinutes(), updatedLine.getFrequencyMinutes()) ||
+            !java.util.Objects.equals(existing.getStationIds(), updatedLine.getStationIds())) {
+            // Recalculate totalDuration if frequency or stations changed
+            existing.setFrequencyMinutes(updatedLine.getFrequencyMinutes());
+            existing.setStationIds(updatedLine.getStationIds());
+            existing.setTotalDuration(calculateTotalDuration(existing));
             changed = true;
         }
         if (existing.isActive() != updatedLine.isActive()) {
@@ -302,14 +308,6 @@ public class MetroLineService {
         }
         if (!java.util.Objects.equals(existing.getFirstDeparture(), updatedLine.getFirstDeparture())) {
             existing.setFirstDeparture(updatedLine.getFirstDeparture());
-            changed = true;
-        }
-        if (!java.util.Objects.equals(existing.getFrequencyMinutes(), updatedLine.getFrequencyMinutes())) {
-            existing.setFrequencyMinutes(updatedLine.getFrequencyMinutes());
-            changed = true;
-        }
-        if (!java.util.Objects.equals(existing.getStationIds(), updatedLine.getStationIds())) {
-            existing.setStationIds(updatedLine.getStationIds());
             changed = true;
         }
 
@@ -353,5 +351,11 @@ public class MetroLineService {
 
     public void deleteAllTrips() {
         tripRepo.deleteAll();
+    }
+
+    private int calculateTotalDuration(MetroLine metroLine) {
+        int numStations = metroLine.getStationIds() != null ? metroLine.getStationIds().size() : 0;
+        int freq = parseFrequency(metroLine.getFrequencyMinutes());
+        return numStations > 1 ? (numStations - 1) * freq : 0;
     }
 }

@@ -1,17 +1,15 @@
-import React, { useState } from 'react';
-import MetroLineGrid from './MetroLineGrid';
-import MetroLineStations from './MetroLineStations';
-import MetroLineMapView from './MetroLineMapView';
+import React, { useState } from "react";
+import MetroLineGrid from "./components/MetroLineGrid";
+import MetroLineStations from "./components/MetroLineStations";
+import MetroLineMapView from "./components/MetroLineMapView";
 
 const Index = () => {
   const [selectedLineId, setSelectedLineId] = useState(null);
 
-  // Handler to show stations for a line
   const handleShowStations = (lineId) => {
     setSelectedLineId(lineId);
   };
 
-  // Handler to go back to metro lines grid
   const handleBack = () => {
     setSelectedLineId(null);
   };
@@ -27,10 +25,8 @@ const Index = () => {
       }}
     >
       <div style={{ width: "90vw", maxWidth: 1100 }}>
-        {/* Map view always on top */}
-        <MetroLineMapView />
+        <MetroLineMapView selectedLineId={selectedLineId} />
         <div style={{ margin: "24px 0" }} />
-        {/* Table or stations view below */}
         {!selectedLineId ? (
           <MetroLineGrid onShowStations={handleShowStations} />
         ) : (
