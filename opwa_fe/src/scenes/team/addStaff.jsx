@@ -3,7 +3,7 @@ import { Box, Button, TextField, MenuItem } from "@mui/material";
 import { Formik } from "formik";
 import * as yup from "yup";
 import useMediaQuery from "@mui/material/useMediaQuery";
-import Header from "../components/Header";
+import Header from "../../components/Header";
 import { useNavigate } from "react-router-dom";
 
 const roles = [
@@ -43,7 +43,7 @@ const initialValues = {
   role: "",
 };
 
-const UpdateStaff = () => {
+const AddStaff = () => {
   const isNonMobile = useMediaQuery("(min-width:600px)");
   const navigate = useNavigate();
 
@@ -81,13 +81,13 @@ const UpdateStaff = () => {
           Back
         </Button>
 
-        <Header title="UPDATE STAFF" subtitle="Update Staff Profile" />
+        <Header title="CREATE STAFF" subtitle="Create a New Staff Profile" />
 
         <Box
           component="form"
           onSubmit={handleFormSubmit}
           sx={{
-            width: { xs: "100%", md: "70%" }, // 70% width on medium+ screens, 100% on small
+            width: { xs: "70%", md: "70%" }, // 70% width on medium+ screens, 100% on small
             px: 4,
             background: "white",
             borderRadius: 3,
@@ -234,7 +234,7 @@ const UpdateStaff = () => {
                 </Box>
                 <Box display="flex" justifyContent="end" mt="20px">
                   <Button type="submit" color="secondary" variant="contained">
-                    Update Staff
+                    Create New Staff
                   </Button>
                 </Box>
               </form>
@@ -246,4 +246,4 @@ const UpdateStaff = () => {
   );
 };
 
-export default UpdateStaff;
+export default AddStaff;

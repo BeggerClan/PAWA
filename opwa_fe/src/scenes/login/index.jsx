@@ -1,6 +1,21 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { loginApi } from "../scenes/login/loginapi";
+
+// Hàm gọi API login
+async function loginApi(email, password) {
+  const response = await fetch("http://localhost:8081/api/v1/auth/authenticate", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, password }),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.message || "Invalid email or password");
+  }
+
+  return response.json();
+}
 
 const LoginPage = () => {
   const [email, setEmail] = useState("");
@@ -14,28 +29,26 @@ const LoginPage = () => {
       setError("Please enter both email and password.");
       return;
     }
-    setError("");
+
     try {
+      setError(""); // Clear error
       const data = await loginApi(email, password);
+
+      // Ví dụ: lưu token vào localStorage nếu có
       if (data.token) {
-        localStorage.setItem("token", "Bearer " + data.token);
-        navigate("/dashboard");
-      } else {
-        setError("Login failed: No token received.");
+        localStorage.setItem("token", data.token);
       }
+
+      // Navigate to dashboard
+      navigate("/dashboard");
     } catch (err) {
-      setError("Login failed: " + err.message);
+      setError(err.message);
     }
   };
 
   return (
-    <div
-      style={{
-        display: "flex",
-        overflow: "hidden",
-      }}
-    >
-      {/* Left Side - Fixed Login Form */}
+    <div style={{ display: "flex", overflow: "hidden" }}>
+      {/* Left Side - Login Form */}
       <div
         style={{
           width: "30vw",
@@ -46,20 +59,13 @@ const LoginPage = () => {
           padding: "2rem",
         }}
       >
-        <div
-          style={{
-            maxWidth: 800,
-            width: "1000%",
-          }}
-        >
+        <div style={{ maxWidth: 800, width: "100%" }}>
           <div className="text-center mb-4">
             <h2 className="fw-bold">Welcome To OPWA</h2>
             <p className="text-muted">Please login to your account</p>
           </div>
 
-          {error && (
-            <div className="alert alert-danger text-center">{error}</div>
-          )}
+          {error && <div className="alert alert-danger text-center">{error}</div>}
 
           <form onSubmit={handleSubmit}>
             <div className="mb-3">
@@ -109,7 +115,7 @@ const LoginPage = () => {
         </div>
       </div>
 
-      {/* Right Side - Full Image, Locked in Place */}
+      {/* Right Side - Image */}
       <div
         style={{
           width: "50vw",
@@ -118,7 +124,7 @@ const LoginPage = () => {
           backgroundSize: "cover",
           backgroundPosition: "center",
           backgroundRepeat: "no-repeat",
-          filter: "brightness(0.9) contrast(1.1)", // Enhancing visibility
+          filter: "brightness(0.9) contrast(1.1)",
         }}
       ></div>
     </div>

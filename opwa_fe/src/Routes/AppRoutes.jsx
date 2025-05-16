@@ -3,18 +3,19 @@ import { useState } from "react";
 import { Routes, Route } from "react-router-dom";
 import { Box } from "@mui/material";
 
-import LoginPage from "../components/loginpage";
+import LoginPage from "../scenes/login";
 import Dashboard from "../scenes/dashboard";
 import Topbar from "../scenes/global/Topbar";
 import Sidebar from "../scenes/global/SideBar";
-import Team from "../team";
-import AddStaff from "../team/addStaff";
-import UpdateStaff from "../team/updateStaff";
-import TicketPurchase from "../ticket";
+import Team from "../scenes/team";
+import AddStaff from "../scenes/team/addStaff";
+import UpdateStaff from "../scenes/team/updateStaff";
+import TicketPurchase from "../scenes/ticket";
 import Bar from "../scenes/bar";
 import Pie from "../scenes/pie";
 import Line from "../scenes/line";
 import Geography from "../scenes/geography";
+import Metroline from "../metroline"; // <-- import Metroline
 
 const SIDEBAR_WIDTH = 250;
 const SIDEBAR_COLLAPSED_WIDTH = 80;
@@ -70,6 +71,7 @@ export default function AppRoutes() {
               <Route path="pie" element={<Pie />} />
               <Route path="line" element={<Line />} />
               <Route path="geography" element={<Geography />} />
+              <Route path="metroline" element={<Metroline />} /> {/* <-- add this */}
               {/* <Route path="contacts" element={<Contacts />} /> */}
             </Routes>
           </DashboardLayout>

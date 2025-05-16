@@ -137,7 +137,7 @@ const Sidebar = ({ isCollapsed, onToggleCollapse, selected, setSelected }) => {
               </Typography>
               <Item
                 title="Metro Line"
-                to="/metroline"
+                to="/dashboard/metroline"
                 icon={<DirectionsTransitOutlinedIcon/>}
                 selected={selected}
                 setSelected={setSelected}
