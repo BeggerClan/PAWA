@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { loginApi } from "../scenes/login/loginapi";
 import { useNavigate, Link } from "react-router-dom";
 import { login } from "../services/authService";
 import AuthLayout from "./AuthLayout";
@@ -13,12 +14,15 @@ const LoginPage = () => {
     e.preventDefault();
     setError("");
     try {
-      const res = await login(email, password);
-      localStorage.setItem("token", res.data.token);
-      localStorage.setItem("roles", JSON.stringify(res.data.roles));
-      navigate("/dashboard");
+      const data = await loginApi(email, password);
+      if (data.token) {
+        localStorage.setItem("token", "Bearer " + data.token);
+        navigate("/dashboard");
+      } else {
+        setError("Login failed: No token received.");
+      }
     } catch (err) {
-      setError("Invalid email or password.");
+      setError("Login failed: " + err.message);
     }
   };
 
