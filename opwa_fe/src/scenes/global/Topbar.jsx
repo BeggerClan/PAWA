@@ -15,7 +15,6 @@ const Topbar = ({ isSidebarCollapsed }) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const colorMode = useContext(ColorModeContext);
-  const navigate = useNavigate();
 
   const sidebarWidth = isSidebarCollapsed ? 80 : 250;
 
@@ -60,7 +59,7 @@ const Topbar = ({ isSidebarCollapsed }) => {
       <Box display="flex" gap={1}>
         {/* MetroLine navigation icon */}
         <IconButton >
-          <TrainIcon />
+        
         </IconButton>
         <IconButton onClick={colorMode.toggleColorMode}>
           {theme.palette.mode === "dark" ? <DarkModeIcon /> : <LightModeIcon />}
