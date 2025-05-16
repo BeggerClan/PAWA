@@ -57,11 +57,7 @@ const Topbar = ({ isSidebarCollapsed }) => {
       </Box>
 
       {/* ICONS */}
-      <Box display="flex" gap={1}>
-        {/* MetroLine navigation icon */}
-        <IconButton >
-          <TrainIcon />
-        </IconButton>
+      <Box display="flex" gap={1}> 
         <IconButton onClick={colorMode.toggleColorMode}>
           {theme.palette.mode === "dark" ? <DarkModeIcon /> : <LightModeIcon />}
         </IconButton>
