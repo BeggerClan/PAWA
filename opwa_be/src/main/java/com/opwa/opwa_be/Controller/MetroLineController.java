@@ -1,6 +1,7 @@
 package com.opwa.opwa_be.Controller;
 
 import com.opwa.opwa_be.Service.MetroLineService;
+import com.opwa.opwa_be.Service.StationService;
 import com.opwa.opwa_be.model.MetroLine;
 import com.opwa.opwa_be.model.Station;
 import com.opwa.opwa_be.model.Trip;
@@ -29,6 +30,9 @@ public class MetroLineController {
      @Autowired
     private TripRepo tripRepo;
 
+     @Autowired
+     private StationService stationService;
+
     @GetMapping("/get-all-metro-lines")
     public ResponseEntity<List<MetroLine>> getAllLines() {
         return ResponseEntity.ok(metroLineService.findAllWithStations());
@@ -37,6 +41,12 @@ public class MetroLineController {
     @GetMapping("/{id}")
     public ResponseEntity<MetroLine> getLineById(@PathVariable String id) {
         return ResponseEntity.ok(metroLineService.findLineByIdWithStations(id));
+    }
+
+    @PostMapping("/create")
+    public ResponseEntity<MetroLine> createMetroLine(@RequestBody MetroLine metroLine) {
+        MetroLine savedLine = metroLineService.createMetroLine(metroLine);
+        return ResponseEntity.ok(savedLine);
     }
 
     @GetMapping("/active")
@@ -109,45 +119,38 @@ public class MetroLineController {
 
     @GetMapping("/{id}/trips")
     public ResponseEntity<List<Trip>> getTripsForLine(@PathVariable String id) {
-        return ResponseEntity.ok(tripRepo.findByLineId(id));
+        return ResponseEntity.ok(metroLineService.getTripsForLine(id));
     }
 
     @GetMapping("/{lineId}/stations/{stationId}/trips")
     public ResponseEntity<List<Trip>> getTripsForStationInLine(
             @PathVariable String lineId,
             @PathVariable String stationId) {
-        List<Trip> trips = tripRepo.findByLineId(lineId).stream()
-            .filter(trip -> trip.getSegments().stream()
-                .anyMatch(segment ->
-                    segment.getFromStationId().equals(stationId) ||
-                    segment.getToStationId().equals(stationId)
-                )
-            )
-            .map(trip -> {
-                // Create a copy of the trip with only the relevant segments
-                Trip filteredTrip = new Trip();
-                filteredTrip.setTripId(trip.getTripId());
-                filteredTrip.setLineId(trip.getLineId());
-                filteredTrip.setDepartureTime(trip.getDepartureTime());
-                filteredTrip.setArrivalTime(trip.getArrivalTime());
-                filteredTrip.setReturnTrip(trip.isReturnTrip());
-                // Only include segments with the station
-                List<Trip.TripSegment> filteredSegments = trip.getSegments().stream()
-                    .filter(segment ->
-                        segment.getFromStationId().equals(stationId) ||
-                        segment.getToStationId().equals(stationId)
-                    )
-                    .toList();
-                filteredTrip.setSegments(filteredSegments);
-                return filteredTrip;
-            })
-            .toList();
-        return ResponseEntity.ok(trips);
+        return ResponseEntity.ok(metroLineService.getTripsForStationInLine(lineId, stationId));
     }
 
     @DeleteMapping("/trips")
     public ResponseEntity<Void> deleteAllTrips() {
-        tripRepo.deleteAll();
+        metroLineService.deleteAllTrips();
         return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteMetroLine(@PathVariable String id) {
+        metroLineService.deleteMetroLine(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<MetroLine> updateMetroLine(
+            @PathVariable String id,
+            @RequestBody MetroLine updatedLine) {
+        MetroLine saved = metroLineService.updateMetroLine(id, updatedLine);
+        return ResponseEntity.ok(saved);
+    }
+
+    @PutMapping("/{lineId}/stations/{stationId}")
+    public ResponseEntity<Station> updateStationInLine(@PathVariable String lineId, @PathVariable String stationId, @RequestBody Station station) {
+        return ResponseEntity.ok(stationService.updateStation(stationId, station));
     }
 }

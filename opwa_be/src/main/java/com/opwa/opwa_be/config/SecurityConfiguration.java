@@ -39,6 +39,8 @@ public class SecurityConfiguration {
                         
                         // Permit all station endpoints
                         .requestMatchers("/api/stations/**").permitAll()
+
+                        .requestMatchers("/api/suspensions/**").permitAll()
                         
                         // Permit data generator endpoints
                         .requestMatchers("/api/data-generator/**").permitAll()

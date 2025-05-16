@@ -95,6 +95,12 @@ public class SuspensionController {
         return ResponseEntity.noContent().build();
     }
 
+    @DeleteMapping("/line/{lineId}")
+    public ResponseEntity<Void> deleteAllSuspensionsByLine(@PathVariable String lineId) {
+        suspensionService.deleteAllSuspensionsByLineId(lineId);
+        return ResponseEntity.noContent().build();
+    }
+
     // Inner class for request body
     public static class SuspensionRequest {
         private String reason;
@@ -156,6 +162,12 @@ public class SuspensionController {
 
         return ResponseEntity.ok(
                 suspensionService.addStationsToSuspension(suspensionId, stationIds));
+    }
+
+    @PutMapping("/update-metro-status/{lineId}")
+    public ResponseEntity<Void> updateMetroLineStatus(@PathVariable String lineId) {
+        suspensionService.updateMetroLineSuspendedStatus(lineId);
+        return ResponseEntity.noContent().build();
     }
 
     // Request DTO

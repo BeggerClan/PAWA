@@ -5,10 +5,10 @@ import { ColorModeContext, useMode } from "./theme";
 import AppRoutes from "./routes/AppRoutes";
 import Topbar from "./scenes/global/Topbar";
 import { Route, Routes, BrowserRouter } from "react-router-dom";
-import Dashboard from "./scenes/dashboard"; 
-import MetroLineGrid from "./components/MetroLineGrid.jsx";
+import MetroLineGrid from "./metroline/MetroLineGrid.jsx";
 import SignUpPage from "./components/SignUpPage";
 import LoginPage from "./components/loginpage";
+import MetroLineStations from "./metroline/MetroLineStations";
 
 function App() {
   const [theme, colorMode] = useMode();
@@ -22,7 +22,7 @@ function App() {
           <Routes>
             <Route path="/" element={<LoginPage />} />
             <Route path="/signup" element={<SignUpPage />} />
-            <Route path="metro-lines" element={<MetroLineGrid />} />
+            <Route path="/metro-lines/:id/stations" element={<MetroLineStations />} />
             </Routes>
         </BrowserRouter>
       </ThemeProvider>
