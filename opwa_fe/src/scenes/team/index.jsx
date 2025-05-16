@@ -1,45 +1,63 @@
-import { Box, IconButton, Typography, useTheme, Button } from "@mui/material";
+import {
+  Box,
+  Typography,
+  useTheme,
+  Button,
+  CircularProgress,
+  Chip,
+  Stack,
+  IconButton,
+} from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import { tokens } from "../../theme";
-import { mockDataTeam } from "../../data/mockData";
-
-import AdminPanelSettingsOutlinedIcon from "@mui/icons-material/AdminPanelSettingsOutlined";
-import LockOpenOutlinedIcon from "@mui/icons-material/LockOpenOutlined";
-import SecurityOutlinedIcon from "@mui/icons-material/SecurityOutlined";
-import EditIcon from "@mui/icons-material/Edit";
-import DeleteIcon from "@mui/icons-material/Delete";
+import { useEffect, useState } from "react";
+import { fetchTeam } from "./teamapi";
 import Header from "../../components/Header";
 import { useNavigate } from "react-router-dom";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
 
 const Team = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const navigate = useNavigate();
 
-  const handleEdit = (id) => {
-    navigate(`/dashboard/team/updateStaff?id=${id}`);
-  };
+  const [team, setTeam] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchTeam()
+      .then((data) => setTeam(data))
+      .catch((err) => alert(err.message))
+      .finally(() => setLoading(false));
+  }, []);
 
   const handleDelete = (id) => {
-    if (window.confirm("Are you sure you want to delete this user?")) {
-      alert(`Deleted user with ID: ${id}`);
-      // TODO: Delete logic
-    }
+    const confirm = window.confirm(
+      "Are you sure you want to delete this user?"
+    );
+    if (!confirm) return;
+
+    // TODO: Call API to delete the user by ID
+    // Example:
+    // deleteUserById(id).then(() => {
+    //   setTeam(prev => prev.filter(user => user._id !== id));
+    // });
+
+    alert("Deleted user with id: " + id); // Placeholder
   };
 
   const columns = [
-    { field: "id", headerName: "ID", width: 70 },
     {
-      field: "name",
-      headerName: "Full Name",
-      width: 180,
-      cellClassName: "name-column--cell",
+      field: "email",
+      headerName: "Email",
+      width: 250,
     },
     {
-      field: "age",
-      headerName: "Age",
-      type: "number",
-      width: 100,
+      field: "nationalId",
+      headerName: "National ID",
+      width: 180,
     },
     {
       field: "phone",
@@ -47,67 +65,86 @@ const Team = () => {
       width: 150,
     },
     {
-      field: "email",
-      headerName: "Email",
-      width: 220,
+      field: "role",
+      headerName: "Role",
+      width: 130,
+      renderCell: ({ value }) => (
+        <Chip
+          label={value}
+          sx={{
+            textTransform: "capitalize",
+            backgroundColor:
+              value === "ADMIN"
+                ? colors.redAccent[500]
+                : colors.greenAccent[500],
+            color: "#fff",
+            fontWeight: "bold",
+          }}
+        />
+      ),
     },
     {
-      field: "access",
-      headerName: "Access Level",
-      width: 180,
-      renderCell: ({ row: { access } }) => {
-        const icon =
-          access === "admin" ? (
-            <AdminPanelSettingsOutlinedIcon />
-          ) : access === "manager" ? (
-            <SecurityOutlinedIcon />
-          ) : (
-            <LockOpenOutlinedIcon />
-          );
-
-        const bgColor =
-          access === "admin"
-            ? colors.greenAccent[600]
-            : colors.greenAccent[700];
-
-        return (
-          <Box
-            display="flex"
-            alignItems="center"
-            justifyContent="center"
-            gap={1}
-            padding="4px 8px"
-            borderRadius="4px"
-            sx={{ backgroundColor: bgColor }}
-          >
-            {icon}
-            <Typography color={colors.grey[100]} textTransform="capitalize">
-              {access}
-            </Typography>
-          </Box>
-        );
-      },
+      field: "employed",
+      headerName: "Employed",
+      width: 130,
+      renderCell: ({ value }) => (
+        <Chip
+          label={value ? "Yes" : "No"}
+          color={value ? "success" : "error"}
+          variant="outlined"
+          sx={{ fontWeight: "bold" }}
+        />
+      ),
     },
     {
-      field: "actions",
-      headerName: "Actions",
+      field: "shift",
+      headerName: "Shift",
       width: 120,
+      renderCell: ({ value }) => (
+        <Chip
+          label={value}
+          sx={{
+            textTransform: "capitalize",
+            backgroundColor:
+              value === "DAY"
+                ? colors.blueAccent[500]
+                : colors.purpleAccent?.[500] || "#9c27b0",
+            color: "#fff",
+            fontWeight: "bold",
+          }}
+        />
+      ),
+    },
+    {
+      field: "action",
+      headerName: "Action",
+      width: 180,
       sortable: false,
-      renderCell: ({ row }) => (
-        <Box>
+      filterable: false,
+      renderCell: (params) => (
+        <Stack direction="row" spacing={1}>
           <IconButton
-            onClick={() => handleEdit(row.id)}
-            sx={{ color: colors.blueAccent[300] }}
+            color="primary"
+            onClick={() => navigate(`/dashboard/team/view/${params.row.id}`)}
+            title="View"
+          >
+            <VisibilityIcon />
+          </IconButton>
+          <IconButton
+            color="info"
+            onClick={() => navigate(`/dashboard/team/edit/${params.row.id}`)}
+            title="Edit"
           >
             <EditIcon />
           </IconButton>
           <IconButton
-            onClick={() => handleDelete(row.id)}
-            sx={{ color: colors.redAccent ? colors.redAccent[400] : "red" }}
+            color="error"
+            onClick={() => handleDelete(params.row.id)}
+            title="Delete"
           >
             <DeleteIcon />
           </IconButton>
-        </Box>
+        </Stack>
       ),
     },
   ];
@@ -134,10 +171,6 @@ const Team = () => {
           "& .MuiDataGrid-cell": {
             borderBottom: "none",
           },
-          "& .name-column--cell": {
-            color: colors.greenAccent[300],
-            fontWeight: 500,
-          },
           "& .MuiDataGrid-columnHeaders": {
             backgroundColor: colors.blueAccent[700],
             borderBottom: "none",
@@ -159,17 +192,36 @@ const Team = () => {
           },
         }}
       >
-        <DataGrid
-          autoHeight
-          checkboxSelection
-          rows={mockDataTeam}
-          columns={columns}
-          disableRowSelectionOnClick
-          pageSizeOptions={[5, 10]}
-          initialState={{
-            pagination: { paginationModel: { pageSize: 5, page: 0 } },
-          }}
-        />
+        {loading ? (
+          <Box
+            display="flex"
+            justifyContent="center"
+            alignItems="center"
+            minHeight={300}
+          >
+            <CircularProgress />
+          </Box>
+        ) : (
+          <DataGrid
+            autoHeight
+            checkboxSelection
+            rows={team.map((user) => ({
+              id: user._id || user.id, // Required
+              email: user.email,
+              nationalId: user.nationalId,
+              phone: user.phone,
+              role: user.role,
+              employed: user.employed,
+              shift: user.shift,
+            }))}
+            columns={columns}
+            disableRowSelectionOnClick
+            pageSizeOptions={[5, 10]}
+            initialState={{
+              pagination: { paginationModel: { pageSize: 5, page: 0 } },
+            }}
+          />
+        )}
       </Box>
     </Box>
   );

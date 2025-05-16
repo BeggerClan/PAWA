@@ -1,5 +1,6 @@
 {
   "java.configuration.updateBuildConfiguration": "automatic",
   "java.compile.nullAnalysis.mode": "automatic",
-  "cSpell.words": ["loginpage"]
+  "cSpell.words": ["loginpage"],
+  "java.debug.settings.onBuildFailureProceed": true
 }
