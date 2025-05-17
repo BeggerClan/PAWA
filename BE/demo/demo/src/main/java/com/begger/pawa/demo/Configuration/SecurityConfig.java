@@ -62,6 +62,14 @@ public class SecurityConfig {
 
                         ).hasRole("PASSENGER")
 
+                        // OPERATOR endpoints
+                        .requestMatchers("/api/operator/**")
+                        .hasRole("OPERATOR")
+
+                        // AGENT endpoints
+                        .requestMatchers("/api/agent/**")
+                        .hasRole("TICKET_AGENT")
+
                 .anyRequest().authenticated()
             )
             .oauth2ResourceServer(oauth -> oauth
@@ -74,7 +82,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://127.0.0.1:5500"));
+        configuration.setAllowedOrigins(Arrays.asList("http://127.0.0.1:5501"));
         configuration.setAllowedMethods(Arrays.asList("*"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setAllowCredentials(true);
