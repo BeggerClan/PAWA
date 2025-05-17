@@ -17,6 +17,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Arrays;
+import org.springframework.http.HttpMethod;
 
 @Configuration
 @EnableWebSecurity
@@ -33,22 +34,24 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests(auth -> auth
                         // Permit all authentication endpoints
                         .requestMatchers("/api/v1/auth/**").permitAll()
-                        
-                        // Permit all metro-line endpoints
-                        .requestMatchers("/api/metro-lines/**").permitAll()
-                        
-                        // Permit all station endpoints
-                        .requestMatchers("/api/stations/**").permitAll()
+
+                        // Allow GET for metro-lines and stations to everyone
+                        .requestMatchers(HttpMethod.GET, "/api/metro-lines/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/stations/**").permitAll()
+
+                        // Restrict POST, PUT, DELETE for metro-lines to ADMIN
+                        .requestMatchers(HttpMethod.POST, "/api/metro-lines/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/metro-lines/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/metro-lines/**").hasRole("ADMIN")
+
+                        // Restrict POST, PUT, DELETE for stations to ADMIN
+                        .requestMatchers(HttpMethod.POST, "/api/stations/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/stations/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/stations/**").hasRole("ADMIN")
 
                         .requestMatchers("/api/suspensions/**").permitAll()
-                        
-                        // Permit data generator endpoints
                         .requestMatchers("/api/data-generator/**").permitAll()
-                        
-                        // Admin-only endpoints
                         .requestMatchers("/api/v1/user/**").hasRole("ADMIN")
-                        
-                        // Any other request needs authentication
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
