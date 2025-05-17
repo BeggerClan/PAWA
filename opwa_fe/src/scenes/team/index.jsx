@@ -11,7 +11,7 @@ import {
 import { DataGrid } from "@mui/x-data-grid";
 import { tokens } from "../../theme";
 import { useEffect, useState } from "react";
-import { fetchTeam } from "./teamapi";
+import { fetchTeam, deleteUserById } from "./teamapi"; // <-- add deleteUserById
 import Header from "../../components/Header";
 import { useNavigate } from "react-router-dom";
 import VisibilityIcon from "@mui/icons-material/Visibility";
@@ -33,19 +33,21 @@ const Team = () => {
       .finally(() => setLoading(false));
   }, []);
 
-  const handleDelete = (id) => {
+  const handleDelete = async (id) => {
     const confirm = window.confirm(
       "Are you sure you want to delete this user?"
     );
     if (!confirm) return;
 
-    // TODO: Call API to delete the user by ID
-    // Example:
-    // deleteUserById(id).then(() => {
-    //   setTeam(prev => prev.filter(user => user._id !== id));
-    // });
-
-    alert("Deleted user with id: " + id); // Placeholder
+    try {
+      await deleteUserById(id);
+      setTeam((prev) =>
+        prev.filter((user) => user._id !== id && user.id !== id)
+      );
+      alert("User deleted successfully!");
+    } catch (err) {
+      alert(err.message || "Failed to delete user");
+    }
   };
 
   const columns = [

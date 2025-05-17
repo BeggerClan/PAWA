@@ -15,7 +15,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import java.util.Map;
+
 
 
 @RestController
@@ -28,7 +29,7 @@ public class UserController {
     private final PasswordEncoder passwordEncoder;
 
     @PostMapping("/add")
-    public ResponseEntity<String> addUser(@RequestBody  AddUserRequest request, HttpServletRequest httpServletRequest) {
+    public ResponseEntity<String> addUser(@Valid @RequestBody  AddUserRequest request, HttpServletRequest httpServletRequest) {
         String authHeader = httpServletRequest.getHeader("Authorization");
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Authorization header missing or invalid.");
@@ -94,7 +95,7 @@ public class UserController {
             if (request.getShift() != null) user.setShift(request.getShift());
 
             userRepo.save(user);
-            return ResponseEntity.ok("User updated successfully.");
+            return ResponseEntity.ok("{ \"message\": \"User updated successfully.\" }");
         } else {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Access denied.");
         }
@@ -139,10 +140,10 @@ public class UserController {
     }
 
     @DeleteMapping("/delete/{userId}")
-    public ResponseEntity<String> deleteUser(@PathVariable String userId, HttpServletRequest httpServletRequest) {
+    public ResponseEntity<?> deleteUser(@PathVariable String userId, HttpServletRequest httpServletRequest) {
         String authHeader = httpServletRequest.getHeader("Authorization");
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Authorization header missing or invalid.");
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("message", "Authorization header missing or invalid."));
         }
 
         String token = authHeader.substring(7);
@@ -150,9 +151,9 @@ public class UserController {
 
         if (roles.contains("ROLE_ADMIN") || roles.contains("ROLE_OPERATOR")) {
             userRepo.deleteById(userId);
-            return ResponseEntity.ok("User deleted successfully.");
+            return ResponseEntity.ok(Map.of("message", "User deleted successfully!"));
         } else {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Access denied.");
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("message", "Access denied."));
         }
     }
 }

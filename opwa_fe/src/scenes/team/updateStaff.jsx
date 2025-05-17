@@ -1,249 +1,326 @@
-import React from "react";
-import { Box, Button, TextField, MenuItem } from "@mui/material";
+import React, { useEffect, useState } from "react";
+import {
+  Box,
+  Button,
+  TextField,
+  MenuItem,
+  FormControlLabel,
+  Switch,
+  CircularProgress,
+  Typography,
+} from "@mui/material";
 import { Formik } from "formik";
 import * as yup from "yup";
-import useMediaQuery from "@mui/material/useMediaQuery";
-import Header from "../../components/Header";
-import { useNavigate } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
+import { getUserById, updateUser } from "./teamapi";
 
 const roles = [
-  { value: "TICKET", label: "Ticket Agent" },
   { value: "ADMIN", label: "Admin" },
   { value: "OPERATOR", label: "Operator" },
+  { value: "TICKET", label: "Ticket Agent" },
 ];
 
-const phoneRegExp =
-  /^((\+[1-9]{1,4}[ -]?)|(\([0-9]{2,3}\)[ -]?)|([0-9]{2,4})[ -]?)*?[0-9]{3,4}[ -]?[0-9]{3,4}$/;
+const shifts = [
+  { value: "DAY", label: "Day" },
+  { value: "EVENING", label: "Evening" },
+  { value: "NIGHT", label: "Night" },
+];
 
 const checkoutSchema = yup.object().shape({
-  firstName: yup.string().required("required"),
-  lastName: yup.string().required("required"),
-  email: yup.string().email("invalid email").required("required"),
-  contact: yup
+  firstName: yup.string().required("Required"),
+  middleName: yup.string(),
+  lastName: yup.string().required("Required"),
+  email: yup.string().email("Invalid email").required("Required"),
+  password: yup.string(),
+  nationalId: yup.string().required("Required"),
+  dateOfBirth: yup.string().required("Required"),
+  addressNumber: yup.string().required("Required"),
+  street: yup.string().required("Required"),
+  ward: yup.string().required("Required"),
+  district: yup.string().required("Required"),
+  city: yup.string().required("Required"),
+  phone: yup.string().required("Required"),
+  employed: yup.boolean().required("Required"),
+  role: yup
     .string()
-    .matches(phoneRegExp, "Phone number is not valid")
-    .required("required"),
-  address1: yup.string().required("required"),
-  address2: yup.string().required("required"),
-  password: yup
-    .string()
-    .min(6, "Password must be at least 6 characters")
-    .required("required"),
-  role: yup.string().required("required"),
+    .oneOf(["ADMIN", "OPERATOR", "TICKET"])
+    .required("Required"),
+  shift: yup.string().oneOf(["DAY", "EVENING", "NIGHT"]).required("Required"),
 });
 
-const initialValues = {
-  firstName: "",
-  lastName: "",
-  email: "",
-  contact: "",
-  address1: "",
-  address2: "",
-  password: "",
-  role: "",
-};
-
-const UpdateStaff = () => {
-  const isNonMobile = useMediaQuery("(min-width:600px)");
+export default function UpdateStaff() {
+  const { id } = useParams();
   const navigate = useNavigate();
+  const [initialValues, setInitialValues] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  const handleFormSubmit = (values) => {
-    alert(JSON.stringify(values, null, 2));
+  useEffect(() => {
+    getUserById(id)
+      .then((user) => {
+        setInitialValues({
+          firstName: user.firstName || "",
+          middleName: user.middleName || "",
+          lastName: user.lastName || "",
+          email: user.email || "",
+          password: "", // Leave blank for security
+          nationalId: user.nationalId || "",
+          dateOfBirth: user.dateOfBirth || "",
+          addressNumber: user.addressNumber || "",
+          street: user.street || "",
+          ward: user.ward || "",
+          district: user.district || "",
+          city: user.city || "",
+          phone: user.phone || "",
+          employed: user.employed ?? true,
+          role: user.role || "",
+          shift: user.shift || "",
+        });
+      })
+      .catch(() => alert("Failed to load user"))
+      .finally(() => setLoading(false));
+  }, [id]);
+
+  const handleFormSubmit = async (values, { setSubmitting }) => {
+    try {
+      await updateUser(id, values);
+      alert("Staff updated successfully!");
+      navigate("/dashboard/team");
+    } catch (error) {
+      alert(error.message || "Failed to update staff");
+      setSubmitting(false);
+    }
   };
 
-  return (
-    <Box
-      sx={{
-        width: "100vw",
-        height: "100vh",
-        bgcolor: "#f4f6f8",
-        display: "flex",
-        flexDirection: "column",
-      }}
-    >
-      <Box
-        sx={{
-          flex: 1,
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "flex-start",
-          alignItems: "center",
-          py: 6,
-          width: "100%",
-        }}
-      >
-        <Button
-          variant="outlined"
-          color="secondary"
-          sx={{ mb: 2, alignSelf: "flex-start", ml: 4 }}
-          onClick={() => navigate("/dashboard/team")}
-        >
-          Back
-        </Button>
-
-        <Header title="UPDATE STAFF" subtitle="Update Staff Profile" />
-
-        <Box
-          component="form"
-          onSubmit={handleFormSubmit}
-          sx={{
-            width: { xs: "100%", md: "70%" }, // 70% width on medium+ screens, 100% on small
-            px: 4,
-            background: "white",
-            borderRadius: 3,
-            boxShadow: 2,
-            mx: "auto",
-          }}
-        >
-          <Formik
-            onSubmit={handleFormSubmit}
-            initialValues={initialValues}
-            validationSchema={checkoutSchema}
-          >
-            {({
-              values,
-              errors,
-              touched,
-              handleBlur,
-              handleChange,
-              handleSubmit,
-            }) => (
-              <form onSubmit={handleSubmit}>
-                <Box
-                  display="grid"
-                  gap="30px"
-                  gridTemplateColumns="repeat(4, minmax(0, 1fr))"
-                  sx={{
-                    "& > div": {
-                      gridColumn: isNonMobile ? undefined : "span 4",
-                    },
-                    p: 0,
-                    width: "100%",
-                  }}
-                >
-                  <TextField
-                    fullWidth
-                    variant="filled"
-                    type="text"
-                    label="First Name"
-                    onBlur={handleBlur}
-                    onChange={handleChange}
-                    value={values.firstName}
-                    name="firstName"
-                    error={!!touched.firstName && !!errors.firstName}
-                    helperText={touched.firstName && errors.firstName}
-                    sx={{ gridColumn: "span 2" }}
-                  />
-                  <TextField
-                    fullWidth
-                    variant="filled"
-                    type="text"
-                    label="Last Name"
-                    onBlur={handleBlur}
-                    onChange={handleChange}
-                    value={values.lastName}
-                    name="lastName"
-                    error={!!touched.lastName && !!errors.lastName}
-                    helperText={touched.lastName && errors.lastName}
-                    sx={{ gridColumn: "span 2" }}
-                  />
-                  <TextField
-                    fullWidth
-                    variant="filled"
-                    type="email"
-                    label="Email"
-                    onBlur={handleBlur}
-                    onChange={handleChange}
-                    value={values.email}
-                    name="email"
-                    error={!!touched.email && !!errors.email}
-                    helperText={touched.email && errors.email}
-                    sx={{ gridColumn: "span 4" }}
-                  />
-                  <TextField
-                    fullWidth
-                    variant="filled"
-                    type="text"
-                    label="Contact Number"
-                    onBlur={handleBlur}
-                    onChange={handleChange}
-                    value={values.contact}
-                    name="contact"
-                    error={!!touched.contact && !!errors.contact}
-                    helperText={touched.contact && errors.contact}
-                    sx={{ gridColumn: "span 2" }}
-                  />
-                  <TextField
-                    fullWidth
-                    variant="filled"
-                    type="text"
-                    label="Address 1"
-                    onBlur={handleBlur}
-                    onChange={handleChange}
-                    value={values.address1}
-                    name="address1"
-                    error={!!touched.address1 && !!errors.address1}
-                    helperText={touched.address1 && errors.address1}
-                    sx={{ gridColumn: "span 2" }}
-                  />
-                  <TextField
-                    fullWidth
-                    variant="filled"
-                    type="text"
-                    label="Address 2"
-                    onBlur={handleBlur}
-                    onChange={handleChange}
-                    value={values.address2}
-                    name="address2"
-                    error={!!touched.address2 && !!errors.address2}
-                    helperText={touched.address2 && errors.address2}
-                    sx={{ gridColumn: "span 4" }}
-                  />
-                  <TextField
-                    fullWidth
-                    variant="filled"
-                    type="password"
-                    label="Password"
-                    onBlur={handleBlur}
-                    onChange={handleChange}
-                    value={values.password}
-                    name="password"
-                    error={!!touched.password && !!errors.password}
-                    helperText={touched.password && errors.password}
-                    sx={{ gridColumn: "span 2" }}
-                  />
-                  <TextField
-                    select
-                    fullWidth
-                    variant="filled"
-                    label="Role"
-                    name="role"
-                    value={values.role}
-                    onBlur={handleBlur}
-                    onChange={handleChange}
-                    error={!!touched.role && !!errors.role}
-                    helperText={touched.role && errors.role}
-                    sx={{ gridColumn: "span 2" }}
-                  >
-                    {roles.map((option) => (
-                      <MenuItem key={option.value} value={option.value}>
-                        {option.label}
-                      </MenuItem>
-                    ))}
-                  </TextField>
-                </Box>
-                <Box display="flex" justifyContent="end" mt="20px">
-                  <Button type="submit" color="secondary" variant="contained">
-                    Update Staff
-                  </Button>
-                </Box>
-              </form>
-            )}
-          </Formik>
-        </Box>
+  if (loading || !initialValues) {
+    return (
+      <Box display="flex" justifyContent="center" mt={5}>
+        <CircularProgress />
       </Box>
+    );
+  }
+
+  return (
+    <Box sx={{ maxWidth: 600, mx: "auto", mt: 5 }}>
+      <Typography variant="h5" mb={3}>
+        Update Staff
+      </Typography>
+      <Formik
+        initialValues={initialValues}
+        validationSchema={checkoutSchema}
+        onSubmit={handleFormSubmit}
+        enableReinitialize
+      >
+        {({
+          values,
+          errors,
+          touched,
+          handleBlur,
+          handleChange,
+          handleSubmit,
+          setFieldValue,
+          isSubmitting,
+        }) => (
+          <form onSubmit={handleSubmit}>
+            <TextField
+              fullWidth
+              label="First Name"
+              name="firstName"
+              value={values.firstName}
+              onChange={handleChange}
+              onBlur={handleBlur}
+              error={!!touched.firstName && !!errors.firstName}
+              helperText={touched.firstName && errors.firstName}
+              margin="normal"
+            />
+            <TextField
+              fullWidth
+              label="Middle Name"
+              name="middleName"
+              value={values.middleName}
+              onChange={handleChange}
+              onBlur={handleBlur}
+              error={!!touched.middleName && !!errors.middleName}
+              helperText={touched.middleName && errors.middleName}
+              margin="normal"
+            />
+            <TextField
+              fullWidth
+              label="Last Name"
+              name="lastName"
+              value={values.lastName}
+              onChange={handleChange}
+              onBlur={handleBlur}
+              error={!!touched.lastName && !!errors.lastName}
+              helperText={touched.lastName && errors.lastName}
+              margin="normal"
+            />
+            <TextField
+              fullWidth
+              label="Email"
+              name="email"
+              value={values.email}
+              onChange={handleChange}
+              onBlur={handleBlur}
+              error={!!touched.email && !!errors.email}
+              helperText={touched.email && errors.email}
+              margin="normal"
+            />
+            <TextField
+              fullWidth
+              label="Password"
+              name="password"
+              value={values.password}
+              onChange={handleChange}
+              onBlur={handleBlur}
+              type="password"
+              error={!!touched.password && !!errors.password}
+              helperText={touched.password && errors.password}
+              margin="normal"
+            />
+            <TextField
+              fullWidth
+              label="National ID"
+              name="nationalId"
+              value={values.nationalId}
+              onChange={handleChange}
+              onBlur={handleBlur}
+              error={!!touched.nationalId && !!errors.nationalId}
+              helperText={touched.nationalId && errors.nationalId}
+              margin="normal"
+            />
+            <TextField
+              fullWidth
+              label="Date of Birth"
+              name="dateOfBirth"
+              value={values.dateOfBirth}
+              onChange={handleChange}
+              onBlur={handleBlur}
+              error={!!touched.dateOfBirth && !!errors.dateOfBirth}
+              helperText={touched.dateOfBirth && errors.dateOfBirth}
+              margin="normal"
+            />
+            <TextField
+              fullWidth
+              label="Address Number"
+              name="addressNumber"
+              value={values.addressNumber}
+              onChange={handleChange}
+              onBlur={handleBlur}
+              error={!!touched.addressNumber && !!errors.addressNumber}
+              helperText={touched.addressNumber && errors.addressNumber}
+              margin="normal"
+            />
+            <TextField
+              fullWidth
+              label="Street"
+              name="street"
+              value={values.street}
+              onChange={handleChange}
+              onBlur={handleBlur}
+              error={!!touched.street && !!errors.street}
+              helperText={touched.street && errors.street}
+              margin="normal"
+            />
+            <TextField
+              fullWidth
+              label="Ward"
+              name="ward"
+              value={values.ward}
+              onChange={handleChange}
+              onBlur={handleBlur}
+              error={!!touched.ward && !!errors.ward}
+              helperText={touched.ward && errors.ward}
+              margin="normal"
+            />
+            <TextField
+              fullWidth
+              label="District"
+              name="district"
+              value={values.district}
+              onChange={handleChange}
+              onBlur={handleBlur}
+              error={!!touched.district && !!errors.district}
+              helperText={touched.district && errors.district}
+              margin="normal"
+            />
+            <TextField
+              fullWidth
+              label="City"
+              name="city"
+              value={values.city}
+              onChange={handleChange}
+              onBlur={handleBlur}
+              error={!!touched.city && !!errors.city}
+              helperText={touched.city && errors.city}
+              margin="normal"
+            />
+            <TextField
+              fullWidth
+              label="Phone"
+              name="phone"
+              value={values.phone}
+              onChange={handleChange}
+              onBlur={handleBlur}
+              error={!!touched.phone && !!errors.phone}
+              helperText={touched.phone && errors.phone}
+              margin="normal"
+            />
+            <TextField
+              select
+              fullWidth
+              label="Role"
+              name="role"
+              value={values.role}
+              onChange={handleChange}
+              onBlur={handleBlur}
+              error={!!touched.role && !!errors.role}
+              helperText={touched.role && errors.role}
+              margin="normal"
+            >
+              {roles.map((option) => (
+                <MenuItem key={option.value} value={option.value}>
+                  {option.label}
+                </MenuItem>
+              ))}
+            </TextField>
+            <TextField
+              select
+              fullWidth
+              label="Shift"
+              name="shift"
+              value={values.shift}
+              onChange={handleChange}
+              onBlur={handleBlur}
+              error={!!touched.shift && !!errors.shift}
+              helperText={touched.shift && errors.shift}
+              margin="normal"
+            >
+              {shifts.map((option) => (
+                <MenuItem key={option.value} value={option.value}>
+                  {option.label}
+                </MenuItem>
+              ))}
+            </TextField>
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={values.employed}
+                  onChange={(e) => setFieldValue("employed", e.target.checked)}
+                  name="employed"
+                  color="primary"
+                />
+              }
+              label="Employed"
+              sx={{ mt: 2 }}
+            />
+            <Box mt={3} textAlign="right">
+              <Button variant="contained" type="submit" disabled={isSubmitting}>
+                Update
+              </Button>
+            </Box>
+          </form>
+        )}
+      </Formik>
     </Box>
   );
-};
-
-export default UpdateStaff;
+}

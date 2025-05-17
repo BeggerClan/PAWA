@@ -40,7 +40,8 @@ public class SecurityConfiguration {
                                 "/api/v1/user/getAll",
                                 "/api/v1/user/add",
                                 "/api/v1/user/update/**",
-                                "/api/v1/user/delete/**"
+                                "/api/v1/user/delete/**",
+                                "/api/v1/user/get/**"
                         ).hasAnyRole("ADMIN", "OPERATOR")
                         .anyRequest().authenticated()
                 )

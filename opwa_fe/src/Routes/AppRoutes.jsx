@@ -1,4 +1,3 @@
-// src/routes/AppRoutes.jsx
 import { useState } from "react";
 import { Routes, Route } from "react-router-dom";
 import { Box } from "@mui/material";
@@ -15,8 +14,8 @@ import Bar from "../scenes/bar";
 import Pie from "../scenes/pie";
 import Line from "../scenes/line";
 import Geography from "../scenes/geography";
-import Metroline from "../metroline"; 
-import ProtectedRoute from "./ProtectedRoute"; 
+import Metroline from "../metroline";
+import ProtectedRoute from "./ProtectedRoute";
 import ViewStaff from "../scenes/team/viewStaff";
 const SIDEBAR_WIDTH = 250;
 const SIDEBAR_COLLAPSED_WIDTH = 80;
@@ -67,8 +66,8 @@ export default function AppRoutes() {
                 <Route path="dashboard" element={<Dashboard />} />
                 <Route path="team" element={<Team />} />
                 <Route path="team/addStaff" element={<AddStaff />} />
-                <Route path="team/updateStaff/{id}" element={<UpdateStaff />} />
-                <Route path="team/view/:id" element={<ViewStaff/>} />
+                <Route path="team/edit/:id" element={<UpdateStaff />} />
+                <Route path="team/view/:id" element={<ViewStaff />} />
                 <Route path="ticket" element={<TicketPurchase />} />
                 <Route path="bar" element={<Bar />} />
                 <Route path="pie" element={<Pie />} />
