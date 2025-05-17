@@ -1,21 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-
-// Hàm gọi API login
-async function loginApi(email, password) {
-  const response = await fetch("http://localhost:8081/api/v1/auth/authenticate", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email, password }),
-  });
-
-  if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(errorData.message || "Invalid email or password");
-  }
-
-  return response.json();
-}
+import { loginApi } from "./loginapi";
 
 const LoginPage = () => {
   const [email, setEmail] = useState("");
@@ -34,7 +19,7 @@ const LoginPage = () => {
       setError(""); // Clear error
       const data = await loginApi(email, password);
 
-      // Ví dụ: lưu token vào localStorage nếu có
+      // Save token to localStorage if present
       if (data.token) {
         localStorage.setItem("token", data.token);
       }
@@ -65,7 +50,9 @@ const LoginPage = () => {
             <p className="text-muted">Please login to your account</p>
           </div>
 
-          {error && <div className="alert alert-danger text-center">{error}</div>}
+          {error && (
+            <div className="alert alert-danger text-center">{error}</div>
+          )}
 
           <form onSubmit={handleSubmit}>
             <div className="mb-3">

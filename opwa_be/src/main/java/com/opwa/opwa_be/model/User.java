@@ -17,19 +17,38 @@ import java.util.List;
 
 @Data
 @Builder
-@Document(collection = "user") // MongoDB-specific annotation
+@Document(collection = "user")
 @AllArgsConstructor
 @NoArgsConstructor
 public class User implements UserDetails {
-@Id
+
+    @Id
     private String id;
+
     private String firstName;
+    private String middleName;
     private String lastName;
     private String email;
     private String password;
 
-    @Enumerated(EnumType.STRING)
+    private String nationalId;
+    private String dateOfBirth;
+
+    private String addressNumber;
+    private String street;
+    private String ward;
+    private String district;
+    private String city;
+
+    private String phone;
+
+    private Boolean employed;
+
+   
     private Role role;
+
+    
+    private Shift shift;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -38,7 +57,7 @@ public class User implements UserDetails {
 
     @Override
     public String getUsername() {
-        return email; // Assuming email is used as the username
+        return email;
     }
 
     @Override
@@ -60,6 +79,7 @@ public class User implements UserDetails {
     public boolean isEnabled() {
         return true;
     }
+
     @Override
     public String getPassword() {
         return password;

@@ -1,4 +1,3 @@
-// src/routes/AppRoutes.jsx
 import { useState } from "react";
 import { Routes, Route } from "react-router-dom";
 import { Box } from "@mui/material";
@@ -15,8 +14,12 @@ import Bar from "../scenes/bar";
 import Pie from "../scenes/pie";
 import Line from "../scenes/line";
 import Geography from "../scenes/geography";
-import Metroline from "../metroline"; // <-- import Metroline
+
 import Station from "../station"; // <-- add this import
+
+import Metroline from "../metroline";
+import ProtectedRoute from "./ProtectedRoute";
+import ViewStaff from "../scenes/team/viewStaff";
 
 const SIDEBAR_WIDTH = 250;
 const SIDEBAR_COLLAPSED_WIDTH = 80;
