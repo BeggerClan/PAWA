@@ -15,6 +15,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Arrays;
+import java.util.List;
 import org.springframework.http.HttpMethod;
 @Configuration
 @EnableWebSecurity
@@ -38,15 +39,15 @@ public class SecurityConfiguration {
                         .requestMatchers(HttpMethod.GET, "/api/metro-lines/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/stations/**").permitAll()
 
-                        // Restrict POST, PUT, DELETE for metro-lines to ADMIN
-                        .requestMatchers(HttpMethod.POST, "/api/metro-lines/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.PUT, "/api/metro-lines/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.DELETE, "/api/metro-lines/**").hasRole("ADMIN")
+                        // Restrict POST, PUT, DELETE for metro-lines to ADMIN or OPERATOR
+                        .requestMatchers(HttpMethod.POST, "/api/metro-lines/**").hasAnyRole("ADMIN", "OPERATOR")
+                        .requestMatchers(HttpMethod.PUT, "/api/metro-lines/**").hasAnyRole("ADMIN", "OPERATOR")
+                        .requestMatchers(HttpMethod.DELETE, "/api/metro-lines/**").hasAnyRole("ADMIN", "OPERATOR")
 
-                        // Restrict POST, PUT, DELETE for stations to ADMIN
-                        .requestMatchers(HttpMethod.POST, "/api/stations/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.PUT, "/api/stations/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.DELETE, "/api/stations/**").hasRole("ADMIN")
+                        // Restrict POST, PUT, DELETE for stations to ADMIN or OPERATOR
+                        .requestMatchers(HttpMethod.POST, "/api/stations/**").hasAnyRole("ADMIN", "OPERATOR")
+                        .requestMatchers(HttpMethod.PUT, "/api/stations/**").hasAnyRole("ADMIN", "OPERATOR")
+                        .requestMatchers(HttpMethod.DELETE, "/api/stations/**").hasAnyRole("ADMIN", "OPERATOR")
 
                         .requestMatchers("/api/suspensions/**").permitAll()
                         .requestMatchers("/api/data-generator/**").permitAll()

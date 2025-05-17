@@ -7,15 +7,18 @@ import com.opwa.opwa_be.model.Station;
 import com.opwa.opwa_be.model.Trip;
 import com.opwa.opwa_be.Repository.MetroLineRepo;
 import com.opwa.opwa_be.Repository.TripRepo;
-import com.opwa.opwa_be.model.Trip;
+import com.opwa.opwa_be.config.JwtService;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import jakarta.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/metro-lines")
@@ -24,14 +27,17 @@ public class MetroLineController {
     @Autowired
     private MetroLineService metroLineService;
 
-     @Autowired
+    @Autowired
     private MetroLineRepo metroLineRepo;
 
-     @Autowired
+    @Autowired
     private TripRepo tripRepo;
 
-     @Autowired
-     private StationService stationService;
+    @Autowired
+    private StationService stationService;
+
+    @Autowired
+    private JwtService jwtService;
 
     @GetMapping("/get-all-metro-lines")
     public ResponseEntity<List<MetroLine>> getAllLines() {
@@ -44,7 +50,10 @@ public class MetroLineController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<MetroLine> createMetroLine(@RequestBody MetroLine metroLine) {
+    public ResponseEntity<?> createMetroLine(@RequestBody MetroLine metroLine, HttpServletRequest request) {
+        if (!hasAdminOrOperatorRole(request)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("message", "Access denied."));
+        }
         MetroLine savedLine = metroLineService.createMetroLine(metroLine);
         return ResponseEntity.ok(savedLine);
     }
@@ -136,15 +145,21 @@ public class MetroLineController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteMetroLine(@PathVariable String id) {
+    public ResponseEntity<?> deleteMetroLine(@PathVariable String id, HttpServletRequest request) {
+        if (!hasAdminOrOperatorRole(request)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("message", "Access denied."));
+        }
         metroLineService.deleteMetroLine(id);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok(Map.of("message", "Metro line deleted successfully!"));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<MetroLine> updateMetroLine(
+    public ResponseEntity<?> updateMetroLine(
             @PathVariable String id,
-            @RequestBody MetroLine updatedLine) {
+            @RequestBody MetroLine updatedLine, HttpServletRequest request) {
+        if (!hasAdminOrOperatorRole(request)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("message", "Access denied."));
+        }
         MetroLine saved = metroLineService.updateMetroLine(id, updatedLine);
         return ResponseEntity.ok(saved);
     }
@@ -152,5 +167,16 @@ public class MetroLineController {
     @PutMapping("/{lineId}/stations/{stationId}")
     public ResponseEntity<Station> updateStationInLine(@PathVariable String lineId, @PathVariable String stationId, @RequestBody Station station) {
         return ResponseEntity.ok(stationService.updateStation(stationId, station));
+    }
+
+    // Utility method for role check
+    private boolean hasAdminOrOperatorRole(HttpServletRequest request) {
+        String authHeader = request.getHeader("Authorization");
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return false;
+        }
+        String token = authHeader.substring(7);
+        List<String> roles = jwtService.extractRoles(token);
+        return roles.contains("ROLE_ADMIN") || roles.contains("ROLE_OPERATOR");
     }
 }
