@@ -70,7 +70,7 @@ export default function AppRoutes() {
               <Route path="dashboard" element={<Dashboard />} />
               <Route path="team" element={<Team />} />
               <Route path="team/addStaff" element={<AddStaff />} />
-              <Route path="team/updateStaff" element={<UpdateStaff/>} />
+              <Route path="team/updateStaff/:id" element={<UpdateStaff />} />
               <Route path="ticket" element={<TicketPurchase />} />
               <Route path="bar" element={<Bar />} />
               <Route path="pie" element={<Pie />} />

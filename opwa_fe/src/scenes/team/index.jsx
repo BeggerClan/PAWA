@@ -134,7 +134,7 @@ const Team = () => {
           </IconButton>
           <IconButton
             color="info"
-            onClick={() => navigate(`/dashboard/team/edit/${params.row.id}`)}
+            onClick={() => navigate(`/dashboard/team/updateStaff/${params.row.id}`)}
             title="Edit"
           >
             <EditIcon />
