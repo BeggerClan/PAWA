@@ -27,8 +27,8 @@ public class JwtService {
 
     public String generateTokenWithRoles(UserDetails userDetails, List<String> roles) {
         Map<String, Object> extraClaims = new HashMap<>();
-        // Prefix roles with "ROLE_"
-        extraClaims.put("roles", roles.stream().map(role -> role.startsWith("ROLE_") ? role : "ROLE_" + role).toList());
+        // Không thêm ROLE_
+        extraClaims.put("roles", roles.stream().map(role -> role.replaceFirst("^ROLE_", "")).toList());
         return Jwts.builder()
                 .setClaims(extraClaims)
                 .setSubject(userDetails.getUsername())

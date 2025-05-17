@@ -51,7 +51,7 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
                 // Extract roles and map them to authorities
                 List<String> roles = jwtService.extractRoles(jwt);
                 var authorities = roles.stream()
-                        .map(SimpleGrantedAuthority::new)
+                        .map(SimpleGrantedAuthority::new) // KHÔNG thêm "ROLE_"
                         .collect(Collectors.toList());
 
                 UsernamePasswordAuthenticationToken authToken =

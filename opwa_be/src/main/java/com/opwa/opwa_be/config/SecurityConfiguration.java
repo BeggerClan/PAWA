@@ -14,9 +14,10 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import java.util.Arrays;
 import java.util.List;
-import org.springframework.http.HttpMethod;
+
+import static org.springframework.http.HttpMethod.*;
+
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
@@ -32,26 +33,6 @@ public class SecurityConfiguration {
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
-                        // Permit all authentication endpoints
-                        .requestMatchers("/api/v1/auth/**").permitAll()
-
-                        // Allow GET for metro-lines and stations to everyone
-                        .requestMatchers(HttpMethod.GET, "/api/metro-lines/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/stations/**").permitAll()
-
-                        // Restrict POST, PUT, DELETE for metro-lines to ADMIN or OPERATOR
-                        .requestMatchers(HttpMethod.POST, "/api/metro-lines/**").hasAnyRole("ADMIN", "OPERATOR")
-                        .requestMatchers(HttpMethod.PUT, "/api/metro-lines/**").hasAnyRole("ADMIN", "OPERATOR")
-                        .requestMatchers(HttpMethod.DELETE, "/api/metro-lines/**").hasAnyRole("ADMIN", "OPERATOR")
-
-                        // Restrict POST, PUT, DELETE for stations to ADMIN or OPERATOR
-                        .requestMatchers(HttpMethod.POST, "/api/stations/**").hasAnyRole("ADMIN", "OPERATOR")
-                        .requestMatchers(HttpMethod.PUT, "/api/stations/**").hasAnyRole("ADMIN", "OPERATOR")
-                        .requestMatchers(HttpMethod.DELETE, "/api/stations/**").hasAnyRole("ADMIN", "OPERATOR")
-
-                        .requestMatchers("/api/suspensions/**").permitAll()
-                        .requestMatchers("/api/data-generator/**").permitAll()
-                        .requestMatchers("/api/v1/user/**").hasRole("ADMIN")
                         .requestMatchers(
                                 "/api/v1/auth/**",
                                 "/api/data-generator/**",
@@ -63,7 +44,12 @@ public class SecurityConfiguration {
                                 "/api/v1/user/update/**",
                                 "/api/v1/user/delete/**",
                                 "/api/v1/user/get/**"
-                        ).hasAnyRole("ADMIN", "OPERATOR")
+                        ).hasAnyAuthority("ADMIN", "OPERATOR")
+                        .requestMatchers(POST, "/api/metro-lines/**").hasAnyAuthority("ADMIN", "OPERATOR")
+                        .requestMatchers(PUT, "/api/metro-lines/**").hasAnyAuthority("ADMIN", "OPERATOR")
+                        .requestMatchers(DELETE, "/api/metro-lines/**").hasAnyAuthority("ADMIN", "OPERATOR")
+                        .requestMatchers("/api/metro-lines/create").hasAnyAuthority("ADMIN", "OPERATOR")
+                        // ... các dòng tương tự cho user, station ...
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

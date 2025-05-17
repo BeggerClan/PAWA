@@ -169,7 +169,7 @@ public class MetroLineController {
         return ResponseEntity.ok(stationService.updateStation(stationId, station));
     }
 
-    // Utility method for role check
+    // Utility method for role check (take token the same way as UserController)
     private boolean hasAdminOrOperatorRole(HttpServletRequest request) {
         String authHeader = request.getHeader("Authorization");
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
@@ -177,6 +177,6 @@ public class MetroLineController {
         }
         String token = authHeader.substring(7);
         List<String> roles = jwtService.extractRoles(token);
-        return roles.contains("ROLE_ADMIN") || roles.contains("ROLE_OPERATOR");
+        return roles.contains("ADMIN") || roles.contains("OPERATOR");
     }
 }

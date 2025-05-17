@@ -3,7 +3,6 @@ package com.opwa.opwa_be.Controller;
 import com.opwa.opwa_be.Repository.UserRepo;
 import com.opwa.opwa_be.auth.AddUserRequest;
 import com.opwa.opwa_be.config.JwtService;
-
 import com.opwa.opwa_be.model.User;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -14,22 +13,18 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import org.springframework.web.bind.annotation.GetMapping;
 import java.util.Map;
-
-
 
 @RestController
 @RequestMapping("/api/v1/user")
 @RequiredArgsConstructor
-
 public class UserController {
     private final UserRepo userRepo;
     private final JwtService jwtService;
     private final PasswordEncoder passwordEncoder;
 
     @PostMapping("/add")
-    public ResponseEntity<?> addUser(@Valid @RequestBody  AddUserRequest request, HttpServletRequest httpServletRequest) {
+    public ResponseEntity<?> addUser(@Valid @RequestBody AddUserRequest request, HttpServletRequest httpServletRequest) {
         String authHeader = httpServletRequest.getHeader("Authorization");
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Authorization header missing or invalid.");
@@ -38,7 +33,8 @@ public class UserController {
         String token = authHeader.substring(7);
         List<String> roles = jwtService.extractRoles(token);
 
-        if (roles.contains("ROLE_ADMIN") || roles.contains("ROLE_OPERATOR")) {
+        // Sửa: chỉ kiểm tra "ADMIN" và "OPERATOR"
+        if (roles.contains("ADMIN") || roles.contains("OPERATOR")) {
             var user = User.builder()
                     .firstName(request.getFirstName())
                     .middleName(request.getMiddleName())
@@ -74,7 +70,7 @@ public class UserController {
         String token = authHeader.substring(7);
         List<String> roles = jwtService.extractRoles(token);
 
-        if (roles.contains("ROLE_ADMIN") || roles.contains("ROLE_OPERATOR")) {
+        if (roles.contains("ADMIN") || roles.contains("OPERATOR")) {
             var user = userRepo.findById(userId).orElseThrow(() -> new RuntimeException("User not found."));
 
             if (request.getFirstName() != null && !request.getFirstName().isBlank()) user.setFirstName(request.getFirstName());
@@ -111,13 +107,14 @@ public class UserController {
         String token = authHeader.substring(7);
         List<String> roles = jwtService.extractRoles(token);
 
-        if (roles.contains("ROLE_ADMIN") || roles.contains("ROLE_OPERATOR")) {
+        if (roles.contains("ADMIN") || roles.contains("OPERATOR")) {
             List<User> users = userRepo.findAll();
             return ResponseEntity.ok(users);
         } else {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
         }
     }
+
     @GetMapping("/get/{id}")
     public ResponseEntity<User> getUserById(@PathVariable String id, HttpServletRequest httpServletRequest) {
         String authHeader = httpServletRequest.getHeader("Authorization");
@@ -128,7 +125,7 @@ public class UserController {
         String token = authHeader.substring(7);
         List<String> roles = jwtService.extractRoles(token);
 
-        if (roles.contains("ROLE_ADMIN") || roles.contains("ROLE_OPERATOR")) {
+        if (roles.contains("ADMIN") || roles.contains("OPERATOR")) {
             User user = userRepo.findById(id).orElse(null);
             if (user == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
@@ -149,7 +146,7 @@ public class UserController {
         String token = authHeader.substring(7);
         List<String> roles = jwtService.extractRoles(token);
 
-        if (roles.contains("ROLE_ADMIN") || roles.contains("ROLE_OPERATOR")) {
+        if (roles.contains("ADMIN") || roles.contains("OPERATOR")) {
             userRepo.deleteById(userId);
             return ResponseEntity.ok(Map.of("message", "User deleted successfully!"));
         } else {
