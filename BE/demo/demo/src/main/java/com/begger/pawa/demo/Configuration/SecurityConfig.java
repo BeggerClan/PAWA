@@ -62,6 +62,14 @@ public class SecurityConfig {
 
                         ).hasRole("PASSENGER")
 
+                        // OPERATOR endpoints
+                        .requestMatchers("/api/operator/**")
+                        .hasRole("OPERATOR")
+
+                        // AGENT endpoints
+                        .requestMatchers("/api/agent/**")
+                        .hasRole("TICKET_AGENT")
+
                 .anyRequest().authenticated()
             )
             .oauth2ResourceServer(oauth -> oauth
