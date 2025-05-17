@@ -63,6 +63,12 @@ public class MetroLineService {
         // Automatically calculate totalDuration
         metroLine.setTotalDuration(calculateTotalDuration(metroLine));
         metroLine.setUpdatedAt(LocalDateTime.now());
+
+        // If no stations are added, set active to false
+        if (metroLine.getStationIds() == null || metroLine.getStationIds().isEmpty()) {
+            metroLine.setActive(false);
+        }
+
         return metroLineRepo.save(metroLine);
     }
 
@@ -294,20 +300,34 @@ public class MetroLineService {
             existing.setLineName(updatedLine.getLineName());
             changed = true;
         }
-        if (!java.util.Objects.equals(existing.getFrequencyMinutes(), updatedLine.getFrequencyMinutes()) ||
-            !java.util.Objects.equals(existing.getStationIds(), updatedLine.getStationIds())) {
-            // Recalculate totalDuration if frequency or stations changed
+
+        boolean freqChanged = false;
+        if (!java.util.Objects.equals(existing.getFrequencyMinutes(), updatedLine.getFrequencyMinutes())) {
             existing.setFrequencyMinutes(updatedLine.getFrequencyMinutes());
+            freqChanged = true;
+            changed = true;
+        }
+        boolean stationsChanged = false;
+        if (updatedLine.getStationIds() != null && !java.util.Objects.equals(existing.getStationIds(), updatedLine.getStationIds())) {
             existing.setStationIds(updatedLine.getStationIds());
+            stationsChanged = true;
+            changed = true;
+        }
+        if (freqChanged || stationsChanged) {
             existing.setTotalDuration(calculateTotalDuration(existing));
-            changed = true;
         }
-        if (existing.isActive() != updatedLine.isActive()) {
-            existing.setActive(updatedLine.isActive());
-            changed = true;
-        }
+
         if (!java.util.Objects.equals(existing.getFirstDeparture(), updatedLine.getFirstDeparture())) {
             existing.setFirstDeparture(updatedLine.getFirstDeparture());
+            changed = true;
+        }
+
+        // Automatically set active to false if less than 3 stations or none
+        if (existing.getStationIds() == null || existing.getStationIds().size() < 3) {
+            existing.setActive(false);
+            changed = true;
+        } else if (existing.isActive() != updatedLine.isActive()) {
+            existing.setActive(updatedLine.isActive());
             changed = true;
         }
 

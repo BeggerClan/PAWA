@@ -4,7 +4,7 @@ import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { FaMapMarkerAlt } from "react-icons/fa";
 import { renderToStaticMarkup } from "react-dom/server";
-import { getAllMetroLines } from "../../services/metroLineApi";
+import { getAllMetroLines } from "../../../services/metroLineApi";
 
 // Map marker color mapping (customize as needed)
 const markerColors = {
@@ -49,14 +49,18 @@ const MetroLineMapView = ({ selectedLineId }) => {
 
   // Filter lines if a line is selected
   const displayedLines = selectedLineId
-    ? lines.filter(line => line.lineId === selectedLineId)
+    ? lines.filter(line => String(line.lineId) === String(selectedLineId))
     : lines;
 
-  // Prepare polylines
-  const polylines = displayedLines.map(line => ({
-    positions: line.stations?.map(st => [st.latitude, st.longitude]) || [],
-    color: getColor(line.stations?.[0]?.mapMarker)
-  }));
+  // Prepare polylines: always use the color of the first station's mapMarker
+  const polylines = displayedLines.map(line => {
+    const firstStation = line.stations?.[0];
+    const color = firstStation ? getColor(firstStation.mapMarker) : markerColors.default;
+    return {
+      positions: line.stations?.map(st => [st.latitude, st.longitude]) || [],
+      color
+    };
+  });
 
   // Group stations by stationName (not stationId)
   const stationNameMap = {};
@@ -119,6 +123,7 @@ const MetroLineMapView = ({ selectedLineId }) => {
 
   return (
     <MapContainer
+      key={selectedLineId || "all"}
       center={center}
       zoom={13}
       minZoom={12}

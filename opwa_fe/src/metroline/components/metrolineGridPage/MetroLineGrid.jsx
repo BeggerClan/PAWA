@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { getAllMetroLines, createMetroLine, updateMetroLine, deleteMetroLine, getStationsForLine } from '../../services/metroLineApi';
+import { getAllMetroLines, createMetroLine, updateMetroLine, deleteMetroLine, getStationsForLine } from '../../../services/metroLineApi';
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button, IconButton, Chip } from '@mui/material';
 import { Edit, Delete, Add } from '@mui/icons-material';
 import MetroLineForm from './MetroLineForm';
 import DeleteDialog from './DeleteDialog';
-import NotificationSnackbar from './NotificationSnackbar';
+import NotificationSnackbar from '../NotificationSnackbar';
 
 const MetroLineGrid = ({ onShowStations }) => {
   const [metroLines, setMetroLines] = useState([]);
@@ -119,61 +119,53 @@ const MetroLineGrid = ({ onShowStations }) => {
       </Button>
 
       <TableContainer component={Paper}>
-        <Table>
+        <Table sx={{ border: 1, borderColor: 'divider' }}>
           <TableHead>
             <TableRow>
-              <TableCell>Line ID</TableCell>
-              <TableCell>Name</TableCell>
-              <TableCell>Duration (min)</TableCell>
-              <TableCell>Frequency</TableCell>
-              <TableCell>First Departure</TableCell>
-              <TableCell>Status</TableCell>
-              <TableCell>Suspended</TableCell>
-              <TableCell>Created At</TableCell>
-              <TableCell>Updated At</TableCell>
-              <TableCell>Stations</TableCell>
-              <TableCell>Actions</TableCell>
+              <TableCell sx={{ border: 1, borderColor: 'divider' }}>Line ID</TableCell>
+              <TableCell sx={{ border: 1, borderColor: 'divider' }}>Name</TableCell>
+              <TableCell sx={{ border: 1, borderColor: 'divider' }}>Duration (min)</TableCell>
+              <TableCell sx={{ border: 1, borderColor: 'divider' }}>Frequency</TableCell>
+              <TableCell sx={{ border: 1, borderColor: 'divider' }}>First Departure</TableCell>
+              <TableCell sx={{ border: 1, borderColor: 'divider' }}>Status</TableCell>
+              <TableCell sx={{ border: 1, borderColor: 'divider' }}>Suspended</TableCell>
+              <TableCell sx={{ border: 1, borderColor: 'divider' }}>Stations</TableCell>
+              <TableCell sx={{ border: 1, borderColor: 'divider' }}>Actions</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {metroLines.map((line) => (
-              <TableRow key={line.lineId}>
-                <TableCell>{line.lineId}</TableCell>
+              <TableRow key={line.lineId} hover>
+                <TableCell sx={{ border: 1, borderColor: 'divider' }}>{line.lineId}</TableCell>
                 <TableCell
-                  style={{ cursor: 'pointer', color: '#1976d2', fontWeight: 500 }}
+                  sx={{ border: 1, borderColor: 'divider', cursor: 'pointer', color: '#1976d2', fontWeight: 500 }}
                   onClick={() => onShowStations(line.lineId)}
                 >
                   {line.lineName}
                 </TableCell>
-                <TableCell>{line.totalDuration}</TableCell>
-                <TableCell>{line.frequencyMinutes}</TableCell>
-                <TableCell>
+                <TableCell sx={{ border: 1, borderColor: 'divider' }}>{line.totalDuration}</TableCell>
+                <TableCell sx={{ border: 1, borderColor: 'divider' }}>{line.frequencyMinutes} minutes</TableCell>
+                <TableCell sx={{ border: 1, borderColor: 'divider' }}>
                   {line.firstDeparture ? new Date(line.firstDeparture).toLocaleString() : 'N/A'}
                 </TableCell>
-                <TableCell>
+                <TableCell sx={{ border: 1, borderColor: 'divider' }}>
                   <Chip
                     label={String(line.active) === "true" ? "Active" : "Inactive"}
                     color={String(line.active) === "true" ? "success" : "error"}
                     size="small"
                   />
                 </TableCell>
-                <TableCell>
+                <TableCell sx={{ border: 1, borderColor: 'divider' }}>
                   <Chip
                     label={line.suspended ? "Yes" : "No"}
                     color={line.suspended ? "warning" : "default"}
                     size="small"
                   />
                 </TableCell>
-                <TableCell>
-                  {line.createdAt ? new Date(line.createdAt).toLocaleString() : ""}
-                </TableCell>
-                <TableCell>
-                  {line.updatedAt ? new Date(line.updatedAt).toLocaleString() : ""}
-                </TableCell>
-                <TableCell>
+                <TableCell sx={{ border: 1, borderColor: 'divider' }}>
                   {line.stations ? line.stations.length : 0}
                 </TableCell>
-                <TableCell>
+                <TableCell sx={{ border: 1, borderColor: 'divider' }}>
                   <IconButton onClick={() => handleOpenEditDialog(line)}>
                     <Edit color="primary" />
                   </IconButton>

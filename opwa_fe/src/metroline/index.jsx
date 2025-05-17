@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import MetroLineGrid from "./components/MetroLineGrid";
-import MetroLineStations from "./components/MetroLineStations";
-import MetroLineMapView from "./components/MetroLineMapView";
+import MetroLineGrid from "./components/metrolineGridPage/MetroLineGrid";
+import MetroLineStations from "./components/metrolineStationGridPage/MetroLineStations";
+import MetroLineMapView from "./components/metrolineGridPage/MetroLineMapView";
 
 const Index = () => {
   const [selectedLineId, setSelectedLineId] = useState(null);

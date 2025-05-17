@@ -1,21 +1,39 @@
 import axios from "axios";
+import { API_BASE_URL } from "../config";
 
-const API_BASE = "/api"; // Change if your backend prefix is different
+const API_BASE = `${API_BASE_URL}/api`;
+
+const getAuthHeader = () => {
+  const token = localStorage.getItem("token"); // or your token storage key
+  return token ? { Authorization: `Bearer ${token}` } : {};
+};
 
 export const getAllStations = () =>
-  axios.get(`${API_BASE}/getAllStations`);
+  axios.get(`${API_BASE}/getAllStations`, {
+    headers: getAuthHeader(),
+  });
 
 export const getStation = (stationId) =>
-  axios.get(`${API_BASE}/getStation/${stationId}`);
+  axios.get(`${API_BASE}/getStation/${stationId}`, {
+    headers: getAuthHeader(),
+  });
 
 export const addStation = (station) =>
-  axios.post(`${API_BASE}/addStation`, station);
+  axios.post(`${API_BASE}/addStation`, station, {
+    headers: getAuthHeader(),
+  });
 
 export const updateStation = (station) =>
-  axios.put(`${API_BASE}/updateStation`, station);
+  axios.put(`${API_BASE}/updateStation`, station, {
+    headers: getAuthHeader(),
+  });
 
 export const deleteStation = (stationId) =>
-  axios.delete(`${API_BASE}/deleteStation/${stationId}`);
+  axios.delete(`${API_BASE}/deleteStation/${stationId}`, {
+    headers: getAuthHeader(),
+  });
 
 export const addStationList = (stations) =>
-  axios.post(`${API_BASE}/addStationList`, stations);
+  axios.post(`${API_BASE}/addStationList`, stations, {
+    headers: getAuthHeader(),
+  });
