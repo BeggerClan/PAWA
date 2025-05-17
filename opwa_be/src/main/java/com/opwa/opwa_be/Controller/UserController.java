@@ -29,7 +29,7 @@ public class UserController {
     private final PasswordEncoder passwordEncoder;
 
     @PostMapping("/add")
-    public ResponseEntity<String> addUser(@Valid @RequestBody  AddUserRequest request, HttpServletRequest httpServletRequest) {
+    public ResponseEntity<?> addUser(@Valid @RequestBody  AddUserRequest request, HttpServletRequest httpServletRequest) {
         String authHeader = httpServletRequest.getHeader("Authorization");
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Authorization header missing or invalid.");
@@ -58,14 +58,14 @@ public class UserController {
                     .shift(request.getShift())
                     .build();
             userRepo.save(user);
-            return ResponseEntity.ok("{ \"message\": \"User added successfully!\" }");
+            return ResponseEntity.ok(Map.of("message", "User added successfully!"));
         } else {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Access denied.");
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("message", "Access denied."));
         }
     }
 
     @PutMapping("/update/{userId}")
-    public ResponseEntity<String> updateUser(@PathVariable String userId, @RequestBody AddUserRequest request, HttpServletRequest httpServletRequest) {
+    public ResponseEntity<?> updateUser(@PathVariable String userId, @RequestBody AddUserRequest request, HttpServletRequest httpServletRequest) {
         String authHeader = httpServletRequest.getHeader("Authorization");
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Authorization header missing or invalid.");
@@ -95,9 +95,9 @@ public class UserController {
             if (request.getShift() != null) user.setShift(request.getShift());
 
             userRepo.save(user);
-            return ResponseEntity.ok("{ \"message\": \"User updated successfully.\" }");
+            return ResponseEntity.ok(Map.of("message", "User updated successfully."));
         } else {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Access denied.");
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("message", "Access denied."));
         }
     }
 
