@@ -165,30 +165,9 @@ const Sidebar = ({ isCollapsed, onToggleCollapse, selected, setSelected }) => {
                 Static Charts
               </Typography>
               <Item
-                title="Bar Chart"
-                to="/dashboard/bar"
-                icon={<BarChartOutlinedIcon />}
-                selected={selected}
-                setSelected={setSelected}
-              />
-              <Item
                 title="Pie Chart"
                 to="/dashboard/pie"
                 icon={<PieChartOutlineOutlinedIcon />}
-                selected={selected}
-                setSelected={setSelected}
-              />
-              <Item
-                title="Geography Chart"
-                to="/dashboard/geography"
-                icon={<MapOutlinedIcon />}
-                selected={selected}
-                setSelected={setSelected}
-              />
-              <Item
-                title="Line Chart"
-                to="/dashboard/line"
-                icon={<TimelineOutlinedIcon />}
                 selected={selected}
                 setSelected={setSelected}
               />

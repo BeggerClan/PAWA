@@ -76,7 +76,7 @@ export default function AppRoutes() {
               <Route path="ticket" element={<TicketPurchase />} />
               <Route path="bar" element={<Bar />} />
               <Route path="pie" element={<Pie />} />
-              <Route path="line" element={<Line />} />
+           
               <Route path="geography" element={<Geography />} />
               <Route path="metroline" element={<Metroline />} />
               <Route path="station" element={<Station />} /> {/* <-- add this */}
