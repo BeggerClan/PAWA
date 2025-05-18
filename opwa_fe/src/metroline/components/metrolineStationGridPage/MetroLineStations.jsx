@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { getStationsForLine, deleteStationFromLine } from "../../../services/metroLineApi";
-import { getSuspensionsForLine } from "../../../services/suspensionApi";
+import { getSuspensionsForLine, removeStationFromSuspension } from "../../../services/suspensionApi";
 import AddStationDialog from "./AddStationDialog";
 import SuspendStationDialog from "./SuspendStationDialog";
 import {
@@ -9,6 +9,7 @@ import {
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import PauseCircleIcon from "@mui/icons-material/PauseCircle";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 
 const MetroLineStations = ({ lineId, onBack, onStationChanged }) => {
   const [stations, setStations] = useState([]);
@@ -76,6 +77,15 @@ const MetroLineStations = ({ lineId, onBack, onStationChanged }) => {
     );
   };
 
+  // Handler to remove station from a suspension
+  const handleRemoveStationFromSuspension = async (stationId) => {
+    const suspension = getActiveSuspensionForStation(stationId);
+    if (suspension) {
+      await removeStationFromSuspension(suspension.id || suspension.suspensionId, stationId);
+      handleRefresh();
+    }
+  };
+
   return (
     <div style={{ padding: 32 }}>
       <Button variant="outlined" onClick={onBack} sx={{ mb: 2 }}>
@@ -120,6 +130,16 @@ const MetroLineStations = ({ lineId, onBack, onStationChanged }) => {
                         <IconButton size="small" color="warning" onClick={() => handleSuspend(station)} title="Suspend">
                           <PauseCircleIcon fontSize="small" />
                         </IconButton>
+                        {suspension && (
+                          <IconButton
+                            size="small"
+                            color="success"
+                            onClick={() => handleRemoveStationFromSuspension(station.stationId)}
+                            title="Remove Suspension for this Station"
+                          >
+                            <CheckCircleIcon fontSize="small" />
+                          </IconButton>
+                        )}
                       </Stack>
                     </TableCell>
                   </TableRow>

@@ -37,6 +37,10 @@ public class SecurityConfiguration {
                                 "/api/v1/auth/**",
                                 "/api/data-generator/**",
                                 "/api/metro-lines/**",
+                                "/api/metro-lines/trips",
+                                "/api/metro-lines/*/trips",
+                                "/api/metro-lines/*/stations/*/trips",
+                                "/api/metro-lines/*/generate-trips",
                                 "/api/suspensions/**",
                                 "/api/stations/**"
                         ).permitAll()
@@ -76,7 +80,7 @@ public class SecurityConfiguration {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(List.of("http://localhost:5173"));
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE"));
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
 

@@ -201,4 +201,12 @@ public class SuspensionController {
             this.durationHours = durationHours;
         }
     }
+
+    @PatchMapping("/{suspensionId}/remove-station/{stationId}")
+    public ResponseEntity<Suspension> removeStationFromSuspension(
+            @PathVariable String suspensionId,
+            @PathVariable String stationId) {
+        Suspension updated = suspensionService.removeStationFromSuspension(suspensionId, stationId);
+        return ResponseEntity.ok(updated);
+    }
 }

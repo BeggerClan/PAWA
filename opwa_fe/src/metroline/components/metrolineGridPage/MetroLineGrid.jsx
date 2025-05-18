@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { getAllMetroLines, createMetroLine, updateMetroLine, deleteMetroLine, getStationsForLine } from '../../../services/metroLineApi';
+import { getSuspensionsForLine } from '../../../services/suspensionApi';
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button, IconButton, Chip } from '@mui/material';
 import { Edit, Delete, Add } from '@mui/icons-material';
 import MetroLineForm from './MetroLineForm';
@@ -8,6 +9,7 @@ import NotificationSnackbar from '../NotificationSnackbar';
 
 const MetroLineGrid = ({ onShowStations }) => {
   const [metroLines, setMetroLines] = useState([]);
+  const [suspensionsMap, setSuspensionsMap] = useState({});
   const [openDialog, setOpenDialog] = useState(false);
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [currentLine, setCurrentLine] = useState(null);
@@ -17,6 +19,7 @@ const MetroLineGrid = ({ onShowStations }) => {
   const [lineStations, setLineStations] = useState([]);
 
   useEffect(() => { fetchMetroLines(); }, []);
+  useEffect(() => { fetchAllSuspensions(); }, [metroLines]);
 
   const fetchMetroLines = async () => {
     try {
@@ -25,6 +28,22 @@ const MetroLineGrid = ({ onShowStations }) => {
     } catch (error) {
       showSnackbar('Failed to fetch metro lines', 'error');
     }
+  };
+
+  // Fetch suspensions for all lines and build a map: { lineId: [suspensions] }
+  const fetchAllSuspensions = async () => {
+    const map = {};
+    await Promise.all(
+      metroLines.map(async (line) => {
+        try {
+          const res = await getSuspensionsForLine(line.lineId);
+          map[line.lineId] = res.data || [];
+        } catch {
+          map[line.lineId] = [];
+        }
+      })
+    );
+    setSuspensionsMap(map);
   };
 
   const handleOpenCreateDialog = () => {
@@ -106,6 +125,19 @@ const MetroLineGrid = ({ onShowStations }) => {
     setSnackbar({ ...snackbar, open: false });
   };
 
+  // Helper: determine active status based on suspensions
+  const isLineActive = (line) => {
+    const suspensions = suspensionsMap[line.lineId] || [];
+    // Get all active suspensions and collect unique affected station IDs
+    const affectedStationsSet = new Set();
+    suspensions.forEach(susp => {
+      if (susp.active && Array.isArray(susp.affectedStationIds)) {
+        susp.affectedStationIds.forEach(id => affectedStationsSet.add(id));
+      }
+    });
+    return affectedStationsSet.size < 3;
+  };
+
   return (
     <div>
       <Button
@@ -143,15 +175,15 @@ const MetroLineGrid = ({ onShowStations }) => {
                 >
                   {line.lineName}
                 </TableCell>
-                <TableCell sx={{ border: 1, borderColor: 'divider' }}>{line.totalDuration}</TableCell>
+                <TableCell sx={{ border: 1, borderColor: 'divider' }}>{line.totalDuration} minutes (One-way-trip)</TableCell>
                 <TableCell sx={{ border: 1, borderColor: 'divider' }}>{line.frequencyMinutes} minutes</TableCell>
                 <TableCell sx={{ border: 1, borderColor: 'divider' }}>
                   {line.firstDeparture ? new Date(line.firstDeparture).toLocaleString() : 'N/A'}
                 </TableCell>
                 <TableCell sx={{ border: 1, borderColor: 'divider' }}>
                   <Chip
-                    label={String(line.active) === "true" ? "Active" : "Inactive"}
-                    color={String(line.active) === "true" ? "success" : "error"}
+                    label={isLineActive(line) ? "Active" : "Inactive"}
+                    color={isLineActive(line) ? "success" : "error"}
                     size="small"
                   />
                 </TableCell>

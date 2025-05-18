@@ -43,3 +43,9 @@ export const deleteSuspension = (suspensionId) =>
   axios.delete(`${API_BASE}/suspensions/${suspensionId}`, {
     headers: getAuthHeader(),
   });
+
+// Remove a station from a suspension
+export const removeStationFromSuspension = (suspensionId, stationId) =>
+  axios.patch(`${API_BASE}/suspensions/${suspensionId}/remove-station/${stationId}`, {}, {
+    headers: getAuthHeader(),
+  });
