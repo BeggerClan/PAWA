@@ -1,3 +1,5 @@
+// metro-lines.js - Updated to fetch from OPWA API
+
 // =====================================================
 // CORE DATA FETCHING FUNCTIONS
 // =====================================================
@@ -18,8 +20,8 @@ async function fetchMetroLines() {
     }
     
     try {
-        // Fetch metro lines from OPWA API
-        const response = await fetch('http://localhost:8080/api/metro-lines/get-all-metro-lines', {
+        // Fetch metro lines from OPWA API - updated URL to use port 8081
+        const response = await fetch('http://localhost:8081/api/metro-lines/get-all-metro-lines', {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json'
@@ -66,8 +68,8 @@ async function searchMetroRoutes(fromStation, toStation, travelTime) {
             datetime: travelTime
         });
         
-        // Call the OPWA API for searching routes
-        const response = await fetch(`http://localhost:8080/api/metro-lines/search?${params}`, {
+        // Call the OPWA API for searching routes - updated URL to use port 8081
+        const response = await fetch(`http://localhost:8081/api/metro-lines/search?${params}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json'
@@ -103,7 +105,7 @@ function displayMetroLines(metroLines) {
     // Clear loading indicator
     container.innerHTML = '';
     
-    if (metroLines.length === 0) {
+    if (!metroLines || metroLines.length === 0) {
         container.innerHTML = `
             <div class="alert alert-info" role="alert">
                 <i class="fas fa-info-circle me-2"></i>
@@ -172,7 +174,7 @@ function displayMetroLines(metroLines) {
                             <tr>
                                 <td>Every ${metroLine.frequencyMinutes || "10"} minutes</td>
                                 <td>${formatTime(metroLine.firstDeparture)}</td>
-                                <td>10:00 PM</td>
+                                <td>6:00 PM</td>
                                 <td>${metroLine.totalDuration} minutes</td>
                             </tr>
                         </tbody>
@@ -195,7 +197,7 @@ function displayRouteResults(routes) {
     const resultsContainer = document.createElement('div');
     resultsContainer.className = 'search-results mt-4';
     
-    if (routes.length === 0) {
+    if (!routes || routes.length === 0) {
         resultsContainer.innerHTML = `
             <div class="alert alert-info">
                 <i class="fas fa-info-circle me-2"></i>
@@ -211,18 +213,18 @@ function displayRouteResults(routes) {
                         <div class="route-header">
                             <div class="route-time">
                                 <div class="departure">${formatTime(route.departureTime)}</div>
-                                <div class="duration"><i class="fas fa-clock"></i> ${route.durationMinutes} min</div>
+                                <div class="duration"><i class="fas fa-clock"></i> ${route.durationMinutes || route.totalDuration || '30'} min</div>
                                 <div class="arrival">${formatTime(route.arrivalTime)}</div>
                             </div>
                             <div class="route-line">${route.lineName}</div>
                         </div>
                         <div class="route-stations">
-                            <div class="from-station">${route.fromStation}</div>
+                            <div class="from-station">${route.fromStation || getFirstStationName(route)}</div>
                             <div class="route-path">
                                 <div class="path-line"></div>
-                                <div class="stations-count">${route.stationsCount} stations</div>
+                                <div class="stations-count">${route.stationsCount || (route.stations && route.stations.length) || calculateStationCount(route)} stations</div>
                             </div>
-                            <div class="to-station">${route.toStation}</div>
+                            <div class="to-station">${route.toStation || getLastStationName(route)}</div>
                         </div>
                         <div class="route-actions">
                             <button class="btn btn-sm btn-outline-primary view-details-btn" data-route-index="${index}">
@@ -243,7 +245,10 @@ function displayRouteResults(routes) {
     if (existingResults) {
         existingResults.replaceWith(resultsContainer);
     } else {
-        document.querySelector('.card.search-card').after(resultsContainer);
+        const searchCard = document.querySelector('.card.search-card');
+        if (searchCard) {
+            searchCard.after(resultsContainer);
+        }
     }
     
     // Add event listeners for detail buttons
@@ -294,7 +299,7 @@ function showRouteDetails(route) {
                                 </div>
                                 <div class="time-item">
                                     <div class="label">Duration</div>
-                                    <div class="value">${route.durationMinutes} min</div>
+                                    <div class="value">${route.durationMinutes || route.totalDuration || '30'} min</div>
                                 </div>
                                 <div class="time-item">
                                     <div class="label">Arrival</div>
@@ -304,15 +309,7 @@ function showRouteDetails(route) {
                         </div>
                         
                         <div class="station-timeline">
-                            ${route.stations && route.stations.map((station, index) => `
-                                <div class="timeline-item">
-                                    <div class="timeline-marker ${index === 0 ? 'start' : (index === route.stations.length - 1 ? 'end' : '')}"></div>
-                                    <div class="timeline-content">
-                                        <div class="station-name">${station.name}</div>
-                                        <div class="station-time">${formatTime(station.time)}</div>
-                                    </div>
-                                </div>
-                            `).join('') || '<div>No station information available</div>'}
+                            ${getStationTimeline(route)}
                         </div>
                     </div>
                 </div>
@@ -347,6 +344,44 @@ function showRouteDetails(route) {
 // =====================================================
 
 /**
+ * Creates timeline HTML for stations in a route
+ */
+function getStationTimeline(route) {
+    if (route.stations && route.stations.length > 0) {
+        return route.stations.map((station, index) => `
+            <div class="timeline-item">
+                <div class="timeline-marker ${index === 0 ? 'start' : (index === route.stations.length - 1 ? 'end' : '')}"></div>
+                <div class="timeline-content">
+                    <div class="station-name">${station.name || station.stationName}</div>
+                    <div class="station-time">${formatTime(station.time || station.arrivalTime)}</div>
+                </div>
+            </div>
+        `).join('');
+    } else if (route.stationIds && route.stationIds.length > 0) {
+        // If we only have station IDs, generate a simple list
+        return route.stationIds.map((stationId, index) => `
+            <div class="timeline-item">
+                <div class="timeline-marker ${index === 0 ? 'start' : (index === route.stationIds.length - 1 ? 'end' : '')}"></div>
+                <div class="timeline-content">
+                    <div class="station-name">Station ${stationId}</div>
+                </div>
+            </div>
+        `).join('');
+    } else {
+        return '<div>No station information available</div>';
+    }
+}
+
+/**
+ * Calculate number of stations in a route
+ */
+function calculateStationCount(route) {
+    if (route.stations && route.stations.length) return route.stations.length;
+    if (route.stationIds && route.stationIds.length) return route.stationIds.length;
+    return 0;
+}
+
+/**
  * Formats time from ISO string to readable format
  * @param {string} isoString - ISO formatted date/time string
  * @returns {string} - Formatted time string (e.g., "06:00 AM")
@@ -374,7 +409,10 @@ function formatTime(isoString) {
  */
 function getFirstStationName(metroLine) {
     if (metroLine.stations && metroLine.stations.length > 0) {
-        return metroLine.stations[0].stationName;
+        return metroLine.stations[0].stationName || metroLine.stations[0].name || "Start Station";
+    }
+    if (metroLine.stationIds && metroLine.stationIds.length > 0) {
+        return `Station ${metroLine.stationIds[0]}`;
     }
     return "First Station";
 }
@@ -386,7 +424,12 @@ function getFirstStationName(metroLine) {
  */
 function getLastStationName(metroLine) {
     if (metroLine.stations && metroLine.stations.length > 0) {
-        return metroLine.stations[metroLine.stations.length - 1].stationName;
+        const lastIndex = metroLine.stations.length - 1;
+        return metroLine.stations[lastIndex].stationName || metroLine.stations[lastIndex].name || "End Station";
+    }
+    if (metroLine.stationIds && metroLine.stationIds.length > 0) {
+        const lastIndex = metroLine.stationIds.length - 1;
+        return `Station ${metroLine.stationIds[lastIndex]}`;
     }
     return "Last Station";
 }
@@ -397,34 +440,51 @@ function getLastStationName(metroLine) {
  * @returns {string} - HTML string for station list
  */
 function generateStationList(metroLine) {
-    if (!metroLine.stations || metroLine.stations.length === 0) {
+    if (metroLine.stations && metroLine.stations.length > 0) {
+        // If we have full station objects
+        return metroLine.stations.map((station, index) => {
+            const isFirst = index === 0;
+            const isLast = index === metroLine.stations.length - 1;
+            const stationClass = isFirst ? 'start-station' : (isLast ? 'end-station' : 'station');
+            
+            // Calculate estimated time based on total duration divided by stations
+            const estimatedMinutesPerStation = metroLine.totalDuration / (metroLine.stations.length - 1);
+            const departureTime = new Date(metroLine.firstDeparture);
+            if (departureTime && !isNaN(departureTime)) {
+                departureTime.setMinutes(departureTime.getMinutes() + (index * estimatedMinutesPerStation));
+            }
+            
+            return `
+                <div class="${stationClass}">
+                    <div class="station-marker"></div>
+                    <div class="station-info">
+                        <div class="station-name">${station.stationName || station.name}</div>
+                        <div class="station-time">${isFirst ? 'Departure: ' : (isLast ? 'Arrival: ' : '')}${
+                            formatTime(departureTime)
+                        }</div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    } else if (metroLine.stationIds && metroLine.stationIds.length > 0) {
+        // If we only have station IDs
+        return metroLine.stationIds.map((stationId, index) => {
+            const isFirst = index === 0;
+            const isLast = index === metroLine.stationIds.length - 1;
+            const stationClass = isFirst ? 'start-station' : (isLast ? 'end-station' : 'station');
+            
+            return `
+                <div class="${stationClass}">
+                    <div class="station-marker"></div>
+                    <div class="station-info">
+                        <div class="station-name">Station ${stationId}</div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    } else {
         return '<div class="alert alert-warning">Station information unavailable</div>';
     }
-    
-    return metroLine.stations.map((station, index) => {
-        const isFirst = index === 0;
-        const isLast = index === metroLine.stations.length - 1;
-        const stationClass = isFirst ? 'start-station' : (isLast ? 'end-station' : 'station');
-        
-        // Calculate estimated time based on total duration divided by stations
-        const estimatedMinutesPerStation = metroLine.totalDuration / (metroLine.stations.length - 1);
-        const departureTime = new Date(metroLine.firstDeparture);
-        if (departureTime && !isNaN(departureTime)) {
-            departureTime.setMinutes(departureTime.getMinutes() + (index * estimatedMinutesPerStation));
-        }
-        
-        return `
-            <div class="${stationClass}">
-                <div class="station-marker"></div>
-                <div class="station-info">
-                    <div class="station-name">${station.stationName}</div>
-                    <div class="station-time">${isFirst ? 'Departure: ' : (isLast ? 'Arrival: ' : '')}${
-                        formatTime(departureTime)
-                    }</div>
-                </div>
-            </div>
-        `;
-    }).join('');
 }
 
 /**
@@ -488,7 +548,9 @@ function generateUpcomingTrips(metroLine) {
  */
 function addRouteToCart(route) {
     // Check if user is logged in
-    if (!isLoggedIn()) {
+    const isLoggedIn = checkIfLoggedIn();
+    
+    if (!isLoggedIn) {
         if (confirm('You need to sign in to book tickets. Would you like to sign in now?')) {
             window.location.href = 'signin.html';
         }
@@ -498,10 +560,51 @@ function addRouteToCart(route) {
     // Add to cart logic
     // This would typically involve a call to your backend to add the route to the user's cart
     
-    alert(`Added route from ${route.fromStation} to ${route.toStation} at ${formatTime(route.departureTime)} to your cart.`);
+    alert(`Added route from ${getFirstStationName(route)} to ${getLastStationName(route)} at ${formatTime(route.departureTime || route.firstDeparture)} to your cart.`);
     
     // Update cart badge
     updateCartBadge();
+}
+
+/**
+ * Simple function to check if user is logged in
+ * You should replace this with your actual authentication check
+ */
+function checkIfLoggedIn() {
+    // This is a placeholder - implement your actual login check here
+    return sessionStorage.getItem('jwtToken') !== null;
+}
+
+/**
+ * Updates cart badge count
+ */
+function updateCartBadge() {
+    const badge = document.querySelector('.cart-count');
+    if (badge) {
+        // This is placeholder logic - implement your actual cart count logic
+        const count = parseInt(badge.textContent || '0');
+        badge.textContent = count + 1;
+        badge.style.display = 'inline-block';
+    }
+}
+
+/**
+ * Updates UI navigation based on authentication status
+ * @param {boolean} isAuthenticated - Whether user is logged in
+ */
+function updateNavigation(isAuthenticated) {
+    const authMenu = document.querySelector('.auth-menu');
+    const guestMenu = document.querySelector('.guest-menu');
+    
+    if (authMenu && guestMenu) {
+        if (isAuthenticated) {
+            authMenu.style.display = 'flex';
+            guestMenu.style.display = 'none';
+        } else {
+            authMenu.style.display = 'none';
+            guestMenu.style.display = 'flex';
+        }
+    }
 }
 
 // =====================================================
@@ -512,12 +615,13 @@ function addRouteToCart(route) {
  * Initializes the page when DOM is fully loaded
  */
 document.addEventListener('DOMContentLoaded', function() {
-    // Initialize auth utilities
-    const isAuthenticated = initAuth();
+    // Check if user is logged in
+    const isAuthenticated = checkIfLoggedIn();
     
     // Update UI based on authentication status
     updateNavigation(isAuthenticated);
 
+    // Update cart badge if authenticated
     if (isAuthenticated) {
         updateCartBadge();
     }
@@ -589,6 +693,7 @@ function initTicketButtons(isAuthenticated) {
             if (isAuthenticated) {
                 // If logged in, add to cart or proceed to purchase
                 alert(`Added ${ticketType} to your cart.`);
+                updateCartBadge();
             } else {
                 // If not logged in, prompt to sign in
                 if (confirm(`You need to sign in to purchase a ${ticketType}. Would you like to sign in now?`)) {
