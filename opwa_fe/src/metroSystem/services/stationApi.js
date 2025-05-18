@@ -1,5 +1,5 @@
 import axios from "axios";
-import { API_BASE_URL } from "../config";
+import { API_BASE_URL } from "../../config";
 
 const API_BASE = `${API_BASE_URL}/api`;
 
@@ -14,22 +14,22 @@ export const getAllStations = () =>
   });
 
 export const getStation = (stationId) =>
-  axios.get(`${API_BASE}/getStation/${stationId}`, {
+  axios.get(`${API_BASE}/stations/${stationId}`, {
     headers: getAuthHeader(),
   });
 
 export const addStation = (station) =>
-  axios.post(`${API_BASE}/addStation`, station, {
+  axios.post(`${API_BASE}/stations/create`, station, {
     headers: getAuthHeader(),
   });
 
-export const updateStation = (station) =>
-  axios.put(`${API_BASE}/updateStation`, station, {
+export const updateStation = (stationId, station) =>
+  axios.put(`${API_BASE}/stations/${stationId}`, station, {
     headers: getAuthHeader(),
   });
 
 export const deleteStation = (stationId) =>
-  axios.delete(`${API_BASE}/deleteStation/${stationId}`, {
+  axios.delete(`${API_BASE}/stations/${stationId}`, {
     headers: getAuthHeader(),
   });
 

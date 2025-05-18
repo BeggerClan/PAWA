@@ -46,7 +46,15 @@ public class MetroLineController {
 
     @GetMapping("/{id}")
     public ResponseEntity<MetroLine> getLineById(@PathVariable String id) {
-        return ResponseEntity.ok(metroLineService.findLineByIdWithStations(id));
+        MetroLine line = metroLineService.findLineByIdWithStations(id);
+        if (line.getStations() != null) {
+            line.getStations().sort((a, b) -> {
+                int numA = Integer.parseInt(a.getStationId().replaceFirst("^ST", ""));
+                int numB = Integer.parseInt(b.getStationId().replaceFirst("^ST", ""));
+                return Integer.compare(numA, numB);
+            });
+        }
+        return ResponseEntity.ok(line);
     }
 
     @PostMapping("/create")
@@ -71,7 +79,13 @@ public class MetroLineController {
     @GetMapping("/{lineId}/stations")
     public ResponseEntity<List<Station>> getStationsForLine(
             @PathVariable String lineId) {
-        return ResponseEntity.ok(metroLineService.getStationsForLine(lineId));
+        List<Station> stations = metroLineService.getStationsForLine(lineId);
+        stations.sort((a, b) -> {
+            int numA = Integer.parseInt(a.getStationId().replaceFirst("^ST", ""));
+            int numB = Integer.parseInt(b.getStationId().replaceFirst("^ST", ""));
+            return Integer.compare(numA, numB);
+        });
+        return ResponseEntity.ok(stations);
     }
 
     // Get specific station from line (by position/index)
@@ -121,9 +135,19 @@ public class MetroLineController {
     }
 
     @PostMapping("/generate-trips")
-    public ResponseEntity<List<Trip>> generateTripsForAllLines() {
-        List<Trip> trips = metroLineService.generateTripsForAllLines();
-        return ResponseEntity.ok(trips);
+    public ResponseEntity<?> generateTripsForAllLinesIndividually() {
+        List<MetroLine> lines = metroLineService.findAllWithStations();
+        List<String> generated = new java.util.ArrayList<>();
+        for (MetroLine line : lines) {
+            if (line.getStationIds() != null && line.getStationIds().size() > 1) {
+                metroLineService.generateTripsForLine(line, java.time.LocalTime.of(22, 0));
+                generated.add(line.getLineId());
+            }
+        }
+        return ResponseEntity.ok(java.util.Map.of(
+            "linesProcessed", generated.size(),
+            "lines", generated
+        ));
     }
 
     @GetMapping("/{id}/trips")
@@ -168,6 +192,17 @@ public class MetroLineController {
         }
         MetroLine saved = metroLineService.updateMetroLine(id, updatedLine);
         return ResponseEntity.ok(saved);
+    }
+
+    @GetMapping("/search-trips")
+    public ResponseEntity<List<Trip>> searchTrips(
+            @RequestParam String fromStationId,
+            @RequestParam String toStationId,
+            @RequestParam(required = false) String approximateTime
+    ) {
+        return ResponseEntity.ok(
+            metroLineService.searchTrips(fromStationId, toStationId, approximateTime)
+        );
     }
 
     // Utility method for role check (take token the same way as UserController)

@@ -128,6 +128,10 @@ const MetroLineMapView = ({ selectedLineId, refresh, focusPosition }) => {
               Line: <span style={{ color }}>{station.lines[0].lineName}</span>
               <br />
               Marker: <span style={{ color }}>{station.mapMarker}</span>
+              <br />
+              Latitude: {station.latitude}
+              <br />
+              Longitude: {station.longitude}
             </>
           )}
         </>
@@ -141,6 +145,12 @@ const MetroLineMapView = ({ selectedLineId, refresh, focusPosition }) => {
     ? [firstStation.latitude, firstStation.longitude]
     : [10.7769, 106.7009];
 
+  // Define max bounds (example: Ho Chi Minh City area)
+  const maxBounds = [
+    [10.5, 106.3], // Southwest corner
+    [11.2, 107.1]  // Northeast corner
+  ];
+
   return (
     <MapContainer
       key={selectedLineId || "all"}
@@ -149,6 +159,8 @@ const MetroLineMapView = ({ selectedLineId, refresh, focusPosition }) => {
       minZoom={12}
       maxZoom={17}
       style={{ height: "70vh", width: "100%" }}
+      maxBounds={maxBounds}
+      maxBoundsViscosity={1.0}
     >
       <MapFocusHandler focusPosition={focusPosition} />
       <TileLayer

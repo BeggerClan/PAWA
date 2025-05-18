@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { loginApi } from "../scenes/login/loginapi";
 import { useNavigate, Link } from "react-router-dom";
-import { login } from "../services/authService";
 import AuthLayout from "./AuthLayout";
 
 const LoginPage = () => {

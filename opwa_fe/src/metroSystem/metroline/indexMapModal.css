@@ -1,0 +1,80 @@
+/* MapModal.css */
+
+.map-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0,0,0,0.35);
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.map-modal-close-row {
+  width: 100vw;
+  display: flex;
+  justify-content: flex-end;
+  position: absolute;
+  top: 24px;
+  right: 0;
+  z-index: 10000;
+}
+
+.map-modal-close-btn {
+  background: #fff;
+  border: 1.5px solid #2d98da;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 1px 4px #e1e1e1;
+  z-index: 10;
+  margin-right: 32px;
+  padding: 0;
+}
+
+.map-modal-box {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 4px 32px #2222;
+  padding: 24px;
+  max-width: 90vw;
+  max-height: 90vh;
+  min-width: 600px;
+  min-height: 400px;
+  position: relative;
+  margin-top: 60px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.mini-map-container {
+  position: sticky;
+  top: 32px;
+  z-index: 100;
+  background: #f5f6fa;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px #e1e1e1;
+  padding: 8px;
+}
+
+.mini-map-enlarge-btn {
+  background: #fff;
+  border: 1.5px solid #2d98da;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 1px 4px #e1e1e1;
+} 

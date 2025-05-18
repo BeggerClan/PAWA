@@ -16,9 +16,8 @@ import Line from "../scenes/line";
 import Geography from "../scenes/geography";
 import ViewStaff from "../scenes/team/viewStaff";
 
-import Station from "../station"; // <-- add this import
-
-import Metroline from "../metroline";
+import Station from "../metroSystem/station"; // <-- add this import
+import Metroline from "../metroSystem/metroline";
 import ProtectedRoute from "./ProtectedRoute";
 
 

@@ -1,5 +1,5 @@
 import axios from "axios";
-import { API_BASE_URL } from "../config";
+import { API_BASE_URL } from "../../config";
 
 // Helper to get token
 const getAuthHeader = () => {
@@ -99,5 +99,17 @@ export const getTripsForStationInLine = (lineId, stationId) =>
 // Delete all trips
 export const deleteAllTrips = () =>
   axios.delete(`${API_BASE_URL}/api/metro-lines/trips`, {
+    headers: getAuthHeader(),
+  });
+
+// Get all trips for all lines
+export const getAllTrips = () =>
+  axios.get(`${API_BASE_URL}/api/metro-lines/trips`, {
+    headers: getAuthHeader(),
+  });
+
+// Get all stations
+export const getAllStations = () =>
+  axios.get(`${API_BASE_URL}/api/stations/get-all-stations`, {
     headers: getAuthHeader(),
   });

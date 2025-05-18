@@ -12,6 +12,7 @@ import PauseCircleIcon from "@mui/icons-material/PauseCircle";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 
 const MetroLineStations = ({ lineId, onBack, onStationChanged, onStationSelect }) => {
+  if (!lineId) return null;
   const [stations, setStations] = useState([]);
   const [suspensions, setSuspensions] = useState([]);
   const [addOpen, setAddOpen] = useState(false);
@@ -21,6 +22,7 @@ const MetroLineStations = ({ lineId, onBack, onStationChanged, onStationSelect }
   const [stationToDelete, setStationToDelete] = useState(null);
 
   useEffect(() => {
+    if (!lineId) return;
     fetchStations();
     fetchSuspensions();
     // eslint-disable-next-line
@@ -50,9 +52,13 @@ const MetroLineStations = ({ lineId, onBack, onStationChanged, onStationSelect }
 
   const handleDeleteConfirm = async () => {
     if (stationToDelete) {
-      await deleteStationFromLine(lineId, stationToDelete.stationId);
+      const res = await deleteStationFromLine(lineId, stationToDelete.stationId);
+      console.log('Delete response:', res);
       fetchStations();
-      if (onStationChanged) onStationChanged();
+      if (onStationChanged) {
+        console.log('Calling onStationChanged after delete');
+        onStationChanged();
+      }
       setDeleteDialogOpen(false);
       setStationToDelete(null);
     }

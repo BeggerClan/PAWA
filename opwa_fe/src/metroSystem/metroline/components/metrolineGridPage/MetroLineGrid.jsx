@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { getAllMetroLines, createMetroLine, updateMetroLine, deleteMetroLine, getStationsForLine } from '../../../services/metroLineApi';
 import { getSuspensionsForLine } from '../../../services/suspensionApi';
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button, IconButton, Chip } from '@mui/material';
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button, IconButton, Chip, Tabs, Tab, Box } from '@mui/material';
 import { Edit, Delete, Add } from '@mui/icons-material';
 import MetroLineForm from './MetroLineForm';
 import DeleteDialog from './DeleteDialog';
 import NotificationSnackbar from '../NotificationSnackbar';
+import MetroLineStations from '../metrolineStationGridPage/MetroLineStations';
+import MetroLineTripsGrid from './MetroLineTripsGrid';
 
 const MetroLineGrid = ({ onShowStations }) => {
   const [metroLines, setMetroLines] = useState([]);
@@ -17,8 +19,15 @@ const MetroLineGrid = ({ onShowStations }) => {
   const [formData, setFormData] = useState({ lineName: '', totalDuration: 0, firstDeparture: '', frequencyMinutes: '10', isSuspended: false, suspensionReason: '', affectedStationIds: [] });
   const [affectedStations, setAffectedStations] = useState([]);
   const [lineStations, setLineStations] = useState([]);
+  const [refresh, setRefresh] = useState(0);
+  const [selectedLineId, setSelectedLineId] = useState(null);
+  const [selectedLineName, setSelectedLineName] = useState('');
+  const [selectedView, setSelectedView] = useState('stations');
 
-  useEffect(() => { fetchMetroLines(); }, []);
+  useEffect(() => { 
+    setMetroLines([]); // Clear grid before fetching new data
+    fetchMetroLines(); 
+  }, [refresh]);
   useEffect(() => { fetchAllSuspensions(); }, [metroLines]);
 
   const fetchMetroLines = async () => {
@@ -138,6 +147,23 @@ const MetroLineGrid = ({ onShowStations }) => {
     return affectedStationsSet.size < 3;
   };
 
+  const handleStationsChanged = () => {
+    setRefresh(r => r + 1);
+  };
+
+  const handleShowStationsOrTrips = (lineId) => {
+    setSelectedLineId(lineId);
+    const line = metroLines.find(l => l.lineId === lineId);
+    setSelectedLineName(line ? line.lineName : '');
+    setSelectedView('stations');
+  };
+
+  const handleBackToGrid = () => {
+    setSelectedLineId(null);
+    setSelectedLineName('');
+    setSelectedView('stations');
+  };
+
   return (
     <div>
       <Button
@@ -156,6 +182,8 @@ const MetroLineGrid = ({ onShowStations }) => {
             <TableRow>
               <TableCell sx={{ border: 1, borderColor: 'divider' }}>Line ID</TableCell>
               <TableCell sx={{ border: 1, borderColor: 'divider' }}>Name</TableCell>
+              <TableCell sx={{ border: 1, borderColor: 'divider' }}>First Station</TableCell>
+              <TableCell sx={{ border: 1, borderColor: 'divider' }}>Last Station</TableCell>
               <TableCell sx={{ border: 1, borderColor: 'divider' }}>Duration (min)</TableCell>
               <TableCell sx={{ border: 1, borderColor: 'divider' }}>Frequency</TableCell>
               <TableCell sx={{ border: 1, borderColor: 'divider' }}>First Departure</TableCell>
@@ -166,47 +194,60 @@ const MetroLineGrid = ({ onShowStations }) => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {metroLines.map((line) => (
-              <TableRow key={line.lineId} hover>
-                <TableCell sx={{ border: 1, borderColor: 'divider' }}>{line.lineId}</TableCell>
-                <TableCell
-                  sx={{ border: 1, borderColor: 'divider', cursor: 'pointer', color: '#1976d2', fontWeight: 500 }}
-                  onClick={() => onShowStations(line.lineId)}
-                >
-                  {line.lineName}
-                </TableCell>
-                <TableCell sx={{ border: 1, borderColor: 'divider' }}>{line.totalDuration} minutes (One-way-trip)</TableCell>
-                <TableCell sx={{ border: 1, borderColor: 'divider' }}>{line.frequencyMinutes} minutes</TableCell>
-                <TableCell sx={{ border: 1, borderColor: 'divider' }}>
-                  {line.firstDeparture ? new Date(line.firstDeparture).toLocaleString() : 'N/A'}
-                </TableCell>
-                <TableCell sx={{ border: 1, borderColor: 'divider' }}>
-                  <Chip
-                    label={isLineActive(line) ? "Active" : "Inactive"}
-                    color={isLineActive(line) ? "success" : "error"}
-                    size="small"
-                  />
-                </TableCell>
-                <TableCell sx={{ border: 1, borderColor: 'divider' }}>
-                  <Chip
-                    label={line.suspended ? "Yes" : "No"}
-                    color={line.suspended ? "warning" : "default"}
-                    size="small"
-                  />
-                </TableCell>
-                <TableCell sx={{ border: 1, borderColor: 'divider' }}>
-                  {line.stations ? line.stations.length : 0}
-                </TableCell>
-                <TableCell sx={{ border: 1, borderColor: 'divider' }}>
-                  <IconButton onClick={() => handleOpenEditDialog(line)}>
-                    <Edit color="primary" />
-                  </IconButton>
-                  <IconButton onClick={() => handleOpenDeleteDialog(line)}>
-                    <Delete color="error" />
-                  </IconButton>
-                </TableCell>
-              </TableRow>
-            ))}
+            {metroLines.map((line) => {
+              const stations = line.stations || [];
+              // Sort stations by stationId numerically (lowest to largest)
+              const sortedStations = [...stations].sort((a, b) => {
+                const numA = parseInt(a.stationId.replace(/^ST/, ''), 10);
+                const numB = parseInt(b.stationId.replace(/^ST/, ''), 10);
+                return numA - numB;
+              });
+              const firstStation = sortedStations[0]?.stationName || '-';
+              const lastStation = sortedStations.length > 0 ? sortedStations[sortedStations.length - 1]?.stationName : '-';
+              return (
+                <TableRow key={line.lineId} hover>
+                  <TableCell sx={{ border: 1, borderColor: 'divider' }}>{line.lineId}</TableCell>
+                  <TableCell
+                    sx={{ border: 1, borderColor: 'divider', cursor: 'pointer', color: '#1976d2', fontWeight: 500 }}
+                    onClick={() => handleShowStationsOrTrips(line.lineId)}
+                  >
+                    {line.lineName}
+                  </TableCell>
+                  <TableCell sx={{ border: 1, borderColor: 'divider' }}>{firstStation}</TableCell>
+                  <TableCell sx={{ border: 1, borderColor: 'divider' }}>{lastStation}</TableCell>
+                  <TableCell sx={{ border: 1, borderColor: 'divider' }}>{line.totalDuration} minutes (One-way-trip)</TableCell>
+                  <TableCell sx={{ border: 1, borderColor: 'divider' }}>{line.frequencyMinutes} minutes</TableCell>
+                  <TableCell sx={{ border: 1, borderColor: 'divider' }}>
+                    {line.firstDeparture ? new Date(line.firstDeparture).toLocaleString() : 'N/A'}
+                  </TableCell>
+                  <TableCell sx={{ border: 1, borderColor: 'divider' }}>
+                    <Chip
+                      label={isLineActive(line) ? "Active" : "Inactive"}
+                      color={isLineActive(line) ? "success" : "error"}
+                      size="small"
+                    />
+                  </TableCell>
+                  <TableCell sx={{ border: 1, borderColor: 'divider' }}>
+                    <Chip
+                      label={line.suspended ? "Yes" : "No"}
+                      color={line.suspended ? "warning" : "default"}
+                      size="small"
+                    />
+                  </TableCell>
+                  <TableCell sx={{ border: 1, borderColor: 'divider' }}>
+                    {line.stations ? line.stations.length : 0}
+                  </TableCell>
+                  <TableCell sx={{ border: 1, borderColor: 'divider' }}>
+                    <IconButton onClick={() => handleOpenEditDialog(line)}>
+                      <Edit color="primary" />
+                    </IconButton>
+                    <IconButton onClick={() => handleOpenDeleteDialog(line)}>
+                      <Delete color="error" />
+                    </IconButton>
+                  </TableCell>
+                </TableRow>
+              );
+            })}
           </TableBody>
         </Table>
       </TableContainer>
@@ -236,6 +277,36 @@ const MetroLineGrid = ({ onShowStations }) => {
         severity={snackbar.severity}
         message={snackbar.message}
       />
+
+      {selectedLineId && (
+        <Box sx={{ mt: 4, mb: 4, p: 2, border: '2px solid #1976d2', borderRadius: 2, background: '#f8fafd' }}>
+          <Button variant="outlined" onClick={handleBackToGrid} sx={{ mb: 2 }}>
+            Back to Metro Lines
+          </Button>
+          <h2 style={{ color: '#1976d2', marginBottom: 16 }}>Metro Line: {selectedLineName} ({selectedLineId})</h2>
+          <Tabs
+            value={selectedView}
+            onChange={(_, v) => setSelectedView(v)}
+            indicatorColor="primary"
+            textColor="primary"
+            sx={{ mb: 2 }}
+          >
+            <Tab label="Stations" value="stations" />
+            <Tab label="Trips" value="trips" />
+          </Tabs>
+          {selectedView === 'stations' && (
+            <MetroLineStations
+              lineId={selectedLineId}
+              onBack={handleBackToGrid}
+              onStationChanged={handleStationsChanged}
+              onStationSelect={() => {}}
+            />
+          )}
+          {selectedView === 'trips' && (
+            <MetroLineTripsGrid lineId={selectedLineId} />
+          )}
+        </Box>
+      )}
     </div>
   );
 };
