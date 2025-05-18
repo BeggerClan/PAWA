@@ -18,8 +18,8 @@ import PieChartOutlineOutlinedIcon from "@mui/icons-material/PieChartOutlineOutl
 import TimelineOutlinedIcon from "@mui/icons-material/TimelineOutlined";
 import MenuOutlinedIcon from "@mui/icons-material/MenuOutlined";
 import MapOutlinedIcon from "@mui/icons-material/MapOutlined";
-import DirectionsTransitOutlinedIcon from '@mui/icons-material/DirectionsTransitOutlined';
-import BarChartOutlinedIcon from '@mui/icons-material/BarChartOutlined';
+import DirectionsTransitOutlinedIcon from "@mui/icons-material/DirectionsTransitOutlined";
+import BarChartOutlinedIcon from "@mui/icons-material/BarChartOutlined";
 import LocationOnOutlinedIcon from "@mui/icons-material/LocationOnOutlined"; // Add this import at the top
 const Item = ({ title, to, icon, selected, setSelected }) => {
   const theme = useTheme();
@@ -113,13 +113,13 @@ const Sidebar = ({ isCollapsed, onToggleCollapse, selected, setSelected }) => {
                 selected={selected}
                 setSelected={setSelected}
               />
-             
+
               <Typography
                 variant="h6"
                 color={colors.grey[300]}
                 sx={{ m: "15px 0 5px 20px" }}
               >
-               Ticket
+                Ticket
               </Typography>
               <Item
                 title="Ticket Purchase"
@@ -128,19 +128,25 @@ const Sidebar = ({ isCollapsed, onToggleCollapse, selected, setSelected }) => {
                 selected={selected}
                 setSelected={setSelected}
               />
-        
+              <Item
+                title="Booking Records"
+                to="/dashboard/booking-records"
+                icon={<ReceiptOutlinedIcon />} // hoặc icon khác bạn thích
+                selected={selected}
+                setSelected={setSelected}
+              />
 
               <Typography
                 variant="h6"
                 color={colors.grey[300]}
                 sx={{ m: "15px 0 5px 20px" }}
               >
-                HCMC Metro System 
+                HCMC Metro System
               </Typography>
               <Item
                 title="Metro Line"
                 to="/dashboard/metroline"
-                icon={<DirectionsTransitOutlinedIcon/>}
+                icon={<DirectionsTransitOutlinedIcon />}
                 selected={selected}
                 setSelected={setSelected}
               />
@@ -151,7 +157,7 @@ const Sidebar = ({ isCollapsed, onToggleCollapse, selected, setSelected }) => {
                 selected={selected}
                 setSelected={setSelected}
               />
-               <Typography
+              <Typography
                 variant="h6"
                 color={colors.grey[300]}
                 sx={{ m: "15px 0 5px 20px" }}
@@ -168,7 +174,7 @@ const Sidebar = ({ isCollapsed, onToggleCollapse, selected, setSelected }) => {
               <Item
                 title="Pie Chart"
                 to="/dashboard/pie"
-                 icon={<PieChartOutlineOutlinedIcon />}
+                icon={<PieChartOutlineOutlinedIcon />}
                 selected={selected}
                 setSelected={setSelected}
               />

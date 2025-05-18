@@ -1,283 +1,119 @@
-import { Box, Button, IconButton, Typography, useTheme } from "@mui/material";
-import { tokens } from "../../theme";
-import { mockTransactions } from "../../data/mockData";
-import DownloadOutlinedIcon from "@mui/icons-material/DownloadOutlined";
-import EmailIcon from "@mui/icons-material/Email";
-import PointOfSaleIcon from "@mui/icons-material/PointOfSale";
-import PersonAddIcon from "@mui/icons-material/PersonAdd";
-import TrafficIcon from "@mui/icons-material/Traffic";
-import Header from "../../components/Header";
-import LineChart from "../../components/LineChart";
-import GeographyChart from "../../components/GeographyChart";
+import React, { useEffect, useState } from "react";
 import BarChart from "../../components/BarChart";
-import StatBox from "../../components/StatBox";
-import ProgressCircle from "../../components/ProgressCircle";
+import PieChart from "../../components/PieChart";
+import { fetchBookingRecords } from "../../components/BarAPI";
+
+const TICKET_TYPE_MAP = {
+  DAILY: "Daily ticket",
+  FREE: "Free ticket",
+  MONTHLY_ADULT: "Monthly ticket (adult)",
+  MONTHLY_STUDENT: "Monthly ticket (student)",
+  ONE_WAY_4: "One-way (≤4 stations)",
+  ONE_WAY_8: "One-way (≤8 stations)",
+  ONE_WAY_UNL: "One-way (unlimited)",
+  THREE_DAY: "Three-day ticket",
+};
 
 const Dashboard = () => {
-  const theme = useTheme();
-  const colors = tokens(theme.palette.mode);
+  const [barData, setBarData] = useState([]);
+  const [pieData, setPieData] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchBookingRecords()
+      .then((data) => {
+        // Bar chart: thống kê loại vé
+        const countByType = {};
+        Object.keys(TICKET_TYPE_MAP).forEach((key) => {
+          countByType[TICKET_TYPE_MAP[key]] = 0;
+        });
+        data.forEach((item) => {
+          const rawType = item.ticketTypeCode;
+          if (TICKET_TYPE_MAP[rawType]) {
+            const displayName = TICKET_TYPE_MAP[rawType];
+            countByType[displayName] = (countByType[displayName] || 0) + 1;
+          }
+        });
+        const barChartData = Object.entries(countByType).map(
+          ([type, count]) => ({
+            ticketType: type,
+            count,
+          })
+        );
+        setBarData(barChartData);
+
+        // Pie chart: thống kê trạng thái vé
+        const countByStatus = {};
+        data.forEach((item) => {
+          const status = item.status || "UNKNOWN";
+          countByStatus[status] = (countByStatus[status] || 0) + 1;
+        });
+        const pieChartData = Object.entries(countByStatus).map(
+          ([status, value]) => ({
+            id: status,
+            label: status,
+            value,
+          })
+        );
+        setPieData(pieChartData);
+      })
+      .catch((err) => alert(err.message))
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (loading)
+    return (
+      <div style={{ textAlign: "center", marginTop: "2rem" }}>Loading...</div>
+    );
 
   return (
-    <Box m="20px">
-      {/* HEADER */}
-      <Box display="flex" justifyContent="space-between" alignItems="center">
-        <Header title="DASHBOARD" subtitle="Welcome to your dashboard" />
-
-        <Box>
-          <Button
-            sx={{
-              backgroundColor: colors.blueAccent[700],
-              color: colors.grey[100],
-              fontSize: "14px",
-              fontWeight: "bold",
-              padding: "10px 20px",
-            }}
-          >
-            <DownloadOutlinedIcon sx={{ mr: "10px" }} />
-            Download Reports
-          </Button>
-        </Box>
-      </Box>
-
-      {/* GRID & CHARTS */}
-      <Box
-        display="grid"
-        gridTemplateColumns="repeat(12, 1fr)"
-        gridAutoRows="140px"
-        gap="20px"
-      >
-        {/* ROW 1 */}
-        <Box
-          gridColumn="span 3"
-          backgroundColor={colors.primary[400]}
-          display="flex"
-          alignItems="center"
-          justifyContent="center"
+    <div style={{ padding: "2rem" }}>
+      <h2 style={{ fontSize: "1.5rem", marginBottom: "2rem" }}>Dashboard</h2>
+      <div style={{ display: "flex", gap: "2rem", flexWrap: "wrap" }}>
+        <div
+          style={{
+            flex: "1 1 400px",
+            minWidth: "350px",
+            background: "#fff",
+            borderRadius: 12,
+            boxShadow: "0 2px 8px #0001",
+            padding: 24,
+          }}
         >
-          <StatBox
-            title="12,361"
-            subtitle="Emails Sent"
-            progress="0.75"
-            increase="+14%"
-            icon={
-              <EmailIcon
-                sx={{ color: colors.greenAccent[600], fontSize: "26px" }}
-              />
-            }
+          <h3 style={{ fontSize: "1.1rem", marginBottom: "1rem" }}>
+            Ticket Type Statistics
+          </h3>
+          <BarChart
+            data={barData}
+            keys={["count"]}
+            indexBy="ticketType"
+            axisBottomLegend="Ticket Type"
+            axisLeftLegend="Quantity"
           />
-        </Box>
-        <Box
-          gridColumn="span 3"
-          backgroundColor={colors.primary[400]}
-          display="flex"
-          alignItems="center"
-          justifyContent="center"
+        </div>
+        <div
+          style={{
+            flex: "1 1 400px",
+            minWidth: "350px",
+            background: "#fff",
+            borderRadius: 12,
+            boxShadow: "0 2px 8px #0001",
+            padding: 24,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
         >
-          <StatBox
-            title="431,225"
-            subtitle="Sales Obtained"
-            progress="0.50"
-            increase="+21%"
-            icon={
-              <PointOfSaleIcon
-                sx={{ color: colors.greenAccent[600], fontSize: "26px" }}
-              />
-            }
-          />
-        </Box>
-        <Box
-          gridColumn="span 3"
-          backgroundColor={colors.primary[400]}
-          display="flex"
-          alignItems="center"
-          justifyContent="center"
-        >
-          <StatBox
-            title="32,441"
-            subtitle="New Clients"
-            progress="0.30"
-            increase="+5%"
-            icon={
-              <PersonAddIcon
-                sx={{ color: colors.greenAccent[600], fontSize: "26px" }}
-              />
-            }
-          />
-        </Box>
-        <Box
-          gridColumn="span 3"
-          backgroundColor={colors.primary[400]}
-          display="flex"
-          alignItems="center"
-          justifyContent="center"
-        >
-          <StatBox
-            title="1,325,134"
-            subtitle="Traffic Received"
-            progress="0.80"
-            increase="+43%"
-            icon={
-              <TrafficIcon
-                sx={{ color: colors.greenAccent[600], fontSize: "26px" }}
-              />
-            }
-          />
-        </Box>
-
-        {/* ROW 2 */}
-        <Box
-          gridColumn="span 8"
-          gridRow="span 2"
-          backgroundColor={colors.primary[400]}
-        >
-          <Box
-            mt="25px"
-            p="0 30px"
-            display="flex "
-            justifyContent="space-between"
-            alignItems="center"
-          >
-            <Box>
-              <Typography
-                variant="h5"
-                fontWeight="600"
-                color={colors.grey[100]}
-              >
-                Revenue Generated
-              </Typography>
-              <Typography
-                variant="h3"
-                fontWeight="bold"
-                color={colors.greenAccent[500]}
-              >
-                $59,342.32
-              </Typography>
-            </Box>
-            <Box>
-              <IconButton>
-                <DownloadOutlinedIcon
-                  sx={{ fontSize: "26px", color: colors.greenAccent[500] }}
-                />
-              </IconButton>
-            </Box>
-          </Box>
-          <Box height="250px" m="-20px 0 0 0">
-            <LineChart isDashboard={true} />
-          </Box>
-        </Box>
-        <Box
-          gridColumn="span 4"
-          gridRow="span 2"
-          backgroundColor={colors.primary[400]}
-          overflow="auto"
-        >
-          <Box
-            display="flex"
-            justifyContent="space-between"
-            alignItems="center"
-            borderBottom={`4px solid ${colors.primary[500]}`}
-            colors={colors.grey[100]}
-            p="15px"
-          >
-            <Typography color={colors.grey[100]} variant="h5" fontWeight="600">
-              Recent Transactions
-            </Typography>
-          </Box>
-          {mockTransactions.map((transaction, i) => (
-            <Box
-              key={`${transaction.txId}-${i}`}
-              display="flex"
-              justifyContent="space-between"
-              alignItems="center"
-              borderBottom={`4px solid ${colors.primary[500]}`}
-              p="15px"
-            >
-              <Box>
-                <Typography
-                  color={colors.greenAccent[500]}
-                  variant="h5"
-                  fontWeight="600"
-                >
-                  {transaction.txId}
-                </Typography>
-                <Typography color={colors.grey[100]}>
-                  {transaction.user}
-                </Typography>
-              </Box>
-              <Box color={colors.grey[100]}>{transaction.date}</Box>
-              <Box
-                backgroundColor={colors.greenAccent[500]}
-                p="5px 10px"
-                borderRadius="4px"
-              >
-                ${transaction.cost}
-              </Box>
-            </Box>
-          ))}
-        </Box>
-
-        {/* ROW 3 */}
-        <Box
-          gridColumn="span 4"
-          gridRow="span 2"
-          backgroundColor={colors.primary[400]}
-          p="30px"
-        >
-          <Typography variant="h5" fontWeight="600">
-            Campaign
-          </Typography>
-          <Box
-            display="flex"
-            flexDirection="column"
-            alignItems="center"
-            mt="25px"
-          >
-            <ProgressCircle size="125" />
-            <Typography
-              variant="h5"
-              color={colors.greenAccent[500]}
-              sx={{ mt: "15px" }}
-            >
-              $48,352 revenue generated
-            </Typography>
-            <Typography>Includes extra misc expenditures and costs</Typography>
-          </Box>
-        </Box>
-        <Box
-          gridColumn="span 4"
-          gridRow="span 2"
-          backgroundColor={colors.primary[400]}
-        >
-          <Typography
-            variant="h5"
-            fontWeight="600"
-            sx={{ padding: "30px 30px 0 30px" }}
-          >
-            Sales Quantity
-          </Typography>
-          <Box height="250px" mt="-20px">
-            <BarChart isDashboard={true} />
-          </Box>
-        </Box>
-        <Box
-          gridColumn="span 4"
-          gridRow="span 2"
-          backgroundColor={colors.primary[400]}
-          padding="30px"
-        >
-          <Typography
-            variant="h5"
-            fontWeight="600"
-            sx={{ marginBottom: "15px" }}
-          >
-            Geography Based Traffic
-          </Typography>
-          <Box height="200px">
-            <GeographyChart isDashboard={true} />
-          </Box>
-        </Box>
-      </Box>
-    </Box>
+          <h3 style={{ fontSize: "1.1rem", marginBottom: "1rem" }}>
+            Ticket Status Distribution
+          </h3>
+          <div style={{ width: "100%", height: "400px" }}>
+            <PieChart data={pieData} />
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };
 

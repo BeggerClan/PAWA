@@ -15,6 +15,8 @@ import Pie from "../scenes/pie";
 import Line from "../scenes/line";
 import Geography from "../scenes/geography";
 import ViewStaff from "../scenes/team/viewStaff";
+import BookingRecords from "../scenes/bar/BookingRecords"; // Thêm dòng này
+
 
 import Station from "../station"; // <-- add this import
 
@@ -78,7 +80,9 @@ export default function AppRoutes() {
               <Route path="geography" element={<Geography />} />
               <Route path="metroline" element={<Metroline />} />
               <Route path="station" element={<Station />} /> {/* <-- add this */}
-              <Route path="team/view/:id" element={<ViewStaff />} /> {/* <-- add this */}
+              <Route path="team/view/:id" element={<ViewStaff />} />
+              <Route path="booking-records" element={<BookingRecords />} />
+               {/* <-- add this */}
               {/* <Route path="contacts" element={<Contacts />} /> */}
             </Routes>
           </DashboardLayout>
