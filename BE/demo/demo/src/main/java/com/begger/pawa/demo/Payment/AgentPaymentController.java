@@ -102,6 +102,25 @@ public class AgentPaymentController {
             // 3e. Return success response
             return ResponseEntity.ok(new PaymentResponse(wallet.getBalance(), "Payment successful via eWallet"));
         }
+        else if ("CASH".equalsIgnoreCase(req.getPaymentMethod())) {
+            TicketType type = ticketTypeRepo.findByCode(ticket.getTicketTypeId())
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ticket type not found"));
+        
+            long price = type.getPrice();
+            Long cashReceived = req.getCashReceived();
+        
+            if (cashReceived == null || cashReceived < price) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                    new PaymentResponse(0, "Insufficient cash. Ticket price is " + price + " VND")
+                );
+            }
+        
+            long change = cashReceived - price;
+        
+            // Optional: Log cash transaction or save to ticket history
+            return ResponseEntity.ok(new PaymentResponse(change, "Payment successful. Change: " + change + " VND"));
+        }
+        
 
         // 4. Unsupported payment method
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
