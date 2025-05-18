@@ -1,10 +1,8 @@
 package com.begger.pawa.demo.Payment;
 
 public class PaymentRequest {
-
     private String ticketId;
-
-    public PaymentRequest() {}
+    private String paymentMethod;
 
     public String getTicketId() {
         return ticketId;
@@ -14,4 +12,11 @@ public class PaymentRequest {
         this.ticketId = ticketId;
     }
 
+    public String getPaymentMethod() {
+        return paymentMethod;
+    }
+
+    public void setPaymentMethod(String paymentMethod) {
+        this.paymentMethod = paymentMethod;
+    }
 }
