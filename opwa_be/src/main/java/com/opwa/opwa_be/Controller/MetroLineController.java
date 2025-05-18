@@ -153,6 +153,12 @@ public class MetroLineController {
         return ResponseEntity.ok(Map.of("message", "Metro line deleted successfully!"));
     }
 
+    @GetMapping("/trips")
+    public ResponseEntity<List<Trip>> getAllTrips() {
+        List<Trip> allTrips = metroLineService.getAllTrips();
+        return ResponseEntity.ok(allTrips);
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<?> updateMetroLine(
             @PathVariable String id,

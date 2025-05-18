@@ -11,7 +11,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import PauseCircleIcon from "@mui/icons-material/PauseCircle";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 
-const MetroLineStations = ({ lineId, onBack, onStationChanged }) => {
+const MetroLineStations = ({ lineId, onBack, onStationChanged, onStationSelect }) => {
   const [stations, setStations] = useState([]);
   const [suspensions, setSuspensions] = useState([]);
   const [addOpen, setAddOpen] = useState(false);
@@ -117,7 +117,12 @@ const MetroLineStations = ({ lineId, onBack, onStationChanged }) => {
                 return (
                   <TableRow key={station.stationId} hover>
                     <TableCell sx={{ border: 1, borderColor: 'divider' }}>{station.stationId}</TableCell>
-                    <TableCell sx={{ border: 1, borderColor: 'divider' }}>{station.stationName}</TableCell>
+                    <TableCell
+                      sx={{ border: 1, borderColor: 'divider', cursor: 'pointer', color: '#1976d2', fontWeight: 500 }}
+                      onClick={() => onStationSelect && onStationSelect(station)}
+                    >
+                      {station.stationName}
+                    </TableCell>
                     <TableCell sx={{ border: 1, borderColor: 'divider' }}>{station.latitude}</TableCell>
                     <TableCell sx={{ border: 1, borderColor: 'divider' }}>{station.longitude}</TableCell>
                     <TableCell sx={{ border: 1, borderColor: 'divider' }}>{suspension ? "Yes" : "No"}</TableCell>

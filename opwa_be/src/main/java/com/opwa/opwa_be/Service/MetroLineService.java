@@ -393,4 +393,8 @@ public class MetroLineService {
         int freq = parseFrequency(metroLine.getFrequencyMinutes());
         return numStations > 1 ? (numStations - 1) * freq : 0;
     }
+
+    public List<Trip> getAllTrips() {
+        return tripRepo.findAll();
+    }
 }

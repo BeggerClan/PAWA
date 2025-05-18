@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { MapContainer, TileLayer, Polyline, Marker, Popup } from "react-leaflet";
+import { MapContainer, TileLayer, Polyline, Marker, Popup, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { FaMapMarkerAlt } from "react-icons/fa";
@@ -40,7 +40,18 @@ const createReactIcon = (color) =>
     popupAnchor: [0, -44]
   });
 
-const MetroLineMapView = ({ selectedLineId, refresh }) => {
+// New: Focus handler for zooming to a station
+const MapFocusHandler = ({ focusPosition }) => {
+  const map = useMap();
+  React.useEffect(() => {
+    if (focusPosition) {
+      map.setView(focusPosition, 16, { animate: true });
+    }
+  }, [focusPosition, map]);
+  return null;
+};
+
+const MetroLineMapView = ({ selectedLineId, refresh, focusPosition }) => {
   const [lines, setLines] = useState([]);
 
   useEffect(() => {
@@ -139,6 +150,7 @@ const MetroLineMapView = ({ selectedLineId, refresh }) => {
       maxZoom={17}
       style={{ height: "70vh", width: "100%" }}
     >
+      <MapFocusHandler focusPosition={focusPosition} />
       <TileLayer
         attribution='&copy; <a href="https://carto.com/attributions">CARTO</a>'
         url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
