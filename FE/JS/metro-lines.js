@@ -608,6 +608,89 @@ function updateNavigation(isAuthenticated) {
 }
 
 // =====================================================
+// Add Real-Time Suspension Alert Processing
+// =====================================================
+
+// Add this function to handle real-time suspension alerts
+function setupSuspensionAlerts() {
+    // Simulate a WebSocket or polling mechanism to receive alerts
+    // In a real implementation, this might use WebSockets or Server-Sent Events
+    const checkForAlerts = async () => {
+        try {
+            const response = await fetch('http://localhost:8081/api/suspensions/active', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            
+            if (!response.ok) {
+                throw new Error(`Failed to fetch alerts: ${response.status}`);
+            }
+            
+            const alerts = await response.json();
+            
+            if (alerts && alerts.length > 0) {
+                displayAlerts(alerts);
+                // Send acknowledgment to OPWA
+                sendAcknowledgment(alerts);
+            }
+        } catch (error) {
+            console.error('Error checking for alerts:', error);
+        }
+    };
+    
+    // Check for alerts initially and then every 30 seconds
+    checkForAlerts();
+    setInterval(checkForAlerts, 30000);
+}
+
+function displayAlerts(alerts) {
+    const alertsContainer = document.querySelector('.system-alerts');
+    if (!alertsContainer) return;
+    
+    // Clear existing alerts
+    alertsContainer.innerHTML = '<h3><i class="fas fa-exclamation-triangle"></i> System Alerts</h3>';
+    
+    alerts.forEach(alert => {
+        const alertElement = document.createElement('div');
+        alertElement.className = 'alert-item';
+        
+        const formattedTime = new Date(alert.startTime).toLocaleString('en-US', {
+            month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit'
+        });
+        
+        alertElement.innerHTML = `
+            <div class="alert-time">${formattedTime}</div>
+            <h5 class="alert-title">${alert.reason} on ${alert.lineName}</h5>
+            <p>${alert.description || 'Affects stations: ' + alert.affectedStationIds.join(', ')}.</p>
+            <p>Expected resolution: ${new Date(alert.expectedEndTime).toLocaleString()}</p>
+        `;
+        
+        alertsContainer.appendChild(alertElement);
+    });
+}
+
+function sendAcknowledgment(alerts) {
+    // Send acknowledgment to OPWA for each alert
+    alerts.forEach(alert => {
+        fetch('http://localhost:8081/api/suspensions/acknowledge', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                suspensionId: alert.id,
+                receivedBy: 'PAWA',
+                receivedAt: new Date().toISOString()
+            })
+        }).catch(error => {
+            console.error('Error sending acknowledgment:', error);
+        });
+    });
+}
+
+// =====================================================
 // EVENT HANDLERS AND INITIALIZATION
 // =====================================================
 
@@ -637,6 +720,9 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Initialize search form
     initSearchForm();
+
+    // Set up suspension alerts
+    setupSuspensionAlerts();
     
     // Fetch metro lines from OPWA API
     fetchMetroLines();
