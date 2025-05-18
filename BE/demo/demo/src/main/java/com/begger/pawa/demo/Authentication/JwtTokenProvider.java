@@ -57,6 +57,7 @@ public class JwtTokenProvider {
         claims.put("verified", p.getVerified());
         claims.put("guest", p.getGuest());
         claims.put("pwdChangedAt", p.getPasswordChangedAt().toString());
+        claims.put("eligibleFreeTicket", p.getEligibleFreeTicket());
         claims.put("roles", List.of("PASSENGER"));
 
         // build 256 bit key from utf 8 secret
