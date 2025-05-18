@@ -38,6 +38,13 @@ public class MetroLineService {
         MetroLine line = metroLineRepo.findById(id)
             .orElseThrow(() -> new RuntimeException("Metro line not found with id: " + id));
         populateStations(line);
+        if (line.getStations() != null) {
+            line.getStations().sort((a, b) -> {
+                int numA = Integer.parseInt(a.getStationId().replaceFirst("^ST", ""));
+                int numB = Integer.parseInt(b.getStationId().replaceFirst("^ST", ""));
+                return Integer.compare(numA, numB);
+            });
+        }
         return line;
     }
 
@@ -75,7 +82,15 @@ public class MetroLineService {
     public List<Station> getStationsForLine(String lineId) {
         MetroLine line = metroLineRepo.findById(lineId).orElseThrow();
         populateStations(line);
-        return line.getStations();
+        List<Station> stations = line.getStations();
+        if (stations != null) {
+            stations.sort((a, b) -> {
+                int numA = Integer.parseInt(a.getStationId().replaceFirst("^ST", ""));
+                int numB = Integer.parseInt(b.getStationId().replaceFirst("^ST", ""));
+                return Integer.compare(numA, numB);
+            });
+        }
+        return stations;
     }
 
     public Station getStationFromLine(String lineId, String stationId) {

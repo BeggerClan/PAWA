@@ -3,7 +3,7 @@ import { API_BASE_URL } from "../config";
 
 // Helper to get token
 const getAuthHeader = () => {
-  const token = localStorage.getItem("token"); // or your token storage key
+  const token = localStorage.getItem("token");
   return token ? { Authorization: `Bearer ${token}` } : {};
 };
 
@@ -37,20 +37,67 @@ export const getStationsForLine = (lineId) =>
     headers: getAuthHeader(),
   });
 
-// Add a station to a metro line
-export const addStationToLine = (lineId, station) =>
-  axios.post(`${API_BASE_URL}/api/metro-lines/${lineId}/stations/add`, station, {
+// Add a station to a metro line (by stationId only)
+export const addStationToLine = (lineId, stationId) =>
+  axios.post(`${API_BASE_URL}/api/metro-lines/${lineId}/stations/${stationId}`, null, {
     headers: getAuthHeader(),
   });
 
-// Update a station in a metro line
-export const updateStationInLine = (lineId, stationId, station) =>
-  axios.put(`${API_BASE_URL}/api/metro-lines/${lineId}/stations/update/${stationId}`, station, {
-    headers: getAuthHeader(),
-  });
-
-// Delete a station from a metro line
+// Remove a station from a metro line
 export const deleteStationFromLine = (lineId, stationId) =>
-  axios.delete(`${API_BASE_URL}/api/metro-lines/${lineId}/stations/delete/${stationId}`, {
+  axios.delete(`${API_BASE_URL}/api/metro-lines/${lineId}/stations/${stationId}`, {
+    headers: getAuthHeader(),
+  });
+
+// Get a specific station from a line
+export const getStationFromLine = (lineId, stationId) =>
+  axios.get(`${API_BASE_URL}/api/metro-lines/${lineId}/stations/${stationId}`, {
+    headers: getAuthHeader(),
+  });
+
+// Get active/inactive lines
+export const getActiveMetroLines = () =>
+  axios.get(`${API_BASE_URL}/api/metro-lines/active`, {
+    headers: getAuthHeader(),
+  });
+
+export const getInactiveMetroLines = () =>
+  axios.get(`${API_BASE_URL}/api/metro-lines/inactive`, {
+    headers: getAuthHeader(),
+  });
+
+// Update line status (PATCH)
+export const updateMetroLineStatus = (id, isActive) =>
+  axios.patch(`${API_BASE_URL}/api/metro-lines/${id}/status?isActive=${isActive}`, null, {
+    headers: getAuthHeader(),
+  });
+
+// Generate trips for a line (optionally with lastDeparture)
+export const generateTripsForLine = (id, lastDeparture) =>
+  axios.post(`${API_BASE_URL}/api/metro-lines/${id}/generate-trips${lastDeparture ? `?lastDeparture=${lastDeparture}` : ''}`, null, {
+    headers: getAuthHeader(),
+  });
+
+// Generate trips for all lines
+export const generateTripsForAllLines = () =>
+  axios.post(`${API_BASE_URL}/api/metro-lines/generate-trips`, null, {
+    headers: getAuthHeader(),
+  });
+
+// Get trips for a line
+export const getTripsForLine = (id) =>
+  axios.get(`${API_BASE_URL}/api/metro-lines/${id}/trips`, {
+    headers: getAuthHeader(),
+  });
+
+// Get trips for a station in a line
+export const getTripsForStationInLine = (lineId, stationId) =>
+  axios.get(`${API_BASE_URL}/api/metro-lines/${lineId}/stations/${stationId}/trips`, {
+    headers: getAuthHeader(),
+  });
+
+// Delete all trips
+export const deleteAllTrips = () =>
+  axios.delete(`${API_BASE_URL}/api/metro-lines/trips`, {
     headers: getAuthHeader(),
   });

@@ -37,7 +37,7 @@ public class SecurityConfiguration {
                                 "/api/v1/auth/**",
                                 "/api/data-generator/**",
                                 "/api/metro-lines/**",
-                                "/api/suspensions",
+                                "/api/suspensions/**",
                                 "/api/stations/**"
                         ).permitAll()
                         .requestMatchers(
@@ -56,10 +56,10 @@ public class SecurityConfiguration {
                         ).hasAnyAuthority("ADMIN", "OPERATOR")
                         // Station CRUD within MetroLine
                         .requestMatchers(
-                                "/api/metro-lines/{lineId}/stations/add",
+                                "/api/metro-lines/{lineId}/stations/{stationId}",
                                 "/api/metro-lines/{lineId}/stations/update/**",
                                 "/api/metro-lines/{lineId}/stations/delete/**"
-                        ).hasAnyAuthority("ADMIN", "OPERATOR")
+                        ).permitAll()//.hasAnyAuthority("ADMIN", "OPERATOR")
                         // Suspension CRUD (ADMIN, OPERATOR)
                         .requestMatchers(
                                 "/api/suspensions/**"

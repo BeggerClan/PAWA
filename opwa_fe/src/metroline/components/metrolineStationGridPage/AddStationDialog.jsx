@@ -22,7 +22,7 @@ const AddStationDialog = ({ open, onClose, lineId, existingStations, onStationAd
 
   const handleAdd = async () => {
     if (selectedStationId) {
-      await addStationToLine(lineId, { stationId: selectedStationId });
+      await addStationToLine(lineId, selectedStationId);
       onStationAdded();
       onClose();
     }

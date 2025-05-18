@@ -9,7 +9,7 @@ const getAuthHeader = () => {
 };
 
 export const getAllStations = () =>
-  axios.get(`${API_BASE}/getAllStations`, {
+  axios.get(`${API_BASE}/stations/get-all-stations`, {
     headers: getAuthHeader(),
   });
 

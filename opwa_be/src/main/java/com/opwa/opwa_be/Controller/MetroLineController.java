@@ -164,11 +164,6 @@ public class MetroLineController {
         return ResponseEntity.ok(saved);
     }
 
-    @PutMapping("/{lineId}/stations/{stationId}")
-    public ResponseEntity<Station> updateStationInLine(@PathVariable String lineId, @PathVariable String stationId, @RequestBody Station station) {
-        return ResponseEntity.ok(stationService.updateStation(stationId, station));
-    }
-
     // Utility method for role check (take token the same way as UserController)
     private boolean hasAdminOrOperatorRole(HttpServletRequest request) {
         String authHeader = request.getHeader("Authorization");

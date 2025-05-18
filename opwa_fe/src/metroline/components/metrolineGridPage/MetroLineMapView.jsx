@@ -40,12 +40,12 @@ const createReactIcon = (color) =>
     popupAnchor: [0, -44]
   });
 
-const MetroLineMapView = ({ selectedLineId }) => {
+const MetroLineMapView = ({ selectedLineId, refresh }) => {
   const [lines, setLines] = useState([]);
 
   useEffect(() => {
     getAllMetroLines().then(res => setLines(res.data));
-  }, []);
+  }, [selectedLineId, refresh]);
 
   // Filter lines if a line is selected
   const displayedLines = selectedLineId
@@ -54,10 +54,19 @@ const MetroLineMapView = ({ selectedLineId }) => {
 
   // Prepare polylines: always use the color of the first station's mapMarker
   const polylines = displayedLines.map(line => {
-    const firstStation = line.stations?.[0];
+    // Order stations by lowest to largest stationId (numerically)
+    let orderedStations = [];
+    if (line.stations) {
+      orderedStations = [...line.stations].sort((a, b) => {
+        const numA = parseInt(a.stationId.replace(/^ST/, ''), 10);
+        const numB = parseInt(b.stationId.replace(/^ST/, ''), 10);
+        return numA - numB;
+      });
+    }
+    const firstStation = orderedStations[0];
     const color = firstStation ? getColor(firstStation.mapMarker) : markerColors.default;
     return {
-      positions: line.stations?.map(st => [st.latitude, st.longitude]) || [],
+      positions: orderedStations.map(st => [st.latitude, st.longitude]),
       color
     };
   });

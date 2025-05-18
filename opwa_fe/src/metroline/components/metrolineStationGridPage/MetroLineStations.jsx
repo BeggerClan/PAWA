@@ -1,25 +1,27 @@
 import React, { useEffect, useState } from "react";
 import { getStationsForLine, deleteStationFromLine } from "../../../services/metroLineApi";
+import { getSuspensionsForLine } from "../../../services/suspensionApi";
 import AddStationDialog from "./AddStationDialog";
-import EditStationDialog from "./EditStationDialog";
 import SuspendStationDialog from "./SuspendStationDialog";
 import {
   Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography,
-  Button, IconButton, Stack
+  Button, IconButton, Stack, Dialog, DialogTitle, DialogContent, DialogActions
 } from "@mui/material";
-import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import PauseCircleIcon from "@mui/icons-material/PauseCircle";
 
-const MetroLineStations = ({ lineId, onBack }) => {
+const MetroLineStations = ({ lineId, onBack, onStationChanged }) => {
   const [stations, setStations] = useState([]);
+  const [suspensions, setSuspensions] = useState([]);
   const [addOpen, setAddOpen] = useState(false);
-  const [editOpen, setEditOpen] = useState(false);
   const [suspendOpen, setSuspendOpen] = useState(false);
   const [selectedStation, setSelectedStation] = useState(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [stationToDelete, setStationToDelete] = useState(null);
 
   useEffect(() => {
     fetchStations();
+    fetchSuspensions();
     // eslint-disable-next-line
   }, [lineId]);
 
@@ -28,25 +30,51 @@ const MetroLineStations = ({ lineId, onBack }) => {
     setStations(res.data);
   };
 
-  const handleAdd = () => setAddOpen(true);
-
-  const handleEdit = (station) => {
-    setSelectedStation(station);
-    setEditOpen(true);
+  const fetchSuspensions = async () => {
+    const res = await getSuspensionsForLine(lineId);
+    setSuspensions(res.data || []);
   };
+
+  const handleAdd = () => setAddOpen(true);
 
   const handleSuspend = (station) => {
     setSelectedStation(station);
     setSuspendOpen(true);
   };
 
-  const handleDelete = async (stationId) => {
-    await deleteStationFromLine(lineId, stationId);
-    fetchStations();
+  const handleDeleteClick = (station) => {
+    setStationToDelete(station);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (stationToDelete) {
+      await deleteStationFromLine(lineId, stationToDelete.stationId);
+      fetchStations();
+      if (onStationChanged) onStationChanged();
+      setDeleteDialogOpen(false);
+      setStationToDelete(null);
+    }
+  };
+
+  const handleDeleteCancel = () => {
+    setDeleteDialogOpen(false);
+    setStationToDelete(null);
   };
 
   // Refresh grid after dialog actions
-  const handleRefresh = () => fetchStations();
+  const handleRefresh = () => {
+    fetchStations();
+    fetchSuspensions();
+    if (onStationChanged) onStationChanged();
+  };
+
+  // Helper: find active suspension for a station
+  const getActiveSuspensionForStation = (stationId) => {
+    return suspensions.find(
+      s => s.active && Array.isArray(s.affectedStationIds) && s.affectedStationIds.includes(stationId)
+    );
+  };
 
   return (
     <div style={{ padding: 32 }}>
@@ -67,55 +95,53 @@ const MetroLineStations = ({ lineId, onBack }) => {
               <TableCell sx={{ border: 1, borderColor: 'divider' }}>Station Name</TableCell>
               <TableCell sx={{ border: 1, borderColor: 'divider' }}>Latitude</TableCell>
               <TableCell sx={{ border: 1, borderColor: 'divider' }}>Longitude</TableCell>
+              <TableCell sx={{ border: 1, borderColor: 'divider' }}>Suspended</TableCell>
+              <TableCell sx={{ border: 1, borderColor: 'divider' }}>Suspension Reason</TableCell>
               <TableCell sx={{ border: 1, borderColor: 'divider' }} align="center">Actions</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {stations.length > 0 ? (
-              stations.map(station => (
-                <TableRow key={station.stationId} hover>
-                  <TableCell sx={{ border: 1, borderColor: 'divider' }}>{station.stationId}</TableCell>
-                  <TableCell sx={{ border: 1, borderColor: 'divider' }}>{station.stationName}</TableCell>
-                  <TableCell sx={{ border: 1, borderColor: 'divider' }}>{station.latitude}</TableCell>
-                  <TableCell sx={{ border: 1, borderColor: 'divider' }}>{station.longitude}</TableCell>
-                  <TableCell sx={{ border: 1, borderColor: 'divider' }} align="center">
-                    <Stack direction="column" spacing={0.5} alignItems="center">
-                      <IconButton size="small" onClick={() => handleEdit(station)} title="Edit">
-                        <EditIcon fontSize="small" />
-                      </IconButton>
-                      <IconButton size="small" color="error" onClick={() => handleDelete(station.stationId)} title="Delete">
-                        <DeleteIcon fontSize="small" />
-                      </IconButton>
-                      <IconButton size="small" color="warning" onClick={() => handleSuspend(station)} title="Suspend">
-                        <PauseCircleIcon fontSize="small" />
-                      </IconButton>
-                    </Stack>
-                  </TableCell>
-                </TableRow>
-              ))
+              stations.map(station => {
+                const suspension = getActiveSuspensionForStation(station.stationId);
+                return (
+                  <TableRow key={station.stationId} hover>
+                    <TableCell sx={{ border: 1, borderColor: 'divider' }}>{station.stationId}</TableCell>
+                    <TableCell sx={{ border: 1, borderColor: 'divider' }}>{station.stationName}</TableCell>
+                    <TableCell sx={{ border: 1, borderColor: 'divider' }}>{station.latitude}</TableCell>
+                    <TableCell sx={{ border: 1, borderColor: 'divider' }}>{station.longitude}</TableCell>
+                    <TableCell sx={{ border: 1, borderColor: 'divider' }}>{suspension ? "Yes" : "No"}</TableCell>
+                    <TableCell sx={{ border: 1, borderColor: 'divider' }}>{suspension ? suspension.reason : "-"}</TableCell>
+                    <TableCell sx={{ border: 1, borderColor: 'divider' }} align="center">
+                      <Stack direction="column" spacing={0.5} alignItems="center">
+                        <IconButton size="small" color="error" onClick={() => handleDeleteClick(station)} title="Delete">
+                          <DeleteIcon fontSize="small" />
+                        </IconButton>
+                        <IconButton size="small" color="warning" onClick={() => handleSuspend(station)} title="Suspend">
+                          <PauseCircleIcon fontSize="small" />
+                        </IconButton>
+                      </Stack>
+                    </TableCell>
+                  </TableRow>
+                );
+              })
             ) : (
               <TableRow>
-                <TableCell sx={{ border: 1, borderColor: 'divider' }} colSpan={5}>No stations found for this line.</TableCell>
+                <TableCell sx={{ border: 1, borderColor: 'divider' }} colSpan={7}>No stations found for this line.</TableCell>
               </TableRow>
             )}
           </TableBody>
         </Table>
       </TableContainer>
-
-      {/* Dialogs */}
       <AddStationDialog
         open={addOpen}
         onClose={() => setAddOpen(false)}
         lineId={lineId}
         existingStations={stations}
-        onStationAdded={handleRefresh}
-      />
-      <EditStationDialog
-        open={editOpen}
-        onClose={() => setEditOpen(false)}
-        lineId={lineId}
-        station={selectedStation}
-        onStationUpdated={handleRefresh}
+        onStationAdded={() => {
+          handleRefresh();
+          if (onStationChanged) onStationChanged();
+        }}
       />
       <SuspendStationDialog
         open={suspendOpen}
@@ -124,6 +150,16 @@ const MetroLineStations = ({ lineId, onBack }) => {
         station={selectedStation}
         onSuspended={handleRefresh}
       />
+      <Dialog open={deleteDialogOpen} onClose={handleDeleteCancel}>
+        <DialogTitle>Confirm Delete</DialogTitle>
+        <DialogContent>
+          Are you sure you want to remove station <b>{stationToDelete?.stationName}</b> from this metro line?
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleDeleteCancel}>Cancel</Button>
+          <Button onClick={handleDeleteConfirm} color="error">Delete</Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 };
