@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.lang.Nullable;
 
 import java.security.Principal;
 import java.time.Instant;
@@ -32,8 +33,8 @@ public class TicketController {
     @PostMapping("/purchase")
     public ResponseEntity<TicketResponse> purchaseTicket(
             @RequestParam String ticketTypeCode,
-            @RequestParam String fromStation,
-            @RequestParam String toStation,
+            @RequestParam (required = false) @Nullable String fromStation,
+            @RequestParam (required = false) @Nullable String toStation,
             @RequestHeader("Authorization") String authHeader,
             Principal principal) {
 
