@@ -1,51 +1,28 @@
 package com.begger.pawa.demo.Ticket;
 
-import com.begger.pawa.demo.TicketType.TicketType;
-import com.begger.pawa.demo.TicketType.TicketTypeRepository;
-import com.begger.pawa.demo.TicketType.ValidFrom;
-import org.bson.types.ObjectId;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.security.Principal;
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/tickets")
 public class TicketController {
 
     private final TicketService ticketService;
-    private final TicketRepository ticketRepo;
-    private final TicketTypeRepository ticketTypeRepo;
 
-    public TicketController(TicketService ticketService, TicketRepository ticketRepo, TicketTypeRepository ticketTypeRepo) {
+    public TicketController(TicketService ticketService) {
         this.ticketService = ticketService;
-        this.ticketRepo = ticketRepo;
-        this.ticketTypeRepo = ticketTypeRepo;
     }
 
     @PostMapping("/purchase")
-    public ResponseEntity<TicketResponse> purchaseTicket(
-            @RequestParam String ticketTypeCode,
-            @RequestParam String fromStation,
-            @RequestParam String toStation,
-            @RequestHeader("Authorization") String authHeader,
-            Principal principal) {
-
-        String token = authHeader.replace("Bearer ", "");
-        TicketResponse resp = ticketService.purchaseTicket(
-                principal.getName(),
-                ticketTypeCode,
-                fromStation,
-                toStation,
-                token
-        );
-        return ResponseEntity.ok(resp);
+    public ResponseEntity<String> purchaseTicket(@RequestParam Long fare, Principal principal) {
+        boolean result = ticketService.purchaseTicket(principal.getName(), fare);
+        if (result) {
+            return ResponseEntity.ok("Ticket purchased successfully.");
+        } else {
+            return ResponseEntity.badRequest().body("Insufficient funds.");
+        }
     }
 
     @PostMapping("/purchase-cart")
@@ -59,49 +36,5 @@ public class TicketController {
         }
     }
 
-    @GetMapping("/history")
-    public List<TicketResponse> getHistory(Principal principal){
-        ObjectId pid = new ObjectId(principal.getName());
-        List<Ticket> tickets = ticketRepo.findByPassengerId(pid);
-        return tickets.stream()
-                .map(t -> {
-                    TicketType type = ticketTypeRepo.findByCode(t.getTicketTypeId())
-                            .orElseThrow(() -> new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR));
-                    return TicketResponse.fromEntity(t, type);
-                })
-                .collect(Collectors.toList());
-    }
 
-    @PostMapping("/{ticketId}/activate")
-    public TicketResponse activate(
-            @PathVariable String ticketId,
-            Principal principal
-    ) {
-        ObjectId tid = new ObjectId(ticketId);
-        Ticket ticket = ticketRepo.findById(tid)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ticket not found"));
-        Instant now = Instant.now();
-        Instant expiry = ticket.getExpiryTime();
-
-        // expired & never activated
-        if (expiry != null && now.isAfter(expiry) && ticket.getActivationTime() == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Ticket expired");
-        }
-
-        // activate if not already
-        if (ticket.getActivationTime() == null) {
-            ticket.setActivationTime(now);
-            // for types validFrom=ACTIVATION, set expiry now
-            TicketType type = ticketTypeRepo.findByCode(ticket.getTicketTypeId())
-                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR));
-            if (type.getValidFrom() == ValidFrom.ACTIVATION) {
-                ticket.setExpiryTime(now.plus(type.getValidityDurationHours(), ChronoUnit.HOURS));
-            }
-            ticketRepo.save(ticket);
-        }
-
-        TicketType type = ticketTypeRepo.findByCode(ticket.getTicketTypeId())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR));
-        return TicketResponse.fromEntity(ticket, type);
-    }
 }

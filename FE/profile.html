@@ -170,8 +170,8 @@
                     <h3>Wallet Balance</h3>
                     <div class="wallet-balance" id="walletBalance">Loading...</div>
                     <div class="wallet-actions">
-                        <a href="#" class="wallet-btn" id="openTopUpModal"><i class="fas fa-plus-circle"></i> Top Up</a>
-                        <a href="#" class="wallet-btn" id="openHistoryModal"><i class="fas fa-history"></i> History</a>
+                        <a href="#" class="wallet-btn"><i class="fas fa-plus-circle"></i> Top Up</a>
+                        <a href="#" class="wallet-btn"><i class="fas fa-history"></i> History</a>
                     </div>
                 </div>
                 
@@ -258,77 +258,6 @@
         </div>
     </footer>
 
-    <!-- Top-Up Modal -->
-    <div id="topUpModal" class="hidden" style="position:fixed;top:0;left:0;
-        width:100%;height:100%;background:rgba(0,0,0,0.5);
-        justify-content:center;align-items:center;">
-    <div class="modal-content" style="background:#fff;padding:1rem;max-width:400px;width:100%;">
-        <button id="closeModal" style="float:right;">×</button>
-        <h3>Top-Up Wallet</h3>
-        <div class="tabs" style="margin-bottom:1rem;">
-        <button id="tabManual">Manual Top-Up</button>
-        <button id="tabCard">Credit-Card</button>
-        </div>
-        <!-- Manual Tab Panel -->
-        <div id="panelManual">
-        <label>
-            Amount (VND):
-            <input type="number" id="manualAmount" min="1" />
-        </label>
-        <br /><br />
-        <button id="manualSubmit">Top Up</button>
-        </div>
-        <!-- Card panel left empty for now -->
-        <div id="panelCard" class="hidden">
-            <label>
-                Amount (VND):
-                <input type="number" id="cardAmount" min="1" />
-            </label>
-            <div id="card-element" style="margin: .5rem 0;"></div>
-            <button id="cardSubmit">Top Up with Card</button>
-        </div>
-
-    </div>
-    </div>
-    <style>
-        .hidden { display: none; }
-        .tabs button { margin-right: 0.5rem; }
-    </style>
-
-    <!-- Ticket History Modal -->
-    <div id="historyModal" class="hidden"
-        style="position:fixed;top:0;left:0;width:100%;height:100%;
-                background:rgba(0,0,0,0.5);
-                justify-content:center;align-items:center;">
-    <div class="modal-content" 
-        style="background:#fff;padding:1rem;max-width:800px;width:90%;">
-        <button id="closeHistoryModal" 
-                style="float:right;font-size:1.5rem;border:none;
-                    background:transparent;cursor:pointer;">×</button>
-        <h3>Your Ticket History</h3>
-        <table class="table" id="historyTable">
-        <thead>
-            <tr>
-            <th>Ticket ID</th>
-            <th>Type</th>
-            <th>Route</th>
-            <th>Purchased</th>
-            <th>Expires</th>
-            <th>Status</th>
-            </tr>
-        </thead>
-        <tbody>
-            <!-- rows get injected here -->
-        </tbody>
-        </table>
-    </div>
-    </div>
-
-    <!-- Stripe.js -->
-    <script src="https://js.stripe.com/v3/"></script>
-    <script>
-    const stripe = Stripe('pk_test_51JH5tPGf0p0OT9IpPNHREFmHvGymO5yEaSrCNNCgsSdyiv7RRpPdRCx1doM4HzH1c83GuXJV7aTqJkq1DRYqR2jl00FVUzlo6z');
-    </script>
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <!-- Custom JS -->

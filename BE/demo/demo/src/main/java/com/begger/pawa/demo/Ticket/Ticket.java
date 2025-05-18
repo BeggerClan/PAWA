@@ -1,12 +1,9 @@
 package com.begger.pawa.demo.Ticket;
 
-import com.begger.pawa.demo.TicketType.TicketType;
-import com.begger.pawa.demo.TicketType.ValidFrom;
 import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.MongoId;
 import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 
 @Document(collection = "tickets")
 public class Ticket {
@@ -14,7 +11,6 @@ public class Ticket {
 
     @MongoId
     private ObjectId ticketId; // Mongo ObjectId
-
 
     private ObjectId passengerId; // Change to ObjectId if passengerId is an ObjectId; otherwise adjust
     private String ticketTypeId;
@@ -24,39 +20,12 @@ public class Ticket {
     private String toStation;
     private boolean isActive;
     private boolean isExpired;
-    private Instant expiryTime;
 
     public Ticket() {
         this.ticketId = new ObjectId();
         this.purchaseTime = Instant.now();
         this.isActive = true;
         this.isExpired = false;
-    }
-
-    public static Ticket createOnPurchase(
-            TicketType type,
-            ObjectId passengerId,
-            String fromStation,
-            String toStation,
-            boolean freeRide
-    ) {
-        Ticket ticket = new Ticket();
-        ticket.setPassengerId(passengerId);
-        // use the TicketType code as the ticketTypeId
-        ticket.setTicketTypeId(type.getCode());
-        ticket.setFromStation(fromStation);
-        ticket.setToStation(toStation);
-
-        Instant now = Instant.now();
-        ticket.setPurchaseTime(now);
-
-        // for types that expire from purchase (e.g. one-way)
-        if (type.getValidFrom() == ValidFrom.PURCHASE) {
-            ticket.setExpiryTime(now.plus(type.getValidityDurationHours(), ChronoUnit.HOURS));
-        }
-        // leave activationTime null; it will be set on activation
-
-        return ticket;
     }
 
 
@@ -129,15 +98,9 @@ public class Ticket {
         isExpired = expired;
     }
 
-    public void setTicketId(ObjectId ticketId) {
-        this.ticketId = ticketId;
-    }
 
-    public Instant getExpiryTime() {
-        return expiryTime;
-    }
-
-    public void setExpiryTime(Instant expiryTime) {
-        this.expiryTime = expiryTime;
+    public void setTicketTypeId(ObjectId objectId) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'setTicketTypeId'");
     }
 }
