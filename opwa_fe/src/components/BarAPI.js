@@ -1,7 +1,7 @@
 export async function fetchBookingRecords() {
   const token = localStorage.getItem("token");
   const response = await fetch(
-    "http://localhost:8080/api/operator/booking-records",
+    "http://localhost:8080/api/opwa/operator/booking-records",
     {
       method: "GET",
       headers: {

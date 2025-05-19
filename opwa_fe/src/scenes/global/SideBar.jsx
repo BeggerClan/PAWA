@@ -21,6 +21,7 @@ import MapOutlinedIcon from "@mui/icons-material/MapOutlined";
 import DirectionsTransitOutlinedIcon from "@mui/icons-material/DirectionsTransitOutlined";
 import BarChartOutlinedIcon from "@mui/icons-material/BarChartOutlined";
 import LocationOnOutlinedIcon from "@mui/icons-material/LocationOnOutlined"; // Add this import at the top
+import LogoutOutlinedIcon from "@mui/icons-material/LogoutOutlined"; // thêm dòng này
 const Item = ({ title, to, icon, selected, setSelected }) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
@@ -42,6 +43,12 @@ const Item = ({ title, to, icon, selected, setSelected }) => {
 const Sidebar = ({ isCollapsed, onToggleCollapse, selected, setSelected }) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
+
+  // Hàm logout
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    window.location.href = "/";
+  };
 
   return (
     <ProSidebarProvider>
@@ -171,6 +178,14 @@ const Sidebar = ({ isCollapsed, onToggleCollapse, selected, setSelected }) => {
                 selected={selected}
                 setSelected={setSelected}
               />
+              {/* Logout */}
+              <MenuItem
+                icon={<LogoutOutlinedIcon />}
+                style={{ color: colors.grey[100], marginTop: "2rem" }}
+                onClick={handleLogout}
+              >
+                <Typography>Logout</Typography>
+              </MenuItem>
             </Box>
           </Menu>
         </ProSidebar>

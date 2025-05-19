@@ -15,7 +15,8 @@ import Pie from "../scenes/pie";
 import Line from "../scenes/line";
 import Geography from "../scenes/geography";
 import ViewStaff from "../scenes/team/viewStaff";
-import BookingRecords from "../scenes/bar/BookingRecords"; // Thêm dòng này
+import BookingRecords from "../scenes/bar/BookingRecords";
+import CreateNewStaff from "../scenes/team/createNewStaff";
 
 
 import Station from "../station"; // <-- add this import
@@ -63,6 +64,7 @@ export default function AppRoutes() {
   return (
     <Routes>
       <Route path="/" element={<LoginPage />} />
+      <Route path="/create_for_new_staff" element={<CreateNewStaff />} />
       <Route
         path="/dashboard/*"
         element={

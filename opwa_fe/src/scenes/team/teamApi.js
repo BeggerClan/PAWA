@@ -89,4 +89,14 @@ export async function getUserById(id) {
 
   return response.json();
 }
+export async function addUserPermitAll(payload) {
+  const response = await fetch("http://localhost:8081/api/v1/auth/register", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.message || "Failed to register user");
+  return data;
+}
 
