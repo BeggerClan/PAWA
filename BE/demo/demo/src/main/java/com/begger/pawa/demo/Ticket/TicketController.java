@@ -92,12 +92,24 @@ public class TicketController {
         // activate if not already
         if (ticket.getActivationTime() == null) {
             ticket.setActivationTime(now);
-            // for types validFrom=ACTIVATION, set expiry now
+
+            // look up the ticket type once
             TicketType type = ticketTypeRepo.findByCode(ticket.getTicketTypeId())
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR));
-            if (type.getValidFrom() == ValidFrom.ACTIVATION) {
+
+            String code = type.getCode();
+            // for these one-way codes, expiry == activation
+            if ("ONE_WAY_4".equals(code) ||
+                     "ONE_WAY_8".equals(code) ||
+                     "ONE_WAY_UNL".equals(code)) {
+                ticket.setExpiryTime(now);
+
+                // otherwise, if it’s ACTIVATION-based, roll forward by its validity hours
+            } else if (type.getValidFrom() == ValidFrom.ACTIVATION) {
                 ticket.setExpiryTime(now.plus(type.getValidityDurationHours(), ChronoUnit.HOURS));
             }
+            // else (PURCHASE-based types) leave the pre-set expiry alone
+
             ticketRepo.save(ticket);
         }
 

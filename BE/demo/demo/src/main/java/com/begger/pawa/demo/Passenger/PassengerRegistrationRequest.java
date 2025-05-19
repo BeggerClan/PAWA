@@ -22,7 +22,7 @@ public class PassengerRegistrationRequest {
     @NotBlank @Size(max=50)
     private String lastName;
 
-    @NotBlank @Size(max=12)
+    @Size(max=12)
     private String nationalId;
 
     @NotNull
@@ -83,11 +83,11 @@ public class PassengerRegistrationRequest {
         this.lastName = lastName;
     }
 
-    public @NotBlank @Size(max = 12) String getNationalId() {
+    public @Size(max = 12) String getNationalId() {
         return nationalId;
     }
 
-    public void setNationalId(@NotBlank @Size(max = 12) String nationalId) {
+    public void setNationalId(@Size(max = 12) String nationalId) {
         this.nationalId = nationalId;
     }
 

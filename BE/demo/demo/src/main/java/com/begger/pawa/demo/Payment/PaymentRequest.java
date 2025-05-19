@@ -1,7 +1,7 @@
 package com.begger.pawa.demo.Payment;
 
 public class PaymentRequest {
-    private String passengerId;
+    private String passengerId; // Optional: only used for wallet payments
     private String ticketTypeId;
     private String paymentMethod; // "WALLET" or "CASH"
     private Long paymentAmount;

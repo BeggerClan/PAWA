@@ -35,6 +35,10 @@ public class PassengerService {
      */
 
     public Passenger register (PassengerRegistrationRequest req) {
+        Instant now = Instant.now();
+        LocalDate today = LocalDate.now();
+        boolean age6OrBelow     = req.getDob().isAfter(today.minusYears(6));
+
         // check for duplicate email
         repo.findByEmail(req.getEmail())
                 .ifPresent(p -> {
@@ -43,13 +47,22 @@ public class PassengerService {
                     );
                 });
 
-        // check db for exist national ID
-        repo.findByNationalId(req.getNationalId())
-                .ifPresent(p -> {
-                    throw new ResponseStatusException(
-                            HttpStatus.CONFLICT, "National Id has been registered"
-                    );
-                });
+        // check db for exist national ID and check to see if age is below 6 (not required nation id)
+        if (!age6OrBelow) {
+            if (req.getNationalId() == null || req.getNationalId().isBlank()) {
+                throw new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST,
+                        "National ID is required for passengers older than 6 years"
+                );
+            }
+            repo.findByNationalId(req.getNationalId())
+                    .ifPresent(p -> {
+                        throw new ResponseStatusException(
+                                HttpStatus.CONFLICT,
+                                "National ID has already been registered"
+                        );
+                    });
+        }
 
         // Map DTO to Entity
         Passenger p  = new Passenger();
@@ -67,16 +80,16 @@ public class PassengerService {
         p.setRevolutionaryStatus(req.getRevolutionaryStatus());
 
         // set default for missing attribute
-        Instant now = Instant.now();
+
         p.setPasswordChangedAt(now);
         p.setCreatedAt(now);
         p.setUpdatedAt(now);
         p.setVerified(false);
         p.setGuest(false);
 
-        LocalDate today = LocalDate.now();
+
         boolean age60OrAbove    = req.getDob().isBefore(today.minusYears(60));
-        boolean age6OrBelow     = req.getDob().isAfter(today.minusYears(6));
+
         boolean hasDisability   = req.getDisabilityStatus();
         boolean isRevolutionary = req.getRevolutionaryStatus();
 

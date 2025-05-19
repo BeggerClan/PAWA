@@ -25,17 +25,20 @@ public class AgentPaymentController {
     private final WalletRepository walletRepo;
     private final TicketTypeRepository ticketTypeRepo;
     private final PassengerRepository passengerRepo;
+    private String passengerId; // Optional: only used for wallet payments
 
 
 
     public AgentPaymentController(TicketRepository ticketRepo,
-                               WalletRepository walletRepo,
-                               TicketTypeRepository ticketTypeRepo, PassengerRepository passengerRepo) {
+    WalletRepository walletRepo,
+    TicketTypeRepository ticketTypeRepo,
+    PassengerRepository passengerRepo) {
     this.ticketRepo = ticketRepo;
     this.walletRepo = walletRepo;
     this.ticketTypeRepo = ticketTypeRepo;
     this.passengerRepo = passengerRepo;
     }
+
 
 
     @PostMapping("/topup")
@@ -60,40 +63,45 @@ public class AgentPaymentController {
     }
 
 
-
     @PostMapping("/payments")
     public ResponseEntity<PaymentResponse> processAgentPayment(@RequestBody PaymentRequest req) {
-        ObjectId passengerId;
-        try {
-            passengerId = new ObjectId(req.getPassengerId());
-        } catch (IllegalArgumentException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid passengerId");
-        }
-
-        // Find ticket type and expected price
+        // 1. Get ticket type & price
         TicketType type = ticketTypeRepo.findByCode(req.getTicketTypeId())
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ticket type not found"));
-
+    
         long expectedPrice = type.getPrice();
-
+    
+        // 2. Handle wallet payment
         if ("WALLET".equalsIgnoreCase(req.getPaymentMethod())) {
+            if (req.getPassengerId() == null || req.getPassengerId().isBlank()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "WALLET payments require a passengerId");
+            }
+    
+            ObjectId passengerId;
+            try {
+                passengerId = new ObjectId(req.getPassengerId());
+            } catch (IllegalArgumentException e) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid passengerId format");
+            }
+    
             PassengerWallet wallet = walletRepo.findByPassengerId(passengerId.toHexString())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Wallet not found"));
-
+    
             if (wallet.getBalance() < expectedPrice) {
                 long shortfall = expectedPrice - wallet.getBalance();
                 return ResponseEntity.status(HttpStatus.PAYMENT_REQUIRED).body(
                     new PaymentResponse(wallet.getBalance(), "Insufficient funds. Need to top up: " + shortfall + " VND")
                 );
             }
-
+    
             wallet.setBalance(wallet.getBalance() - expectedPrice);
             wallet.setUpdatedAt(Instant.now());
             walletRepo.save(wallet);
-
+    
             return ResponseEntity.ok(new PaymentResponse(wallet.getBalance(), "eWallet payment successful"));
         }
-
+    
+        // 3. Handle cash payment
         else if ("CASH".equalsIgnoreCase(req.getPaymentMethod())) {
             Long cash = req.getCashReceived();
             if (cash == null || cash < expectedPrice) {
@@ -101,15 +109,17 @@ public class AgentPaymentController {
                     new PaymentResponse(0, "Insufficient cash. Ticket price is " + expectedPrice + " VND")
                 );
             }
-
+    
             long change = cash - expectedPrice;
             return ResponseEntity.ok(new PaymentResponse(change, "Cash payment successful. Change: " + change + " VND"));
         }
-
+    
+        // 4. Invalid payment method
         return ResponseEntity.badRequest().body(
             new PaymentResponse(0, "Unsupported payment method")
         );
     }
+    
 
     // this was made by Dat in OPWA
     // Lấy tất cả passengerId có trong hệ thống 
