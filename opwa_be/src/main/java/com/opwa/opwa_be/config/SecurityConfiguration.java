@@ -40,8 +40,9 @@ public class SecurityConfiguration {
                                 "/api/metro-lines/trips",
                                 "/api/metro-lines/*/trips",
                                 "/api/metro-lines/*/stations/*/trips",
-                                "/api/metro-lines/*/generate-trips",
                                 "/api/suspensions/**",
+                                "/api/metro-lines/*/full-details",
+                                "/api/metro-lines/full-details",
                                 "/api/stations/**"
                         ).permitAll()
                         .requestMatchers(

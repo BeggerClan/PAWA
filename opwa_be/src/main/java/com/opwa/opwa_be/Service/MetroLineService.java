@@ -4,6 +4,7 @@ import com.opwa.opwa_be.Repository.MetroLineRepo;
 import com.opwa.opwa_be.Repository.StationRepo;
 import com.opwa.opwa_be.Repository.SuspensionRepo;
 import com.opwa.opwa_be.Repository.TripRepo;
+import com.opwa.opwa_be.dto.MetroLineFullDetailsDTO;
 import com.opwa.opwa_be.model.MetroLine;
 import com.opwa.opwa_be.model.Station;
 import com.opwa.opwa_be.model.Suspension;
@@ -512,5 +513,83 @@ public class MetroLineService {
             }
         }
         return result;
+    }
+
+    public MetroLineFullDetailsDTO getFullDetailsForLine(String lineId) {
+        MetroLine line = findLineByIdWithStations(lineId);
+        List<Station> stations = getStationsForLine(lineId);
+        List<Suspension> suspensions = suspensionRepo.findByMetroLineId(lineId);
+        List<Trip> trips = getTripsForLine(lineId);
+
+        MetroLineFullDetailsDTO dto = new MetroLineFullDetailsDTO();
+        dto.setLineId(line.getLineId());
+        dto.setLineName(line.getLineName());
+        dto.setTotalDuration(line.getTotalDuration());
+        dto.setActive(line.isActive());
+        dto.setSuspended(line.isSuspended());
+        dto.setSuspensionReason(line.getSuspensionReason());
+        dto.setSuspensionStartTime(line.getSuspensionStartTime());
+        dto.setSuspensionEndTime(line.getSuspensionEndTime());
+        dto.setFirstDeparture(line.getFirstDeparture());
+        dto.setFrequencyMinutes(line.getFrequencyMinutes());
+        dto.setStationIds(line.getStationIds());
+
+        // Map stations
+        List<MetroLineFullDetailsDTO.StationDTO> stationDTOs = stations.stream().map(s -> {
+            MetroLineFullDetailsDTO.StationDTO sdto = new MetroLineFullDetailsDTO.StationDTO();
+            sdto.setStationId(s.getStationId());
+            sdto.setStationName(s.getStationName());
+            sdto.setLatitude(s.getLatitude());
+            sdto.setLongitude(s.getLongitude());
+            sdto.setMapMarker(s.getMapMarker());
+            return sdto;
+        }).toList();
+        dto.setStations(stationDTOs);
+
+        // Map suspensions
+        List<MetroLineFullDetailsDTO.SuspensionDTO> suspensionDTOs = suspensions.stream().map(s -> {
+            MetroLineFullDetailsDTO.SuspensionDTO sdto = new MetroLineFullDetailsDTO.SuspensionDTO();
+            sdto.setSuspensionId(s.getId());
+            sdto.setMetroLineId(s.getMetroLineId());
+            sdto.setLineName(s.getLineName());
+            sdto.setAffectedStationIds(s.getAffectedStationIds());
+            sdto.setReason(s.getReason());
+            sdto.setDescription(s.getDescription());
+            sdto.setStartTime(s.getStartTime());
+            sdto.setExpectedEndTime(s.getExpectedEndTime());
+            sdto.setActive(s.isActive());
+            return sdto;
+        }).toList();
+        dto.setSuspensions(suspensionDTOs);
+
+        // Map trips
+        List<MetroLineFullDetailsDTO.TripDTO> tripDTOs = trips.stream().map(t -> {
+            MetroLineFullDetailsDTO.TripDTO tdto = new MetroLineFullDetailsDTO.TripDTO();
+            tdto.setTripId(t.getTripId());
+            tdto.setLineId(t.getLineId());
+            tdto.setDepartureTime(t.getDepartureTime());
+            tdto.setArrivalTime(t.getArrivalTime());
+            tdto.setReturnTrip(t.isReturnTrip());
+            tdto.setSegments(t.getSegments().stream().map(seg -> {
+                MetroLineFullDetailsDTO.TripSegmentDTO sgdto = new MetroLineFullDetailsDTO.TripSegmentDTO();
+                sgdto.setFromStationId(seg.getFromStationId());
+                sgdto.setToStationId(seg.getToStationId());
+                sgdto.setDepartureTime(seg.getDepartureTime());
+                sgdto.setArrivalTime(seg.getArrivalTime());
+                sgdto.setDurationMinutes(seg.getDurationMinutes());
+                return sgdto;
+            }).toList());
+            return tdto;
+        }).toList();
+        dto.setTrips(tripDTOs);
+
+        return dto;
+    }
+
+    public List<MetroLineFullDetailsDTO> getAllFullDetails() {
+        List<MetroLine> lines = metroLineRepo.findAll();
+        return lines.stream()
+            .map(line -> getFullDetailsForLine(line.getLineId()))
+            .toList();
     }
 }

@@ -8,6 +8,7 @@ import com.opwa.opwa_be.model.Trip;
 import com.opwa.opwa_be.Repository.MetroLineRepo;
 import com.opwa.opwa_be.Repository.TripRepo;
 import com.opwa.opwa_be.config.JwtService;
+import com.opwa.opwa_be.dto.MetroLineFullDetailsDTO;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -203,6 +204,18 @@ public class MetroLineController {
         return ResponseEntity.ok(
             metroLineService.searchTrips(fromStationId, toStationId, approximateTime)
         );
+    }
+
+    @GetMapping("/{id}/full-details")
+    public ResponseEntity<MetroLineFullDetailsDTO> getFullDetails(@PathVariable String id) {
+        MetroLineFullDetailsDTO dto = metroLineService.getFullDetailsForLine(id);
+        return ResponseEntity.ok(dto);
+    }
+
+    @GetMapping("/full-details")
+    public ResponseEntity<List<MetroLineFullDetailsDTO>> getAllFullDetails() {
+        List<MetroLineFullDetailsDTO> dtos = metroLineService.getAllFullDetails();
+        return ResponseEntity.ok(dtos);
     }
 
     // Utility method for role check (take token the same way as UserController)
