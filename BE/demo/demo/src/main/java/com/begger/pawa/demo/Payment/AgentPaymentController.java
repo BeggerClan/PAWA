@@ -65,60 +65,77 @@ public class AgentPaymentController {
 
     @PostMapping("/payments")
     public ResponseEntity<PaymentResponse> processAgentPayment(@RequestBody PaymentRequest req) {
-        // 1. Get ticket type & price
+        // 1. Validate ticket type
+        if (req.getTicketTypeId() == null || req.getTicketTypeId().isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Ticket type ID is required.");
+        }
+
         TicketType type = ticketTypeRepo.findByCode(req.getTicketTypeId())
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ticket type not found"));
-    
+
         long expectedPrice = type.getPrice();
-    
-        // 2. Handle wallet payment
-        if ("WALLET".equalsIgnoreCase(req.getPaymentMethod())) {
+
+        // 2. Validate payment method
+        if (req.getPaymentMethod() == null || req.getPaymentMethod().isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Payment method is required");
+        }
+
+        String method = req.getPaymentMethod().toUpperCase();
+
+        // 3. Handle wallet payment
+        if ("WALLET".equals(method)) {
             if (req.getPassengerId() == null || req.getPassengerId().isBlank()) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "WALLET payments require a passengerId");
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "WALLET payments require a valid passengerId");
             }
-    
+
             ObjectId passengerId;
             try {
                 passengerId = new ObjectId(req.getPassengerId());
             } catch (IllegalArgumentException e) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid passengerId format");
             }
-    
+
             PassengerWallet wallet = walletRepo.findByPassengerId(passengerId.toHexString())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Wallet not found"));
-    
-            if (wallet.getBalance() < expectedPrice) {
-                long shortfall = expectedPrice - wallet.getBalance();
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Wallet not found for this passenger"));
+
+            long balance = wallet.getBalance();
+
+            if (balance < expectedPrice) {
+                long shortfall = expectedPrice - balance;
                 return ResponseEntity.status(HttpStatus.PAYMENT_REQUIRED).body(
-                    new PaymentResponse(wallet.getBalance(), "Insufficient funds. Need to top up: " + shortfall + " VND")
+                    new PaymentResponse(balance, "Insufficient funds. Need to top up: " + shortfall + " VND")
                 );
             }
-    
-            wallet.setBalance(wallet.getBalance() - expectedPrice);
+
+            wallet.setBalance(balance - expectedPrice);
             wallet.setUpdatedAt(Instant.now());
             walletRepo.save(wallet);
-    
+
             return ResponseEntity.ok(new PaymentResponse(wallet.getBalance(), "eWallet payment successful"));
         }
-    
-        // 3. Handle cash payment
-        else if ("CASH".equalsIgnoreCase(req.getPaymentMethod())) {
+
+        // 4. Handle cash payment
+        else if ("CASH".equals(method)) {
             Long cash = req.getCashReceived();
-            if (cash == null || cash < expectedPrice) {
+            if (cash == null) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cash amount must be provided");
+            }
+            if (cash < expectedPrice) {
                 return ResponseEntity.badRequest().body(
                     new PaymentResponse(0, "Insufficient cash. Ticket price is " + expectedPrice + " VND")
                 );
             }
-    
+
             long change = cash - expectedPrice;
             return ResponseEntity.ok(new PaymentResponse(change, "Cash payment successful. Change: " + change + " VND"));
         }
-    
-        // 4. Invalid payment method
+
+        // 5. Invalid method
         return ResponseEntity.badRequest().body(
-            new PaymentResponse(0, "Unsupported payment method")
+            new PaymentResponse(0, "Unsupported payment method: " + method)
         );
     }
+
     
 
     // this was made by Dat in OPWA
