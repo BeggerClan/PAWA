@@ -68,8 +68,7 @@ public class SecurityConfig {
 
                         // AGENT endpoints
                         .requestMatchers("/api/agent/**")
-                        .hasRole("TICKET_AGENT")
-
+                        .permitAll()
                 .anyRequest().authenticated()
             )
             .oauth2ResourceServer(oauth -> oauth

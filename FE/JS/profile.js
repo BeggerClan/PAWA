@@ -218,18 +218,25 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!res.ok) throw new Error('Failed to load ticket history');
         const list = await res.json();
         // Build rows
-        list.forEach(t => {
+        if (list.length === 0) {
             const tr = document.createElement('tr');
-            tr.innerHTML = `
-            <td>${t.ticketId}</td>
-            <td>${t.ticketTypeCode}</td>
-            <td>${t.fromStation} → ${t.toStation}</td>
-            <td>${formatDateTime(t.purchaseTime)}</td>
-            <td>${formatDateTime(t.expiryTime)}</td>
-            <td>${t.status}</td>
-            `;
-            historyTbody.append(tr);
-        });
+            tr.innerHTML = `<td colspan="6" class="text-center text-muted">You have no purchased ticket history.</td>`;
+            historyTbody.appendChild(tr);
+        } else {
+            list.forEach(t => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                <td>${t.ticketId}</td>
+                <td>${t.ticketTypeCode}</td>
+                <td>${t.fromStation} → ${t.toStation}</td>
+                <td>${formatDateTime(t.purchaseTime)}</td>
+                <td>${formatDateTime(t.expiryTime)}</td>
+                <td>${t.status}</td>
+                `;
+                historyTbody.appendChild(tr);
+            });
+        }
+        
         // Show modal
         historyModal.classList.add('active');
         } catch (err) {
