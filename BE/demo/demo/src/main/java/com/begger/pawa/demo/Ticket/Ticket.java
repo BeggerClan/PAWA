@@ -40,6 +40,9 @@ public class Ticket {
             String toStation,
             boolean freeRide
     ) {
+        System.out.println("⚙️ Ticket.createOnPurchase called");
+        System.out.println("type = " + type.getCode() + ", from = " + fromStation + ", to = " + toStation + ", free = " + freeRide);
+
         Ticket ticket = new Ticket();
         ticket.setPassengerId(passengerId);
         // use the TicketType code as the ticketTypeId
@@ -55,7 +58,7 @@ public class Ticket {
             ticket.setExpiryTime(now.plus(type.getValidityDurationHours(), ChronoUnit.HOURS));
         }
         // leave activationTime null; it will be set on activation
-
+        System.out.println("✔ Ticket object built successfully");
         return ticket;
     }
 

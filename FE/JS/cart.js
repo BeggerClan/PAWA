@@ -136,7 +136,7 @@ function renderCart() {
 
     const endpoint =
       method === 'wallet'
-        ? 'http://localhost:8080/api/payments/tickets/wallet'
+        ? 'http://localhost:8080/api/tickets/purchase-cart'
         : 'http://localhost:8080/api/payments/tickets';
 
     fetch(endpoint, {

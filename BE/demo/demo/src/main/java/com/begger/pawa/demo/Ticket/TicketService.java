@@ -204,11 +204,17 @@ public class TicketService {
     }
 
     private List<Ticket> generateTickets(String passengerId, List<CartRequest.CartItem> items, boolean freeRide, String studentId) {
+        System.out.println("==> generateTickets called with " + items.size() + " items");
+        System.out.println("passengerId = " + passengerId);
+        System.out.println("freeRide = " + freeRide + ", studentId = " + studentId);
+
+        
         List<Ticket> createdTickets = new ArrayList<>();
         ObjectId passId = new ObjectId(passengerId);
 
         for (CartRequest.CartItem item : items) {
             // 1) lookup the type by code
+            System.out.println("Looking up ticket type: " + item.getTicketType());
             TicketType type = typeRepo.findByCode(item.getTicketType())
                     .orElseThrow(() -> new ResponseStatusException(
                             HttpStatus.BAD_REQUEST, "Unknown ticket type " + item.getTicketType()));
@@ -229,14 +235,25 @@ public class TicketService {
 
             // 2) create exactly 'quantity' tickets
             for (int i = 0; i < item.getQuantity(); i++) {
-                Ticket ticket = Ticket.createOnPurchase(
+                System.out.println("Creating " + item.getQuantity() + " ticket(s) of type " + item.getTicketType());
+                System.out.println("From: " + item.getFromStation() + ", To: " + item.getToStation());
+
+                try {
+                    Ticket ticket = Ticket.createOnPurchase(
                         type, passId,
                         item.getFromStation(),
                         item.getToStation(),
-                        freeRide  // we don’t need this in the factory itself—it’s for wallet logic
-                );
-                ticketRepo.save(ticket);
-                createdTickets.add(ticket);
+                        freeRide
+                    );
+                    ticketRepo.save(ticket);
+                    createdTickets.add(ticket);
+                } catch (Exception e) {
+                    e.printStackTrace(); // ✅ Log detailed error
+                    throw new ResponseStatusException(
+                        HttpStatus.INTERNAL_SERVER_ERROR,
+                        "Failed to create ticket: " + e.getMessage()
+                    );
+                }
             }
         }
         return createdTickets;

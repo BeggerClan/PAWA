@@ -29,6 +29,12 @@ public class CartRequest {
     
         public String getToStation() { return toStation; }
         public void setToStation(String toStation) { this.toStation = toStation; }
+
+        @Override
+        public String toString() {
+            return "CartItem{ticketType='" + ticketType + "', quantity=" + quantity + ", from='" + fromStation + "', to='" + toStation + "'}";
+        }
+
     }
     
 }
