@@ -245,7 +245,6 @@ body {
     font-weight: 600;
 }
 
-/* Specifically match your screenshot styling */
 .metro-line-header {
     display: flex;
     align-items: center;
@@ -365,13 +364,275 @@ h1, h2, h3, h4, h5, h6, p, .lead, .metro-info-value, .station-item {
     font-weight: 600;
 }
 
-/* Style the search form to match your UI */
+/* Trip search results styling */
+.search-results-header {
+    background: #212a36;
+    padding: 1.5rem;
+    border-radius: var(--border-radius);
+    margin-bottom: 1.5rem;
+    box-shadow: var(--box-shadow);
+}
+
+.search-results-header h3 {
+    margin: 0;
+    color: var(--light-text);
+}
+
+.search-results-header .lead {
+    color: var(--secondary-text);
+    margin: 0.5rem 0 0 0;
+}
+
+.trip-card {
+    background-color: #212a36;
+    border-radius: var(--border-radius);
+    margin-bottom: 1.25rem;
+    box-shadow: var(--box-shadow);
+    overflow: hidden;
+    transition: var(--transition);
+    position: relative;
+}
+
+.trip-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--hover-shadow);
+}
+
+.trip-header {
+    padding: 1.25rem;
+    border-bottom: 1px solid #2d3748;
+    position: relative;
+}
+
+.trip-times {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 0.5rem;
+}
+
+.trip-departure, .trip-arrival {
+    text-align: center;
+    flex-basis: 30%;
+}
+
+.trip-departure strong, .trip-arrival strong {
+    font-size: 1.25rem;
+    color: var(--light-text);
+    display: block;
+    margin-bottom: 0.25rem;
+}
+
+.trip-departure div, .trip-arrival div {
+    color: var(--secondary-text);
+    font-size: 0.9rem;
+}
+
+.trip-duration {
+    flex-grow: 1;
+    text-align: center;
+    position: relative;
+    padding: 0 1rem;
+}
+
+.trip-duration-line {
+    height: 2px;
+    background-color: #2d3748;
+    width: 100%;
+    position: relative;
+}
+
+.trip-duration-line::before, .trip-duration-line::after {
+    content: '';
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: var(--primary-blue);
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.trip-duration-line::before {
+    left: 0;
+}
+
+.trip-duration-line::after {
+    right: 0;
+}
+
+.trip-duration-time {
+    position: absolute;
+    left: 50%;
+    top: -10px;
+    transform: translateX(-50%);
+    background-color: #2d3748;
+    padding: 2px 10px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    color: var(--secondary-text);
+}
+
+.trip-footer {
+    padding: 1rem 1.25rem;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.book-trip-btn {
+    background-color: var(--primary-blue);
+    color: var(--light-text);
+    border: none;
+    transition: var(--transition);
+}
+
+.book-trip-btn:hover {
+    background-color: #1557b0;
+    transform: translateY(-2px);
+}
+
+.trip-line-badge {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background-color: rgba(26, 115, 232, 0.2);
+    color: var(--primary-blue);
+    border-radius: 20px;
+    padding: 0.25rem 0.75rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.load-more-btn {
+    display: block;
+    width: 100%;
+    padding: 0.8rem;
+    margin-bottom: 2rem;
+    background-color: transparent;
+    color: var(--primary-blue);
+    border: 1px solid var(--primary-blue);
+    text-align: center;
+    transition: var(--transition);
+}
+
+.load-more-btn:hover {
+    background-color: rgba(26, 115, 232, 0.1);
+}
+
+/* Suspension alerts styling */
+.suspension-alerts-container {
+    margin-bottom: 2rem;
+}
+
+.suspension-alert {
+    background-color: rgba(220, 53, 69, 0.1);
+    border-left: 4px solid #dc3545;
+    border-radius: var(--border-radius);
+    padding: 1.25rem;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: flex-start;
+    position: relative;
+    box-shadow: var(--box-shadow);
+}
+
+.suspension-alert-icon {
+    font-size: 1.5rem;
+    color: #dc3545;
+    margin-right: 1rem;
+    margin-top: 0.25rem;
+}
+
+.suspension-alert-content {
+    flex: 1;
+}
+
+.suspension-alert h4 {
+    color: #dc3545;
+    margin: 0 0 0.5rem 0;
+    font-size: 1.1rem;
+}
+
+.suspension-alert p {
+    color: var(--light-text);
+    margin: 0;
+    font-size: 0.95rem;
+}
+
+.suspension-alert-details {
+    margin-top: 0.75rem;
+    background-color: rgba(255, 255, 255, 0.05);
+    padding: 0.75rem;
+    border-radius: 4px;
+}
+
+.suspension-alert-detail {
+    display: flex;
+    margin-bottom: 0.5rem;
+}
+
+.suspension-alert-detail:last-child {
+    margin-bottom: 0;
+}
+
+.suspension-alert-label {
+    font-weight: 600;
+    min-width: 140px;
+    color: var(--secondary-text);
+}
+
+.suspension-alert-value {
+    color: var(--light-text);
+}
+
+.btn-close-white {
+    color: #fff;
+    text-shadow: none;
+    opacity: 0.7;
+}
+
+.btn-close-white:hover {
+    opacity: 1;
+}
+
+/* Fix for error messages to ensure they're readable */
+.alert-info.bg-dark {
+    background-color: #1a212c !important;
+    border-color: #2d3748 !important;
+    color: var(--light-text) !important;
+}
+
+/* Animation for new cards and alerts */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fade-in {
+    animation: fadeIn 0.3s ease forwards;
+}
+
+/* Make search error messages more readable */
+#search-error {
+    background-color: rgba(220, 53, 69, 0.1);
+    color: #dc3545;
+    border-color: rgba(220, 53, 69, 0.3);
+    font-weight: 500;
+}
+
+/* Style the search container better */
 .search-container {
     background-color: #212a36;
-    border-radius: 8px;
+    border-radius: var(--border-radius);
     padding: 1.5rem;
     margin-bottom: 2rem;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--box-shadow);
 }
 
 .search-form {
@@ -395,7 +656,7 @@ h1, h2, h3, h4, h5, h6, p, .lead, .metro-info-value, .station-item {
 .search-form input {
     width: 100%;
     padding: 0.75rem;
-    border-radius: 8px;
+    border-radius: var(--border-radius);
     border: 1px solid #2d3748;
     background-color: #1a212c;
     color: var(--light-text);
@@ -406,6 +667,16 @@ h1, h2, h3, h4, h5, h6, p, .lead, .metro-info-value, .station-item {
     outline: none;
     border-color: var(--gradient-start);
     box-shadow: 0 0 0 2px rgba(0, 229, 187, 0.2);
+}
+
+.search-form select option {
+    background-color: #1a212c;
+    color: var(--light-text);
+}
+
+.search-form select optgroup {
+    font-weight: bold;
+    color: var(--primary-blue);
 }
 
 .search-actions {
@@ -424,5 +695,41 @@ h1, h2, h3, h4, h5, h6, p, .lead, .metro-info-value, .station-item {
     
     .search-actions {
         grid-column: span 1;
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .search-actions #search-error {
+        width: 100%;
+        margin-bottom: 1rem;
+    }
+    
+    .trip-times {
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+    
+    .trip-departure, .trip-arrival {
+        width: 100%;
+    }
+    
+    .trip-duration {
+        width: 100%;
+    }
+    
+    .suspension-alert {
+        flex-direction: column;
+    }
+    
+    .suspension-alert-icon {
+        margin-bottom: 1rem;
+    }
+    
+    .suspension-alert-detail {
+        flex-direction: column;
+    }
+    
+    .suspension-alert-label {
+        margin-bottom: 0.25rem;
     }
 }
