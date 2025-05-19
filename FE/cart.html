@@ -2,44 +2,100 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>HCMC Metro – Your Cart</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Cart - HCMC Metro</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
-  <link rel="stylesheet" href="CSS/metro-lines.css" />
-  <link rel="stylesheet" href="CSS/cart.css" />
-  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="CSS/home.css" />
 </head>
 <body>
+  <!-- Navbar -->
+  <script src="js/navbar.js"></script> <!-- or inline navbar copy if navbar.js is not modular -->
+    <nav
+      class="navbar navbar-expand-lg navbar-dark custom-navbar fixed-top px-4"
+    >
+      <div class="container-fluid position-relative w-100">
+        <!-- Logo aligned left -->
+        <a class="logo-left d-flex align-items-center" href="home.html">
+          <img src="assets/hcmc-metro-logo.png" alt="Logo" height="40" />
+        </a>
 
-<nav class="navbar navbar-expand-lg navbar-dark custom-navbar fixed-top px-4">
-  <div class="container-fluid position-relative w-100">
+        <!-- Centered Brand Text -->
+        <div class="brand-center-text text-white fw-bold">HCMC METRO</div>
 
-    <!-- Left Logo -->
-    <a class="logo-left d-flex align-items-center" href="home.html">
-      <img src="assets/hcmc-metro-logo.png" alt="Logo" height="40" />
-    </a>
+        <!-- Right-side nav links -->
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarNav"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
 
-    <!-- Centered Brand -->
-    <div class="brand-center-text text-white fw-bold">HCMC METRO</div>
+        <div
+          class="collapse navbar-collapse justify-content-end"
+          id="navbarNav"
+        >
+          <!-- Authenticated User Menu -->
+          <ul class="navbar-nav auth-menu" style="display: none">
+            <li class="nav-item">
+              <a class="nav-link nav-hover" href="home.html">Home</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link nav-hover active" href="metro-lines.html"
+                >Metro Lines</a
+              >
+            </li>
+            <li class="nav-item">
+              <a class="nav-link nav-hover" href="#">My Tickets</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link nav-hover" href="profile.html">Profile</a>
+            </li>
+            <li class="nav-item ms-4 d-flex align-items-center">
+              <button id="logout-btn" class="btn btn-outline-light btn-sm">
+                Sign Out
+              </button>
+            </li>
+          </ul>
 
-    <!-- Right Links -->
-    <div class="collapse navbar-collapse justify-content-end">
-      <ul class="navbar-nav auth-menu">
-        <li class="nav-item"><a class="nav-link nav-hover" href="home.html">Home</a></li>
-        <li class="nav-item"><a class="nav-link nav-hover" href="metro-lines.html">Metro Lines</a></li>
-        <li class="nav-item"><a class="nav-link nav-hover active" href="cart.html">Cart</a></li>
-        <li class="nav-item"><a class="nav-link nav-hover" href="profile.html">Profile</a></li>
-        <li class="nav-item position-relative">
-          <a class="nav-link nav-hover" href="cart.html">
-            <i class="fas fa-shopping-cart"></i>
-            <span class="cart-count badge bg-danger rounded-circle position-absolute top-0 start-100 translate-middle">0</span>
-          </a>
-        </li>
-        <li class="nav-item ms-4 d-flex align-items-center">
-          <button id="logout-btn" class="btn btn-outline-light btn-sm">Sign Out</button>
-        </li>
-      </ul>
+          <!-- Guest Menu -->
+          <ul class="navbar-nav guest-menu" style="display: none">
+            <li class="nav-item">
+              <a class="nav-link nav-hover" href="home.html">Home</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link nav-hover active" href="metro-lines.html"
+                >Metro Lines</a
+              >
+            </li>
+            <li class="nav-item">
+              <a class="nav-link nav-hover" href="announcements.html"
+                >Announcements</a
+              >
+            </li>
+            <li class="nav-item">
+              <a href="signin.html" class="btn btn-outline-light btn-sm me-2"
+                >Sign In</a
+              >
+            </li>
+            <li class="nav-item">
+              <a href="signup.html" class="btn btn-light btn-sm">Sign Up</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+  <div class="container my-5">
+    <h1 class="mb-4">Your Ticket Cart</h1>
+    <div id="cart-container">
+      <!-- JS will render cart here -->
+      <p>Loading cart...</p>
     </div>
-
   </div>
-</nav>
+
+  <script src="js/auth-utils.js"></script>
+  <script src="js/cart.js"></script>
+</body>
+</html>

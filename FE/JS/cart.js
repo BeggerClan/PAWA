@@ -1,111 +1,203 @@
-// const API_BASE = '/api';
-// const token = localStorage.getItem('jwt'); // or however you store your JWT
-
-// const headers = {
-//   'Content-Type': 'application/json',
-//   'Authorization': `Bearer ${token}`
-// };
-
-// document.addEventListener('DOMContentLoaded', () => {
-//   updateCartBadge();
-//   loadCart();
-//   document.getElementById('checkoutBtn').addEventListener('click', checkout);
-// });
-
-// function updateCartBadge() {
-//   fetch(`${API_BASE}/cart/count`, { headers })
-//     .then(res => res.json())
-//     .then(count => {
-//       const badge = document.querySelector('.cart-count');
-//       badge.textContent = count;
-//       badge.style.display = count > 0 ? 'inline-block' : 'none';
-//     });
-// }
-
-// function loadCart() {
-//   fetch(`${API_BASE}/cart/update`, { method: 'GET', headers })
-//     .then(() => fetch(`${API_BASE}/cart/total`, { headers }))
-//     .then(res => res.json())
-//     .then(data => {
-//       document.getElementById('totalFare').textContent = `₫${data.totalFare.toLocaleString()}`;
-//     });
-
-//   // (Optional) Fetch and show items — if you add a /cart/items endpoint
-// }
-
-// function checkout() {
-//   fetch(`${API_BASE}/cart/checkout`, {
-//     method: 'POST',
-//     headers
-//   })
-//     .then(res => {
-//       if (!res.ok) throw new Error("Payment failed");
-//       return res.json();
-//     })
-//     .then(data => {
-//       alert(`Payment successful! New balance: ₫${data.newBalance.toLocaleString()}`);
-//       loadCart();
-//       updateCartBadge();
-//     })
-//     .catch(err => alert(err.message));
-// }
-
 document.addEventListener('DOMContentLoaded', () => {
+  const isAuthenticated = initAuth();
+  updateNavigation(isAuthenticated);
+
+  renderCart();
   updateCartBadge();
-  loadGuestCart();
-  document.getElementById('checkoutBtn').addEventListener('click', () => {
-    alert("✅ Demo only: Payment flow disabled in guest mode.");
-  });
 });
 
-function updateCartBadge() {
-  const badge = document.querySelector('.cart-count');
-  const cart = JSON.parse(localStorage.getItem('guestCart') || '[]');
-  badge.textContent = cart.length;
-  badge.style.display = cart.length > 0 ? 'inline-block' : 'none';
-}
-
-function loadGuestCart() {
-  const cart = JSON.parse(localStorage.getItem('guestCart') || '[]');
-  const cartItems = document.getElementById('cartItems');
-  cartItems.innerHTML = '';
-
-  let total = 0;
+function renderCart() {
+  const cart = JSON.parse(localStorage.getItem('cart')) || [];
+  const container = document.getElementById('cart-container');
+  container.innerHTML = '';
 
   if (cart.length === 0) {
-    cartItems.innerHTML = '<p>Your cart is empty.</p>';
+    container.innerHTML = `
+      <div class="alert alert-info">
+        Your cart is empty. <a href="metro-lines.html">Browse tickets</a>.
+      </div>
+    `;
     return;
   }
 
-  cart.forEach((item, index) => {
-    const div = document.createElement('div');
-    div.className = 'card mb-3 text-dark';
-    div.innerHTML = `
-      <div class="card-body">
-        <h5 class="card-title">${item.description?.split('\n')[0]}</h5>
-        <p class="card-text">${item.description?.replace(/\n/g, '<br>')}</p>
-        <button class="btn btn-sm btn-danger" data-index="${index}">Remove</button>
-      </div>
-    `;
-    cartItems.appendChild(div);
+  const table = document.createElement('table');
+  table.className = 'table table-bordered';
+  table.innerHTML = `
+    <thead>
+      <tr>
+        <th>Ticket</th>
+        <th>Price</th>
+        <th>Quantity</th>
+        <th>Subtotal</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${cart.map(item => `
+        <tr data-code="${item.code}">
+          <td>${item.name}</td>
+          <td>${item.price.toLocaleString('vi-VN')}đ</td>
+          <td>
+            <div class="d-flex align-items-center gap-2">
+              <button class="btn btn-sm btn-outline-secondary decrease-btn" data-code="${item.code}">−</button>
+              <span class="fw-bold">${item.quantity}</span>
+              <button class="btn btn-sm btn-outline-secondary increase-btn" data-code="${item.code}">+</button>
+            </div>
+          </td>
+          <td>${(item.price * item.quantity).toLocaleString('vi-VN')}đ</td>
+          <td><button class="btn btn-sm btn-danger remove-btn">Remove</button></td>
+        </tr>
+      `).join('')}
+    </tbody>
+  `;
 
-    // Try to extract all prices in description (multi-line)
-    const matches = [...item.description.matchAll(/(\d[\d,]*)đ/g)];
-    matches.forEach(match => {
-      const raw = match[1].replace(/,/g, '');
-      total += parseInt(raw);
+  const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+
+  const summary = document.createElement('div');
+  summary.innerHTML = `
+    <div class="d-flex justify-content-between align-items-center mt-3">
+      <h4>Total: <span class="text-success">${total.toLocaleString('vi-VN')}đ</span></h4>
+      <div>
+        <button class="btn btn-outline-danger btn-sm me-2" id="clear-cart">Clear All</button>
+        <button class="btn btn-primary btn-sm" id="checkout-btn">Proceed to Checkout</button>
+      </div>
+    </div>
+  `;
+
+  container.appendChild(table);
+  container.appendChild(summary);
+
+  // Remove buttons
+  document.querySelectorAll('.remove-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const code = btn.closest('tr').dataset.code;
+      removeFromCart(code);
     });
   });
 
-  document.getElementById('totalFare').textContent = `₫${total.toLocaleString()}`;
-
-  // Add remove button behavior
-  document.querySelectorAll('[data-index]').forEach(btn => {
+  // Increase quantity
+  document.querySelectorAll('.increase-btn').forEach(btn => {
     btn.addEventListener('click', () => {
-      cart.splice(parseInt(btn.dataset.index), 1);
-      localStorage.setItem('guestCart', JSON.stringify(cart));
-      loadGuestCart();
-      updateCartBadge();
+      const code = btn.dataset.code;
+      updateQuantity(code, +1);
     });
+  });
+
+  // Decrease quantity
+  document.querySelectorAll('.decrease-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const code = btn.dataset.code;
+      updateQuantity(code, -1);
+    });
+  });
+
+  // Clear All
+  document.getElementById('clear-cart').addEventListener('click', () => {
+    if (confirm('Clear all items from cart?')) {
+      localStorage.removeItem('cart');
+      renderCart();
+    }
+  });
+
+  // Checkout button handler (inside renderCart!)
+  document.getElementById('checkout-btn')?.addEventListener('click', () => {
+    const cart = JSON.parse(localStorage.getItem('cart')) || [];
+    if (cart.length === 0) {
+      alert('Your cart is empty.');
+      return;
+    }
+
+    const payload = {
+      items: cart.map(item => ({
+        code: item.code,
+        quantity: item.quantity
+      }))
+    };
+
+    const token = sessionStorage.getItem('jwtToken');
+    let method = 'stripe';
+
+    if (token) {
+      const choice = prompt("Choose payment method: 'wallet' or 'stripe'").toLowerCase();
+      if (choice === 'wallet') {
+        method = 'wallet';
+      } else if (choice === 'stripe') {
+        method = 'stripe';
+      } else {
+        alert('Invalid method. Try again.');
+        return;
+      }
+    }
+
+    // Add fake token for Stripe
+    if (method === 'stripe') {
+      payload.paymentToken = 'test-token';
+    }
+
+    const endpoint =
+      method === 'wallet'
+        ? 'http://localhost:8080/api/payments/tickets/wallet'
+        : 'http://localhost:8080/api/payments/tickets';
+
+    fetch(endpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token && { Authorization: `Bearer ${token}` })
+      },
+      body: JSON.stringify(payload)
+    })
+      .then(async res => {
+        if (!res.ok) {
+          const error = await res.text();
+          throw new Error(`Checkout failed: ${res.status} ${error}`);
+        }
+        return res.json();
+      })
+      .then(data => {
+        alert('Purchase successful!');
+        localStorage.removeItem('cart');
+        renderCart();
+        updateCartBadge?.();
+      })
+      .catch(err => {
+        alert(err.message);
+        console.error(err);
+      });
+  });
+}
+
+function removeFromCart(code) {
+  let cart = JSON.parse(localStorage.getItem('cart')) || [];
+  cart = cart.filter(item => item.code !== code);
+  localStorage.setItem('cart', JSON.stringify(cart));
+  renderCart();
+  updateCartBadge?.(); // optional if used
+}
+
+function updateQuantity(code, delta) {
+  let cart = JSON.parse(localStorage.getItem('cart')) || [];
+  const index = cart.findIndex(item => item.code === code);
+  if (index === -1) return;
+
+  cart[index].quantity += delta;
+
+  if (cart[index].quantity <= 0) {
+    cart.splice(index, 1); // remove if quantity hits 0
+  }
+
+  localStorage.setItem('cart', JSON.stringify(cart));
+  renderCart();
+  updateCartBadge?.();
+}
+
+// Update cart badge
+function updateCartBadge() {
+  const cart = JSON.parse(localStorage.getItem('cart')) || [];
+  const totalQty = cart.reduce((sum, item) => sum + item.quantity, 0);
+
+  // Update all elements with class 'cart-count'
+  document.querySelectorAll('.cart-count').forEach(badge => {
+    badge.textContent = totalQty;
   });
 }

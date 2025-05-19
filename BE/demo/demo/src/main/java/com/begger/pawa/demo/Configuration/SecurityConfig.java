@@ -42,33 +42,36 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .cors(Customizer.withDefaults()) // Enable CORS with the corsConfigurationSource bean
-                .csrf(csrf -> csrf.disable())
-                .authorizeHttpRequests(auth -> auth
-                        // open endpoint for guest
-                        .requestMatchers(
-                                HttpMethod.POST,
-                                "/api/passengers/register",
-                                "/api/auth/login",
-                                "/api/payments/tickets"
-                        ).permitAll()
-                        .requestMatchers("/error").permitAll()
-                        // direct purchase ticket endpoint for all
+            .cors(Customizer.withDefaults()) // Enable CORS with the corsConfigurationSource bean
+            .csrf(csrf -> csrf.disable())
+            .authorizeHttpRequests(auth -> auth
 
-                        // endpoint for passenger
-                        .requestMatchers("/api/passengers/profile/**",
-                                "/api/wallet/**",
-                                "/api/payments/tickets/wallet/top-up/credit-card"
+                // open endpoints for guests
+                .requestMatchers(
+                    HttpMethod.POST,
+                    "/api/passengers/register",
+                    "/api/auth/login",
+                    "/api/payments/tickets"
+                ).permitAll()
 
-                        ).hasRole("PASSENGER")
+                // Allow ticket type & metro line viewing without login
+                .requestMatchers(HttpMethod.GET, "/api/ticket-types").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/metro-lines/get-all-metro-lines").permitAll()
 
-                        // OPERATOR endpoints
-                        .requestMatchers("/api/operator/**")
-                        .hasRole("OPERATOR")
+                .requestMatchers("/error").permitAll()
 
-                        // AGENT endpoints
-                        .requestMatchers("/api/agent/**")
-                        .hasRole("TICKET_AGENT")
+                // passenger endpoints
+                .requestMatchers(
+                    "/api/passengers/profile/**",
+                    "/api/wallet/**",
+                    "/api/payments/tickets/wallet/top-up/credit-card"
+                ).hasRole("PASSENGER")
+
+                // OPERATOR endpoints
+                .requestMatchers("/api/operator/**").hasRole("OPERATOR")
+
+                // AGENT endpoints
+                .requestMatchers("/api/agent/**").hasRole("TICKET_AGENT")
 
                 .anyRequest().authenticated()
             )

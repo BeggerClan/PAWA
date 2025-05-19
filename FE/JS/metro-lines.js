@@ -598,3 +598,94 @@ function initTicketButtons(isAuthenticated) {
         });
     });
 }
+
+// TICKET TYPE
+document.addEventListener('DOMContentLoaded', () => {
+  fetchAndRenderTicketTypes();
+  updateCartBadge();
+});
+
+document.addEventListener('DOMContentLoaded', fetchAndRenderTicketTypes);
+
+async function fetchAndRenderTicketTypes() {
+  const container = document.querySelector('.ticket-types');
+  if (!container) return;
+
+  try {
+    const response = await fetch('http://localhost:8080/api/ticket-types', {
+      credentials: 'include',
+    });
+
+    if (!response.ok) {
+      const text = await response.text();
+      throw new Error(`Status ${response.status}: ${text}`);
+    }
+
+    const ticketTypes = await response.json();
+    container.innerHTML = ''; // Clear loading text
+
+    ticketTypes.forEach(ticket => {
+      const card = document.createElement('div');
+      card.className = 'ticket-type mb-4';
+
+      card.innerHTML = `
+        <h5>${ticket.displayName}</h5>
+        <p>Valid for ${ticket.validityDurationHours} hours after ${ticket.validFrom.toLowerCase()}.</p>
+        <div class="d-flex justify-content-between align-items-center">
+          <div><strong>${ticket.price.toLocaleString('vi-VN')}đ</strong></div>
+          <div class="d-flex gap-2">
+            <button class="btn btn-outline-primary btn-sm add-to-cart-btn">
+            <i class="fas fa-cart-plus"></i>
+            </button>
+
+            <button class="btn btn-outline-success btn-sm" disabled>
+              Purchase
+            </button>
+          </div>
+        </div>
+      `;
+
+    container.appendChild(card);
+
+    const addBtn = card.querySelector('.add-to-cart-btn');
+    addBtn.addEventListener('click', () => addToCart(ticket));
+    });
+
+  } catch (error) {
+    console.error('Error fetching ticket types:', error);
+    container.innerHTML = `<p class="text-danger">Unable to load ticket types. (${error.message})</p>`;
+  }
+}
+
+
+// Add to cart
+function addToCart(ticket) {
+  const cart = JSON.parse(localStorage.getItem('cart')) || [];
+
+  const index = cart.findIndex(item => item.code === ticket.code);
+  if (index !== -1) {
+    cart[index].quantity += 1;
+  } else {
+    cart.push({
+      code: ticket.code,
+      name: ticket.displayName,
+      price: ticket.price,
+      quantity: 1
+    });
+  }
+
+  localStorage.setItem('cart', JSON.stringify(cart));
+  updateCartBadge();
+}
+
+// Update cart badge
+function updateCartBadge() {
+  const cart = JSON.parse(localStorage.getItem('cart')) || [];
+  const totalQty = cart.reduce((sum, item) => sum + item.quantity, 0);
+
+  // Update all elements with class 'cart-count'
+  document.querySelectorAll('.cart-count').forEach(badge => {
+    badge.textContent = totalQty;
+  });
+}
+

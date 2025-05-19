@@ -19,7 +19,6 @@
     <link rel="stylesheet" href="CSS/metro-lines.css" />
   </head>
   <body>
-    <!-- Navbar matching homepage -->
     <nav
       class="navbar navbar-expand-lg navbar-dark custom-navbar fixed-top px-4"
     >
@@ -93,6 +92,16 @@
               <a class="nav-link nav-hover" href="announcements.html"
                 >Announcements</a
               >
+            </li>
+            <li class="nav-item position-relative">
+              <a class="nav-link nav-hover" href="cart.html">
+                <i class="fas fa-shopping-cart"></i>
+                <span
+                  class="cart-count badge bg-danger rounded-circle position-absolute top-0 start-100 translate-middle"
+                >
+                  0
+                </span>
+              </a>
             </li>
             <li class="nav-item">
               <a href="signin.html" class="btn btn-outline-light btn-sm me-2"
@@ -212,88 +221,10 @@
                 <i class="fas fa-ticket-alt me-2"></i>Ticket Types
               </h3>
             </div>
-            <div class="card-body">
-              <div class="ticket-type">
-                <h5>One-way Ticket</h5>
-                <p>Valid for a single journey between specified stations.</p>
-                <div class="d-flex justify-content-between align-items-center">
-                  <div class="pricing">
-                    <div>Up to 4 stations: <strong>8,000đ</strong></div>
-                    <div>Up to 8 stations: <strong>12,000đ</strong></div>
-                    <div>More than 8 stations: <strong>20,000đ</strong></div>
-                  </div>
-                  <button
-                    class="btn btn-outline-primary add-to-cart"
-                    data-type="daily"
-                    data-price="40000"
-                  >
-                    Select
-                  </button>
-                </div>
-              </div>
-              <hr />
-              <div class="ticket-type">
-                <h5>Daily Ticket</h5>
-                <p>
-                  Valid for unlimited trips on all metro lines for 24 hours
-                  after activation.
-                </p>
-                <div class="d-flex justify-content-between align-items-center">
-                  <div class="pricing">
-                    <div><strong>40,000đ</strong></div>
-                  </div>
-                  <button
-                    class="btn btn-outline-primary add-to-cart"
-                    data-type="daily"
-                    data-price="40000"
-                  >
-                    Select
-                  </button>
-                </div>
-              </div>
-              <hr />
-              <div class="ticket-type">
-                <h5>Three-day Ticket</h5>
-                <p>
-                  Valid for unlimited trips on all metro lines for 72 hours
-                  after activation.
-                </p>
-                <div class="d-flex justify-content-between align-items-center">
-                  <div class="pricing">
-                    <div><strong>90,000đ</strong></div>
-                  </div>
-                  <button
-                    class="btn btn-outline-primary add-to-cart"
-                    data-type="daily"
-                    data-price="40000"
-                  >
-                    Select
-                  </button>
-                </div>
-              </div>
-              <hr />
-              <div class="ticket-type">
-                <h5>Monthly Tickets</h5>
-                <p>
-                  Valid for unlimited trips on all metro lines for 30 days after
-                  activation.
-                </p>
-                <div class="d-flex justify-content-between align-items-center">
-                  <div class="pricing">
-                    <div>Students: <strong>150,000đ</strong></div>
-                    <div>Adults: <strong>300,000đ</strong></div>
-                  </div>
-                  <button
-                    class="btn btn-outline-primary add-to-cart"
-                    data-type="daily"
-                    data-price="40000"
-                  >
-                    Select
-                  </button>
-                </div>
-              </div>
+            <div class="card-body ticket-types">
+              <p>Loading ticket types...</p>
             </div>
-          </div>
+
 
           <!-- System Alerts Card -->
           <div class="card mb-4">
