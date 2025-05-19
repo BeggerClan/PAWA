@@ -1,262 +1,143 @@
-/* metro-lines.css - Reorganized and commented */
+/* metro-lines.css - Styles for HCMC Metro Lines page */
 
-/* =====================================================
-   SEARCH RESULTS STYLING
-   ===================================================== */
-
-.search-results {
-    margin-top: 2rem;
-    animation: fadeIn 0.3s ease-out forwards;
+/* Main container styles */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
 }
 
-.route-list {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-}
-
-.route-card {
-    background-color: white;
-    border-radius: var(--border-radius);
-    padding: 1.25rem;
+/* Metro line card styles */
+.metro-card {
+    background-color: #fff;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    transition: var(--transition);
+    overflow: hidden;
+    transition: all 0.3s ease;
 }
 
-.route-card:hover {
-    transform: translateY(-2px);
+.metro-card:hover {
+    transform: translateY(-3px);
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
 }
 
-/* Route Header */
-.route-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1rem;
-}
-
-.route-time {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-}
-
-.departure, .arrival {
-    font-weight: 600;
-    font-size: 1.1rem;
-}
-
-.duration {
-    color: #666;
-    font-size: 0.9rem;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.route-line {
-    background-color: var(--primary-color);
+.metro-card-header {
+    background: linear-gradient(135deg, #1a73e8, #0d47a1);
     color: white;
-    padding: 0.5rem 1rem;
-    border-radius: 1rem;
+    padding: 1rem 1.5rem;
+    font-size: 1.25rem;
     font-weight: 600;
-    font-size: 0.9rem;
-}
-
-/* Route Stations */
-.route-stations {
     display: flex;
     align-items: center;
-    margin-bottom: 1rem;
 }
 
-.from-station, .to-station {
+.metro-card-header i {
+    margin-right: 0.5rem;
+    font-size: 1.25rem;
+}
+
+.metro-card-body {
+    padding: 1.5rem;
+}
+
+/* Metro line info styles */
+.metro-info-row {
+    display: flex;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.metro-info-row:last-child {
+    border-bottom: none;
+}
+
+.metro-info-label {
+    width: 150px;
+    font-weight: 600;
+    color: #444;
+}
+
+.metro-info-value {
     flex: 1;
-    font-weight: 500;
 }
 
-.route-path {
-    width: 100px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    position: relative;
-    margin: 0 1rem;
+/* Station list styles */
+.station-list {
+    margin-top: 1rem;
+    padding: 1rem;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    display: none; /* Hidden by default */
+    border: 1px solid #e9ecef;
 }
 
-.path-line {
-    height: 2px;
+.station-item {
+    padding: 0.75rem 0.5rem;
+    border-bottom: 1px dashed #dee2e6;
+    transition: background-color 0.2s ease;
+}
+
+.station-item:last-child {
+    border-bottom: none;
+}
+
+.station-item:hover {
+    background-color: #f1f3f5;
+}
+
+.station-item strong {
+    display: inline-block;
+    width: 2rem;
+    color: #1a73e8;
+}
+
+/* Toggle button styles */
+.toggle-stations-btn {
     width: 100%;
-    background-color: var(--primary-color);
-    position: relative;
-}
-
-.path-line::before, .path-line::after {
-    content: '';
-    position: absolute;
-    width: 8px;
-    height: 8px;
-    background-color: var(--primary-color);
-    border-radius: 50%;
-    top: 50%;
-    transform: translateY(-50%);
-}
-
-.path-line::before {
-    left: 0;
-}
-
-.path-line::after {
-    right: 0;
-}
-
-.stations-count {
-    font-size: 0.8rem;
-    color: #666;
-    margin-top: 0.25rem;
-}
-
-.route-actions {
+    padding: 0.75rem;
+    background-color: #f8f9fa;
+    color: #1a73e8;
+    border: 1px solid #1a73e8;
+    border-radius: 4px;
     display: flex;
-    gap: 1rem;
-    justify-content: flex-end;
-}
-
-/* =====================================================
-   ROUTE DETAILS MODAL STYLING
-   ===================================================== */
-
-.route-details {
-    padding: 1rem 0;
-}
-
-.route-summary {
-    display: flex;
-    justify-content: space-between;
     align-items: center;
-    margin-bottom: 2rem;
+    justify-content: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
 }
 
-.route-line-badge {
-    background-color: var(--primary-color);
+.toggle-stations-btn:hover {
+    background-color: #1a73e8;
     color: white;
-    padding: 0.5rem 1.5rem;
-    border-radius: 2rem;
-    font-weight: 600;
 }
 
-.route-time-details {
-    display: flex;
-    gap: 2rem;
+.toggle-stations-btn i {
+    font-size: 0.875rem;
 }
 
-.time-item {
-    text-align: center;
-}
-
-.time-item .label {
-    font-size: 0.8rem;
-    color: #666;
-    margin-bottom: 0.25rem;
-}
-
-.time-item .value {
-    font-size: 1.1rem;
-    font-weight: 600;
-}
-
-/* Station Timeline */
-.station-timeline {
-    position: relative;
-    padding-left: 30px;
-}
-
-.station-timeline::before {
-    content: '';
-    position: absolute;
-    left: 10px;
-    top: 0;
-    bottom: 0;
-    width: 2px;
-    background-color: #ddd;
-}
-
-.timeline-item {
-    position: relative;
-    padding: 1rem 0;
-    display: flex;
-    align-items: center;
-}
-
-.timeline-marker {
-    position: absolute;
-    left: -30px;
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    background-color: white;
-    border: 2px solid #ddd;
-    z-index: 1;
-}
-
-.timeline-marker.start {
-    background-color: var(--primary-color);
-    border-color: var(--primary-color);
-}
-
-.timeline-marker.end {
-    background-color: var(--primary-color);
-    border-color: var(--primary-color);
-}
-
-.timeline-content {
-    flex: 1;
-}
-
-.station-name {
-    font-weight: 600;
-}
-
-.station-time {
-    font-size: 0.9rem;
-    color: #666;
-}
-
-/* =====================================================
-   RESPONSIVE STYLES
-   ===================================================== */
-
+/* Responsive adjustments */
 @media (max-width: 768px) {
-    .route-summary {
+    .metro-info-row {
         flex-direction: column;
-        gap: 1rem;
     }
     
-    .route-time-details {
+    .metro-info-label {
         width: 100%;
-        justify-content: space-between;
+        margin-bottom: 0.25rem;
     }
     
-    .route-header {
-        flex-direction: column;
-        gap: 0.5rem;
-    }
-    
-    .route-time {
-        width: 100%;
-        justify-content: space-between;
+    .toggle-stations-btn {
+        padding: 0.5rem;
     }
 }
 
-/* =====================================================
-   ANIMATIONS
-   ===================================================== */
-
+/* Animation for displaying station list */
 @keyframes fadeIn {
     from {
         opacity: 0;
-        transform: translateY(10px);
+        transform: translateY(-10px);
     }
     to {
         opacity: 1;
@@ -264,6 +145,32 @@
     }
 }
 
-.fade-in {
-    animation: fadeIn 0.3s ease-out forwards;
+.station-list.show {
+    display: block;
+    animation: fadeIn 0.3s ease forwards;
+}
+
+/* Status indicators */
+.status-badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 50px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.status-operational {
+    background-color: #e6f7ed;
+    color: #0c7b3d;
+}
+
+.status-inactive {
+    background-color: #e8eaed;
+    color: #5f6368;
+}
+
+.status-suspended {
+    background-color: #fce8e6;
+    color: #c5221f;
 }
