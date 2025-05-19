@@ -441,6 +441,44 @@
         </div>
     </footer>
 
+    <!-- One-way Ticket Purchase Modal -->
+    <div class="modal fade" id="oneWayTicketModal" tabindex="-1" aria-labelledby="oneWayTicketModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+        <form class="modal-content" id="oneWayTicketForm">
+            <div class="modal-header">
+            <h5 class="modal-title">Purchase One-way Ticket</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+            <div class="mb-3">
+                <label for="modalPassengerId" class="form-label">Passenger ID</label>
+                <input type="text" class="form-control" id="modalPassengerId" required>
+            </div>
+            <div class="mb-3">
+                <label for="modalFromStation" class="form-label">From Station</label>
+                <select class="form-select" id="modalFromStation" required></select>
+            </div>
+            <div class="mb-3">
+                <label for="modalToStation" class="form-label">To Station</label>
+                <select class="form-select" id="modalToStation" required></select>
+            </div>
+            <div class="mb-3">
+                <label for="modalPaymentMode" class="form-label">Payment Mode</label>
+                <select class="form-select" id="modalPaymentMode">
+                <option value="EWALLET">eWallet</option>
+                <option value="CASH">Cash</option>
+                </select>
+            </div>
+            <div id="purchaseFeedback" class="text-danger small"></div>
+            </div>
+            <div class="modal-footer">
+            <button type="submit" class="btn btn-primary">Confirm Purchase</button>
+            </div>
+        </form>
+        </div>
+    </div>
+  
+
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <!-- Custom JS -->

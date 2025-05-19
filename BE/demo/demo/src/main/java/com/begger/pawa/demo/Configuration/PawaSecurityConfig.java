@@ -72,7 +72,7 @@ public class PawaSecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(Arrays.asList("http://127.0.0.1:5501","http://localhost:5173"));
+        config.setAllowedOrigins(Arrays.asList("http://127.0.0.1:5501","http://localhost:5173","http://192.168.102.12:3000", "http://localhost:3000","http://127.0.0.1:5501","http://localhost:5173"));
         config.setAllowedMethods(Arrays.asList("*"));
         config.setAllowedHeaders(Arrays.asList("*"));
         config.setAllowCredentials(true);

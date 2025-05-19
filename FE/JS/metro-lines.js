@@ -124,3 +124,82 @@ function updateNavigation(isAuthenticated) {
         guestMenu.style.display = isAuthenticated ? 'none' : 'flex';
     }
 }
+
+
+    // Handle One-way Ticket select → show modal
+    const ticketTypes = document.querySelectorAll('.ticket-type');
+    ticketTypes.forEach(ticket => {
+        const header = ticket.querySelector('h5');
+        const selectBtn = ticket.querySelector('.select-ticket-btn');
+        if (header && header.textContent.includes("One-way Ticket") && selectBtn) {
+            selectBtn.addEventListener('click', () => {
+                if (!isAuthenticated) {
+                    if (confirm("You need to sign in to purchase this ticket. Redirect now?")) {
+                        window.location.href = "signin.html";
+                    }
+                    return;
+                }
+
+                populateStationDropdowns();
+                const modal = new bootstrap.Modal(document.getElementById('oneWayTicketModal'));
+                modal.show();
+            });
+        }
+    });
+
+    // Populate station dropdowns from search box
+    function populateStationDropdowns() {
+        const options = document.querySelectorAll('#from-station option');
+        const fromSelect = document.getElementById('modalFromStation');
+        const toSelect = document.getElementById('modalToStation');
+
+        fromSelect.innerHTML = '';
+        toSelect.innerHTML = '';
+
+        options.forEach(opt => {
+            if (opt.value) {
+                const label = opt.textContent;
+                fromSelect.append(new Option(label, opt.value));
+                toSelect.append(new Option(label, opt.value));
+            }
+        });
+    }
+
+    // Handle form submit
+    const purchaseForm = document.getElementById('oneWayTicketForm');
+    purchaseForm.addEventListener('submit', async function (e) {
+        e.preventDefault();
+
+        const payload = {
+            passengerId: document.getElementById('modalPassengerId').value,
+            ticketType: "ONE_WAY",
+            fromStation: document.getElementById('modalFromStation').value,
+            toStation: document.getElementById('modalToStation').value,
+            paymentMode: document.getElementById('modalPaymentMode').value,
+            freeRide: false
+        };
+
+        try {
+            const res = await fetch('http://localhost:8080/api/tickets/purchase', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                    // Authorization is added automatically via auth-utils.js
+                },
+                body: JSON.stringify(payload)
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                document.getElementById('purchaseFeedback').textContent = data.message || 'Purchase failed.';
+            } else {
+                alert("Ticket purchased successfully!");
+                const modal = bootstrap.Modal.getInstance(document.getElementById('oneWayTicketModal'));
+                modal.hide();
+                purchaseForm.reset();
+            }
+        } catch (err) {
+            document.getElementById('purchaseFeedback').textContent = "Network error: " + err.message;
+        }
+    });
