@@ -62,79 +62,57 @@ public class AgentPaymentController {
 
 
     @PostMapping("/payments")
-    public ResponseEntity<PaymentResponse> processPayment(@RequestBody PaymentRequest req) {
-        ObjectId tid;
-
-        // Validate ticketId format
+    public ResponseEntity<PaymentResponse> processAgentPayment(@RequestBody PaymentRequest req) {
+        ObjectId passengerId;
         try {
-            tid = new ObjectId(req.getTicketId());
+            passengerId = new ObjectId(req.getPassengerId());
         } catch (IllegalArgumentException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid ticketId");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid passengerId");
         }
 
-        // 1. Retrieve the ticket
-        Ticket ticket = ticketRepo.findById(tid)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ticket not found"));
+        // Find ticket type and expected price
+        TicketType type = ticketTypeRepo.findByCode(req.getTicketTypeId())
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ticket type not found"));
 
-        // 2. Extract passenger ID
-        String pid = ticket.getPassengerId().toHexString();
+        long expectedPrice = type.getPrice();
 
-        // 3. Only handle WALLET payment for now
         if ("WALLET".equalsIgnoreCase(req.getPaymentMethod())) {
-            // 3a. Retrieve wallet
-            PassengerWallet wallet = walletRepo.findByPassengerId(pid)
-                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Wallet not found"));
+            PassengerWallet wallet = walletRepo.findByPassengerId(passengerId.toHexString())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Wallet not found"));
 
-            // 3b. Determine price from TicketType
-            TicketType type = ticketTypeRepo.findByCode(ticket.getTicketTypeId())
-                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ticket type not found"));
-
-            long price = type.getPrice();
-            long balance = wallet.getBalance();
-
-            // 3c. Check if balance is sufficient
-            if (balance < price) {
-                long shortfall = price - balance;
+            if (wallet.getBalance() < expectedPrice) {
+                long shortfall = expectedPrice - wallet.getBalance();
                 return ResponseEntity.status(HttpStatus.PAYMENT_REQUIRED).body(
-                        new PaymentResponse(balance, "Insufficient funds. Need to top up: " + shortfall + " VND")
+                    new PaymentResponse(wallet.getBalance(), "Insufficient funds. Need to top up: " + shortfall + " VND")
                 );
             }
 
-            // 3d. Deduct and save
-            wallet.setBalance(balance - price);
+            wallet.setBalance(wallet.getBalance() - expectedPrice);
             wallet.setUpdatedAt(Instant.now());
             walletRepo.save(wallet);
 
-            // 3e. Return success response
-            return ResponseEntity.ok(new PaymentResponse(wallet.getBalance(), "Payment successful via eWallet"));
+            return ResponseEntity.ok(new PaymentResponse(wallet.getBalance(), "eWallet payment successful"));
         }
+
         else if ("CASH".equalsIgnoreCase(req.getPaymentMethod())) {
-            TicketType type = ticketTypeRepo.findByCode(ticket.getTicketTypeId())
-                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ticket type not found"));
-        
-            long price = type.getPrice();
-            Long cashReceived = req.getCashReceived();
-        
-            if (cashReceived == null || cashReceived < price) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-                    new PaymentResponse(0, "Insufficient cash. Ticket price is " + price + " VND")
+            Long cash = req.getCashReceived();
+            if (cash == null || cash < expectedPrice) {
+                return ResponseEntity.badRequest().body(
+                    new PaymentResponse(0, "Insufficient cash. Ticket price is " + expectedPrice + " VND")
                 );
             }
-        
-            long change = cashReceived - price;
-        
-            // Optional: Log cash transaction or save to ticket history
-            return ResponseEntity.ok(new PaymentResponse(change, "Payment successful. Change: " + change + " VND"));
-        }
-        
 
-        // 4. Unsupported payment method
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-                new PaymentResponse(0, "Unsupported or missing payment method")
+            long change = cash - expectedPrice;
+            return ResponseEntity.ok(new PaymentResponse(change, "Cash payment successful. Change: " + change + " VND"));
+        }
+
+        return ResponseEntity.badRequest().body(
+            new PaymentResponse(0, "Unsupported payment method")
         );
     }
 
-    // Lấy tất cả passengerId có trong hệ thống
+    // this was made by Dat in OPWA
+    // Lấy tất cả passengerId có trong hệ thống 
     @GetMapping("/passenger-ids")
     public ResponseEntity<?> getAllPassengerIdsAndNames() {
         var wallets = walletRepo.findAll();

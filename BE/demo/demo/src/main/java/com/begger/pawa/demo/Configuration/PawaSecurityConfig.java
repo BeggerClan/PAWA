@@ -56,7 +56,7 @@ public class PawaSecurityConfig {
 
                         .requestMatchers("/api/opwa/operator/**").hasAnyRole("OPERATOR", "ADMIN")
 
-                        .requestMatchers("/api/opwa/agent/**").hasAnyRole("TICKET_AGENT","ADMIN","OPERATOR")
+                        .requestMatchers("/api/opwa/agent/**").permitAll()
 
                         .anyRequest().authenticated()
                 )
