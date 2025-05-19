@@ -39,32 +39,39 @@ public class PawaSecurityConfig {
     @Bean
     public SecurityFilterChain pawaFilterChain(HttpSecurity http) throws Exception {
         http
-                .cors(Customizer.withDefaults())
-                .csrf(csrf -> csrf.disable())
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(HttpMethod.POST,
-                                "/api/passengers/register",
-                                "/api/auth/login",
-                                "/api/payments/tickets"
-                        ).permitAll()
-                        .requestMatchers("/error").permitAll()
+            .cors(Customizer.withDefaults())
+            .csrf(csrf -> csrf.disable())
+            .authorizeHttpRequests(auth -> auth
+                // open endpoints for guests
+                .requestMatchers(HttpMethod.POST,
+                        "/api/passengers/register",
+                        "/api/auth/login",
+                        "/api/payments/tickets"
+                ).permitAll()
 
-                        .requestMatchers("/api/passengers/profile/**",
-                                "/api/wallet/**",
-                                "/api/payments/tickets/wallet/top-up/credit-card"
-                        ).hasRole("PASSENGER")
+                // Allow ticket type & metro line viewing without login
+                .requestMatchers(HttpMethod.GET, "/api/ticket-types").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/metro-lines/get-all-metro-lines").permitAll()
+                
+                .requestMatchers("/error").permitAll()
 
-                        .requestMatchers("/api/opwa/operator/**").hasAnyRole("OPERATOR", "ADMIN")
+                // PASSENGER endpoints
+                .requestMatchers(
+                    "/api/passengers/profile/**",
+                    "/api/wallet/**",
+                    "/api/payments/tickets/wallet/top-up/credit-card"
+                ).hasRole("PASSENGER")
 
                         .requestMatchers("/api/opwa/agent/**").hasAnyRole("OPERATOR", "ADMIN")
 
-                        .anyRequest().authenticated()
-                )
-                .oauth2ResourceServer(oauth -> oauth
-                        .jwt(jwt -> jwt
-                                .decoder(pawaJwtDecoder(null, null)) // placeholder, sẽ override bean
-                                .jwtAuthenticationConverter(jwtAuthConverter()))
-                );
+                .anyRequest().authenticated()
+            )
+            .oauth2ResourceServer(oauth -> oauth
+                .jwt(jwt -> jwt
+                    .decoder(pawaJwtDecoder(null, null)) // placeholder, sẽ override bean
+                    .jwtAuthenticationConverter(jwtAuthConverter())
+                    )
+            );
 
         return http.build();
     }

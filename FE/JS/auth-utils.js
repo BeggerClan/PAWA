@@ -1,8 +1,8 @@
 // FE/js/auth-utils.js
 // Function to check if the user is logged in
 function isLoggedIn() {
-    const token = sessionStorage.getItem('jwtToken');
-    const expiry = sessionStorage.getItem('tokenExpiry');
+    const token = localStorage.getItem('jwtToken');
+    const expiry = localStorage.getItem('tokenExpiry');
     
     if (!token || !expiry) {
         return false;
@@ -18,6 +18,17 @@ function isLoggedIn() {
     return true;
 }
 
+// Update Navigation Bar based on login/logout
+function updateNavigation(isLoggedIn) {
+    if (isLoggedIn) {
+        document.querySelector('.auth-menu').style.display = 'flex';
+        document.querySelector('.guest-menu').style.display = 'none';
+    } else {
+        document.querySelector('.auth-menu').style.display = 'none';
+        document.querySelector('.guest-menu').style.display = 'flex';
+    }
+}
+
 // Function to log out
 function logout() {
     // Add fade-out animation to the body
@@ -25,15 +36,15 @@ function logout() {
     
     // After animation completes, clear storage and redirect
     setTimeout(() => {
-        sessionStorage.removeItem('jwtToken');
-        sessionStorage.removeItem('tokenExpiry');
+        localStorage.removeItem('jwtToken');
+        localStorage.removeItem('tokenExpiry');
         window.location.href = 'home.html';
     }, 300);
 }
 
 // Function to get the JWT token
 function getToken() {
-    return sessionStorage.getItem('jwtToken');
+    return localStorage.getItem('jwtToken');
 }
 
 // Function to get user info from JWT
@@ -92,7 +103,7 @@ function setupAuthNavigation() {
     navLinks.forEach(link => {
         link.addEventListener('click', function(e) {
             // Allow normal navigation without interfering with auth state
-            // We don't prevent default or modify URLs as token is in sessionStorage
+            // We don't prevent default or modify URLs as token is in localStorage
         });
     });
 }
