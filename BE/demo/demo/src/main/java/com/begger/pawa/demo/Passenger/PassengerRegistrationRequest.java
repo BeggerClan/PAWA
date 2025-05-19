@@ -7,64 +7,42 @@ import java.time.LocalDateTime;
 
 public class PassengerRegistrationRequest {
 
-    @NotBlank(message = "Email is required")
-    @Email(message = "Must be a valid email address")
-    @Pattern(regexp = "^[a-zA-Z0-9.]+@[a-zA-Z0-9]+(\\.[c][o][m]|\\.[v][n])$", 
-             message = "Email must end with .com or .vn domain extensions")
-    @Size(max = 255, message = "Email cannot exceed 255 characters")
+    @NotBlank @Email @Size(max=255)
     private String email;
 
-    @NotBlank(message = "Password is required")
-    @Size(min = 8, message = "Password must be at least 8 characters")
-    @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?]).+$", 
-             message = "Password must contain at least one uppercase letter, one lowercase letter, one digit, and one special character")
+    @NotBlank @Size(min=8, max=255)
     private String password;
 
-    @NotBlank(message = "First name is required")
-    @Pattern(regexp = "^[a-zA-ZÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơƯĂẠẢẤẦẨẪẬẮẰẲẴẶẸẺẼỀỀỂưăạảấầẩẫậắằẳẵặẹẻẽềềểỄỆỈỊỌỎỐỒỔỖỘỚỜỞỠỢỤỦỨỪễệỉịọỏốồổỗộớờởỡợụủứừỬỮỰỲỴÝỶỸửữựỳỵỷỹ\\s]+$", 
-            message = "First name must contain only alphabet characters, including Vietnamese characters")
-    @Size(max = 50, message = "First name cannot exceed 50 characters")
+    @NotBlank @Size(max=50)
     private String firstName;
 
-    @Pattern(regexp = "^[a-zA-ZÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơƯĂẠẢẤẦẨẪẬẮẰẲẴẶẸẺẼỀỀỂưăạảấầẩẫậắằẳẵặẹẻẽềềểỄỆỈỊỌỎỐỒỔỖỘỚỜỞỠỢỤỦỨỪễệỉịọỏốồổỗộớờởỡợụủứừỬỮỰỲỴÝỶỸửữựỳỵỷỹ\\s]*$", 
-            message = "Middle name must contain only alphabet characters, including Vietnamese characters")
-    @Size(max = 50, message = "Middle name cannot exceed 50 characters")
+    @Size(max=50)
     private String middleName;    // optional
 
-    @NotBlank(message = "Last name is required")
-    @Pattern(regexp = "^[a-zA-ZÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơƯĂẠẢẤẦẨẪẬẮẰẲẴẶẸẺẼỀỀỂưăạảấầẩẫậắằẳẵặẹẻẽềềểỄỆỈỊỌỎỐỒỔỖỘỚỜỞỠỢỤỦỨỪễệỉịọỏốồổỗộớờởỡợụủứừỬỮỰỲỴÝỶỸửữựỳỵỷỹ\\s]+$", 
-            message = "Last name must contain only alphabet characters, including Vietnamese characters")
-    @Size(max = 50, message = "Last name cannot exceed 50 characters")
+    @NotBlank @Size(max=50)
     private String lastName;
 
-    @NotBlank(message = "National ID is required")
-    @Pattern(regexp = "^\\d{12}$", message = "National ID must be exactly 12 digits")
+    @Size(max=12)
     private String nationalId;
 
-    @NotNull(message = "Date of birth is required")
-    private @NotNull LocalDate dob;    // maps to DATETIME
+    @NotNull
+    private LocalDate dob;    // maps to DATETIME
 
-    @NotBlank(message = "Residence address is required")
-    @Pattern(regexp = "^[a-zA-Z0-9ÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơƯĂẠẢẤẦẨẪẬẮẰẲẴẶẸẺẼỀỀỂưăạảấầẩẫậắằẳẵặẹẻẽềềểỄỆỈỊỌỎỐỒỔỖỘỚỜỞỠỢỤỦỨỪễệỉịọỏốồổỗộớờởỡợụủứừỬỮỰỲỴÝỶỸửữựỳỵỷỹ\\s,./-]+$", 
-             message = "Residence address can only contain alphanumeric characters, Vietnamese characters, and the symbols , . - /")
-    @Size(max = 50, message = "Residence address cannot exceed 50 characters")
+    @NotBlank @Size(max=50)
     private String residenceAddress;
 
-    @NotBlank(message = "Phone number is required")
-    @Pattern(regexp = "^0\\d{9}$", message = "Phone number must be exactly 10 digits and start with 0")
+    @NotBlank @Size(min=10, max=10)
     private String phoneNumber;
 
-    @Pattern(regexp = "^[a-zA-Z0-9]{0,15}$", 
-             message = "Student ID must contain only alphanumeric characters and not exceed 15 characters")
+    @Size(max=50)
     private String studentId;     // optional
 
-    @NotNull(message = "Disability status is required")
+    @NotNull
     private Boolean disabilityStatus;
 
-    @NotNull(message = "Revolutionary status is required")
+    @NotNull
     private Boolean revolutionaryStatus;
 
-    // Use existing getters and setters
     public @NotBlank @Email @Size(max = 255) String getEmail() {
         return email;
     }
@@ -105,11 +83,11 @@ public class PassengerRegistrationRequest {
         this.lastName = lastName;
     }
 
-    public @NotBlank @Size(max = 12) String getNationalId() {
+    public @Size(max = 12) String getNationalId() {
         return nationalId;
     }
 
-    public void setNationalId(@NotBlank @Size(max = 12) String nationalId) {
+    public void setNationalId(@Size(max = 12) String nationalId) {
         this.nationalId = nationalId;
     }
 

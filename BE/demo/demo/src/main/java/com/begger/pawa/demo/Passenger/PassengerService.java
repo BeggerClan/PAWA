@@ -1,5 +1,9 @@
 package com.begger.pawa.demo.Passenger;
 
+import com.begger.pawa.demo.Passenger.Passenger;
+import com.begger.pawa.demo.Passenger.PassengerRegistrationRequest;
+import com.begger.pawa.demo.Passenger.PassengerRepository;
+
 import com.begger.pawa.demo.Wallet.PassengerWallet;
 import com.begger.pawa.demo.Wallet.WalletRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,11 +14,10 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Instant;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.Period;
 
 @Service
 public class PassengerService {
+
 
     private final PassengerRepository repo;
     private final PasswordEncoder passwordEncoder;
@@ -27,110 +30,42 @@ public class PassengerService {
     }
 
     /**
-     * Register a new Passenger with enhanced validation.
-     * @throws ResponseStatusException with specific error messages for validation failures
+     * Register a new Passenger.
+     * @throws ResponseStatusException(409) if email or nationalId already exist.
      */
-    public Passenger register(PassengerRegistrationRequest req) {
-        // Email validation
-        if (!req.getEmail().matches("^[a-zA-Z0-9.]+@[a-zA-Z0-9]+(\\.[c][o][m]|\\.[v][n])$")) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST, 
-                    "Invalid email format. The email must end with '.com' or '.vn' (e.g., example@domain.com)."
-            );
-        }
 
-        // Check for duplicate email
+    public Passenger register (PassengerRegistrationRequest req) {
+        Instant now = Instant.now();
+        LocalDate today = LocalDate.now();
+        boolean age6OrBelow     = req.getDob().isAfter(today.minusYears(6));
+
+        // check for duplicate email
         repo.findByEmail(req.getEmail())
                 .ifPresent(p -> {
                     throw new ResponseStatusException(
-                            HttpStatus.CONFLICT, "Email is already registered"
+                            HttpStatus.CONFLICT, "Email is already existed"
                     );
                 });
 
-        // Check for duplicate national ID
-        repo.findByNationalId(req.getNationalId())
-                .ifPresent(p -> {
-                    throw new ResponseStatusException(
-                            HttpStatus.CONFLICT, "National ID has already been registered"
-                    );
-                });
-
-        // Password complexity validation
-        if (!req.getPassword().matches("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?]).+$")) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST, 
-                    "Password must contain at least one uppercase letter, one lowercase letter, one digit, and one special character."
-            );
-        }
-
-        // Name validation (Vietnamese characters allowed)
-        String nameRegex = "^[a-zA-ZÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơƯĂẠẢẤẦẨẪẬẮẰẲẴẶẸẺẼỀỀỂưăạảấầẩẫậắằẳẵặẹẻẽềềểỄỆỈỊỌỎỐỒỔỖỘỚỜỞỠỢỤỦỨỪễệỉịọỏốồổỗộớờởỡợụủứừỬỮỰỲỴÝỶỸửữựỳỵỷỹ\\s]+$";
-        if (req.getFirstName() != null && !req.getFirstName().matches(nameRegex)) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST, 
-                    "First name must contain only alphabet characters, including Vietnamese characters."
-            );
-        }
-        if (req.getMiddleName() != null && !req.getMiddleName().isEmpty() && !req.getMiddleName().matches(nameRegex)) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST, 
-                    "Middle name must contain only alphabet characters, including Vietnamese characters."
-            );
-        }
-        if (req.getLastName() != null && !req.getLastName().matches(nameRegex)) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST, 
-                    "Last name must contain only alphabet characters, including Vietnamese characters."
-            );
-        }
-
-        // National ID validation
-        if (req.getNationalId() != null && !req.getNationalId().matches("^\\d{12}$")) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST, 
-                    "National ID must be exactly 12 digits."
-            );
-        }
-
-        // Date of birth validation - at least 6 years old
-        if (req.getDob() != null) {
-            LocalDate minDob = LocalDate.now().minusYears(6);
-            if (req.getDob().isAfter(minDob)) {
+        // check db for exist national ID and check to see if age is below 6 (not required nation id)
+        if (!age6OrBelow) {
+            if (req.getNationalId() == null || req.getNationalId().isBlank()) {
                 throw new ResponseStatusException(
-                        HttpStatus.BAD_REQUEST, 
-                        "You must be at least 6 years old to register."
+                        HttpStatus.BAD_REQUEST,
+                        "National ID is required for passengers older than 6 years"
                 );
             }
-        }
-
-        // Residence address validation
-        if (req.getResidenceAddress() != null && 
-            !req.getResidenceAddress().matches("^[a-zA-Z0-9ÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơƯĂẠẢẤẦẨẪẬẮẰẲẴẶẸẺẼỀỀỂưăạảấầẩẫậắằẳẵặẹẻẽềềểỄỆỈỊỌỎỐỒỔỖỘỚỜỞỠỢỤỦỨỪễệỉịọỏốồổỗộớờởỡợụủứừỬỮỰỲỴÝỶỸửữựỳỵỷỹ\\s,./-]+$")) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST, 
-                    "Residence address can only contain alphanumeric characters, Vietnamese characters, and the symbols , . - /"
-            );
-        }
-
-        // Phone number validation
-        if (req.getPhoneNumber() != null && !req.getPhoneNumber().matches("^0\\d{9}$")) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST, 
-                    "Phone number must be exactly 10 digits and start with 0."
-            );
-        }
-
-        // Student ID validation
-        if (req.getStudentId() != null && !req.getStudentId().isEmpty() && 
-            !req.getStudentId().matches("^[a-zA-Z0-9]{1,15}$")) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST, 
-                    "Student ID must contain only alphanumeric characters and not exceed 15 characters."
-            );
+            repo.findByNationalId(req.getNationalId())
+                    .ifPresent(p -> {
+                        throw new ResponseStatusException(
+                                HttpStatus.CONFLICT,
+                                "National ID has already been registered"
+                        );
+                    });
         }
 
         // Map DTO to Entity
-        Passenger p = new Passenger();
+        Passenger p  = new Passenger();
         p.setEmail(req.getEmail());
         p.setPassword(passwordEncoder.encode(req.getPassword()));
         p.setFirstName(req.getFirstName());
@@ -144,17 +79,17 @@ public class PassengerService {
         p.setDisabilityStatus(req.getDisabilityStatus());
         p.setRevolutionaryStatus(req.getRevolutionaryStatus());
 
-        // Set default for missing attribute
-        Instant now = Instant.now();
+        // set default for missing attribute
+
         p.setPasswordChangedAt(now);
         p.setCreatedAt(now);
         p.setUpdatedAt(now);
         p.setVerified(false);
         p.setGuest(false);
 
-        LocalDate today = LocalDate.now();
+
         boolean age60OrAbove    = req.getDob().isBefore(today.minusYears(60));
-        boolean age6OrBelow     = req.getDob().isAfter(today.minusYears(6));
+
         boolean hasDisability   = req.getDisabilityStatus();
         boolean isRevolutionary = req.getRevolutionaryStatus();
 
@@ -163,7 +98,7 @@ public class PassengerService {
         // save passenger
         Passenger saved = repo.save(p);
 
-        // Create wallet with zero balance
+        // create wallet with zero balance
         PassengerWallet wallet = new PassengerWallet();
         wallet.setPassengerId(saved.getPassengerId());
         wallet.setBalance(0L);
@@ -173,5 +108,7 @@ public class PassengerService {
         walletRepo.save(wallet);
 
         return saved;
+
+
     }
 }
