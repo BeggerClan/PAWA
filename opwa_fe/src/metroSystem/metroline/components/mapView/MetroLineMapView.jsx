@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { MapContainer, TileLayer, Polyline, Marker, Popup } from "react-leaflet";
+import { MapContainer, TileLayer, Polyline, Marker, Popup, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { FaMapMarkerAlt } from "react-icons/fa";
 import { renderToStaticMarkup } from "react-dom/server";
-import { getAllMetroLines } from "../../services/metroLineApi";
+import { getAllMetroLines } from "../../../services/metroLineApi";
 
 // Map marker color mapping (customize as needed)
 const markerColors = {
@@ -40,23 +40,50 @@ const createReactIcon = (color) =>
     popupAnchor: [0, -44]
   });
 
-const MetroLineMapView = ({ selectedLineId }) => {
+// New: Focus handler for zooming to a station
+const MapFocusHandler = ({ focusPosition }) => {
+  const map = useMap();
+  React.useEffect(() => {
+    if (focusPosition) {
+      map.setView(focusPosition, 16, { animate: true });
+    }
+  }, [focusPosition, map]);
+  return null;
+};
+
+const MetroLineMapView = ({ selectedLineId, refresh, focusPosition, visibleLineIds }) => {
   const [lines, setLines] = useState([]);
 
   useEffect(() => {
     getAllMetroLines().then(res => setLines(res.data));
-  }, []);
+  }, [selectedLineId, refresh]);
 
-  // Filter lines if a line is selected
-  const displayedLines = selectedLineId
-    ? lines.filter(line => line.lineId === selectedLineId)
-    : lines;
+  // Filter lines if a line is selected or visibleLineIds is provided
+  let displayedLines = lines;
+  if (Array.isArray(visibleLineIds) && visibleLineIds.length > 0) {
+    displayedLines = lines.filter(line => visibleLineIds.includes(line.lineId));
+  } else if (selectedLineId) {
+    displayedLines = lines.filter(line => String(line.lineId) === String(selectedLineId));
+  }
 
-  // Prepare polylines
-  const polylines = displayedLines.map(line => ({
-    positions: line.stations?.map(st => [st.latitude, st.longitude]) || [],
-    color: getColor(line.stations?.[0]?.mapMarker)
-  }));
+  // Prepare polylines: always use the color of the first station's mapMarker
+  const polylines = displayedLines.map(line => {
+    // Order stations by lowest to largest stationId (numerically)
+    let orderedStations = [];
+    if (line.stations) {
+      orderedStations = [...line.stations].sort((a, b) => {
+        const numA = parseInt(a.stationId.replace(/^ST/, ''), 10);
+        const numB = parseInt(b.stationId.replace(/^ST/, ''), 10);
+        return numA - numB;
+      });
+    }
+    const firstStation = orderedStations[0];
+    const color = firstStation ? getColor(firstStation.mapMarker) : markerColors.default;
+    return {
+      positions: orderedStations.map(st => [st.latitude, st.longitude]),
+      color
+    };
+  });
 
   // Group stations by stationName (not stationId)
   const stationNameMap = {};
@@ -104,6 +131,10 @@ const MetroLineMapView = ({ selectedLineId }) => {
               Line: <span style={{ color }}>{station.lines[0].lineName}</span>
               <br />
               Marker: <span style={{ color }}>{station.mapMarker}</span>
+              <br />
+              Latitude: {station.latitude}
+              <br />
+              Longitude: {station.longitude}
             </>
           )}
         </>
@@ -117,14 +148,24 @@ const MetroLineMapView = ({ selectedLineId }) => {
     ? [firstStation.latitude, firstStation.longitude]
     : [10.7769, 106.7009];
 
+  // Define max bounds (example: Ho Chi Minh City area)
+  const maxBounds = [
+    [10.5, 106.3], // Southwest corner
+    [11.2, 107.1]  // Northeast corner
+  ];
+
   return (
     <MapContainer
+      key={selectedLineId || "all"}
       center={center}
       zoom={13}
       minZoom={12}
       maxZoom={17}
       style={{ height: "70vh", width: "100%" }}
+      maxBounds={maxBounds}
+      maxBoundsViscosity={1.0}
     >
+      <MapFocusHandler focusPosition={focusPosition} />
       <TileLayer
         attribution='&copy; <a href="https://carto.com/attributions">CARTO</a>'
         url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"

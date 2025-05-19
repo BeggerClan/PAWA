@@ -19,9 +19,8 @@ import BookingRecords from "../scenes/bar/BookingRecords";
 import CreateNewStaff from "../scenes/team/createNewStaff";
 
 
-import Station from "../station"; // <-- add this import
-
-import Metroline from "../metroline";
+import Station from "../metroSystem/station"; // <-- add this import
+import Metroline from "../metroSystem/metroline";
 import ProtectedRoute from "./ProtectedRoute";
 
 

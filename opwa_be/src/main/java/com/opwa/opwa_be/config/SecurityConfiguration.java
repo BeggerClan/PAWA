@@ -36,7 +36,13 @@ public class SecurityConfiguration {
                         .requestMatchers(
                                 "/api/v1/auth/**",
                                 "/api/data-generator/**",
-                                "/api/metro-lines/get-all-metro-lines"
+                                "/api/metro-lines/**",
+                                "/api/metro-lines/trips",
+                                "/api/metro-lines/*/trips",
+                                "/api/metro-lines/*/stations/*/trips",
+                                "/api/metro-lines/*/generate-trips",
+                                "/api/suspensions/**",
+                                "/api/stations/**"
                         ).permitAll()
                         .requestMatchers(
                                 "/api/v1/user/getAll",
@@ -45,11 +51,23 @@ public class SecurityConfiguration {
                                 "/api/v1/user/delete/**",
                                 "/api/v1/user/get/**"
                         ).hasAnyAuthority("ADMIN", "OPERATOR")
-                        .requestMatchers(POST, "/api/metro-lines/**").hasAnyAuthority("ADMIN", "OPERATOR")
-                        .requestMatchers(PUT, "/api/metro-lines/**").hasAnyAuthority("ADMIN", "OPERATOR")
-                        .requestMatchers(DELETE, "/api/metro-lines/**").hasAnyAuthority("ADMIN", "OPERATOR")
-                        .requestMatchers("/api/metro-lines/create").hasAnyAuthority("ADMIN", "OPERATOR")
-                        // ... các dòng tương tự cho user, station ...
+                        // MetroLine CRUD
+                        .requestMatchers(
+                                "/api/metro-lines/create",
+                                "/api/metro-lines/{id}",
+                                "/api/metro-lines/update/**",
+                                "/api/metro-lines/delete/**"
+                        ).hasAnyAuthority("ADMIN", "OPERATOR")
+                        // Station CRUD within MetroLine
+                        .requestMatchers(
+                                "/api/metro-lines/{lineId}/stations/{stationId}",
+                                "/api/metro-lines/{lineId}/stations/update/**",
+                                "/api/metro-lines/{lineId}/stations/delete/**"
+                        ).permitAll()//.hasAnyAuthority("ADMIN", "OPERATOR")
+                        // Suspension CRUD (ADMIN, OPERATOR)
+                        .requestMatchers(
+                                "/api/suspensions/**"
+                        ).hasAnyAuthority("ADMIN", "OPERATOR")
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -62,7 +80,7 @@ public class SecurityConfiguration {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(List.of("http://localhost:5173"));
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE"));
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
 

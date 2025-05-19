@@ -1,0 +1,74 @@
+.alltrips-title {
+  margin-bottom: 24px;
+  color: #2d98da;
+  font-size: 2rem;
+  font-weight: 600;
+}
+
+.alltrips-table-wrapper {
+  overflow-x: auto;
+}
+
+.alltrips-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fafcff;
+  border: 2px solid #2d98da;
+  font-size: 15px;
+}
+
+.alltrips-header-row {
+  background: #f1f2f6;
+}
+
+.alltrips-header {
+  padding: 8px;
+  font-weight: 500;
+  border: 1.5px solid #2d98da;
+  text-align: center;
+  font-size: 1rem;
+}
+
+.alltrips-row {
+  transition: background 0.2s;
+}
+
+.alltrips-row.even {
+  background: #fff;
+}
+
+.alltrips-row.odd {
+  background: #f8fafd;
+}
+
+.alltrips-row:hover {
+  background: #e3f0fa;
+}
+
+.alltrips-cell {
+  padding: 0 8px;
+  border: 1.5px solid #2d98da;
+  vertical-align: middle;
+  font-size: 15px;
+  height: 48px;
+}
+
+.alltrips-cell.center {
+  text-align: center;
+}
+
+.alltrips-station-chip {
+  background: #f1f2f6;
+  border-radius: 4px;
+  padding: 2px 8px;
+  font-size: 13px;
+  color: #222;
+  display: inline-block;
+  min-width: 80px;
+}
+
+.alltrips-station-id {
+  color: #888;
+  font-size: 11px;
+  margin-left: 2px;
+} 

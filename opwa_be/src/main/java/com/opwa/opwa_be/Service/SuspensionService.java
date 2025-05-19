@@ -262,4 +262,20 @@ public class SuspensionService {
             metroLineRepo.save(line);
         });
     }
+
+    public Suspension removeStationFromSuspension(String suspensionId, String stationId) {
+        return suspensionRepo.findById(suspensionId).map(suspension -> {
+            if (suspension.getAffectedStationIds() != null) {
+                suspension.getAffectedStationIds().removeIf(id -> id.equals(stationId));
+                if (suspension.getAffectedStationIds().isEmpty()) {
+                    suspension.setActive(false);
+                }
+                suspension.setUpdatedAt(java.time.LocalDateTime.now());
+                suspensionRepo.save(suspension);
+                // Optionally, update metro line status
+                updateMetroLineSuspendedStatus(suspension.getMetroLineId());
+            }
+            return suspension;
+        }).orElseThrow(() -> new RuntimeException("Suspension not found"));
+    }
 }
