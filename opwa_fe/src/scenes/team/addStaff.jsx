@@ -17,7 +17,7 @@ import { addUser } from "./teamapi";
 const roles = [
   { value: "ADMIN", label: "Admin" },
   { value: "OPERATOR", label: "Operator" },
-  { value: "TICKET", label: "Ticket Agent" },
+  { value: "TICKET_AGENT", label: "Ticket Agent" }, // Sửa lại cho đúng enum BE
 ];
 
 const shifts = [
@@ -109,7 +109,7 @@ const checkoutSchema = yup.object().shape({
   employed: yup.boolean().required("Required"),
   role: yup
     .string()
-    .oneOf(["ADMIN", "OPERATOR", "TICKET"])
+    .oneOf(["ADMIN", "OPERATOR", "TICKET_AGENT"])
     .required("Required"),
   shift: yup.string().oneOf(["DAY", "EVENING", "NIGHT"]).required("Required"),
 });
@@ -139,11 +139,10 @@ const AddStaff = () => {
 
   const handleFormSubmit = async (values, { setSubmitting, resetForm }) => {
     try {
-      // Convert role and shift to enum values
       const payload = {
         ...values,
-        role: values.role,
-        shift: values.shift,
+        role: values.role, // Đã là "ADMIN", "OPERATOR", "TICKET_AGENT"
+        shift: values.shift, // Đã là "DAY", "EVENING", "NIGHT"
       };
       await addUser(payload);
       alert("Staff created successfully!");
