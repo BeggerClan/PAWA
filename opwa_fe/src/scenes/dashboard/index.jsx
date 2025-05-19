@@ -1,283 +1,206 @@
-import { Box, Button, IconButton, Typography, useTheme } from "@mui/material";
-import { tokens } from "../../theme";
-import { mockTransactions } from "../../data/mockData";
-import DownloadOutlinedIcon from "@mui/icons-material/DownloadOutlined";
-import EmailIcon from "@mui/icons-material/Email";
-import PointOfSaleIcon from "@mui/icons-material/PointOfSale";
-import PersonAddIcon from "@mui/icons-material/PersonAdd";
-import TrafficIcon from "@mui/icons-material/Traffic";
-import Header from "../../components/Header";
-import LineChart from "../../components/LineChart";
-import GeographyChart from "../../components/GeographyChart";
+import React, { useEffect, useState } from "react";
 import BarChart from "../../components/BarChart";
-import StatBox from "../../components/StatBox";
-import ProgressCircle from "../../components/ProgressCircle";
+import PieChart from "../../components/PieChart";
+import { fetchBookingRecords } from "../../components/BarAPI";
+
+// Bảng giá vé
+const TICKET_TYPE_INFO = {
+  DAILY: { displayName: "Daily ticket", price: 40000 },
+  FREE: { displayName: "Free ticket", price: 0 },
+  MONTHLY_ADULT: { displayName: "Monthly ticket (adult)", price: 300000 },
+  MONTHLY_STUDENT: { displayName: "Monthly ticket (student)", price: 150000 },
+  ONE_WAY_4: { displayName: "One-way (up to 4 stations)", price: 8000 },
+  ONE_WAY_8: { displayName: "One-way (up to 8 stations)", price: 12000 },
+  ONE_WAY_UNL: { displayName: "One-way (unlimited stations)", price: 20000 },
+  THREE_DAY: { displayName: "Three-day ticket", price: 90000 },
+};
 
 const Dashboard = () => {
-  const theme = useTheme();
-  const colors = tokens(theme.palette.mode);
+  const [barData, setBarData] = useState([]);
+  const [pieData, setPieData] = useState([]);
+  const [ticketStats, setTicketStats] = useState([]);
+  const [totalRevenue, setTotalRevenue] = useState(0);
+  const [totalTickets, setTotalTickets] = useState(0);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchBookingRecords()
+      .then((data) => {
+        // Thống kê số lượng từng loại vé
+        const countByType = {};
+        Object.keys(TICKET_TYPE_INFO).forEach((key) => {
+          countByType[key] = 0;
+        });
+        data.forEach((item) => {
+          const rawType = item.ticketTypeCode;
+          if (TICKET_TYPE_INFO[rawType]) {
+            countByType[rawType] = (countByType[rawType] || 0) + 1;
+          }
+        });
+
+        // Chuẩn bị dữ liệu cho BarChart
+        const barChartData = Object.entries(TICKET_TYPE_INFO).map(
+          ([code, info]) => ({
+            ticketType: info.displayName,
+            count: countByType[code] || 0,
+          })
+        );
+        setBarData(barChartData);
+
+        // Chuẩn bị dữ liệu cho PieChart
+        const countByStatus = {};
+        data.forEach((item) => {
+          const status = item.status || "UNKNOWN";
+          countByStatus[status] = (countByStatus[status] || 0) + 1;
+        });
+        const pieChartData = Object.entries(countByStatus).map(
+          ([status, value]) => ({
+            id: status,
+            label: status,
+            value,
+          })
+        );
+        setPieData(pieChartData);
+
+        // Tính tổng số vé và tổng tiền từng loại
+        let total = 0;
+        let totalMoney = 0;
+        const stats = Object.entries(TICKET_TYPE_INFO).map(([code, info]) => {
+          const quantity = countByType[code] || 0;
+          const money = quantity * info.price;
+          total += quantity;
+          totalMoney += money;
+          return {
+            code,
+            displayName: info.displayName,
+            price: info.price,
+            quantity,
+            money,
+          };
+        });
+        setTicketStats(stats);
+        setTotalTickets(total);
+        setTotalRevenue(totalMoney);
+      })
+      .catch((err) => alert(err.message))
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (loading)
+    return (
+      <div style={{ textAlign: "center", marginTop: "2rem" }}>Loading...</div>
+    );
 
   return (
-    <Box m="20px">
-      {/* HEADER */}
-      <Box display="flex" justifyContent="space-between" alignItems="center">
-        <Header title="DASHBOARD" subtitle="Welcome to your dashboard" />
+    <div style={{ padding: "2rem" }}>
+      <h2 style={{ fontSize: "1.5rem", marginBottom: "2rem" }}>Dashboard</h2>
+      <div style={{ display: "flex", gap: "2rem", flexWrap: "wrap" }}>
+        <div
+          style={{
+            flex: "1 1 400px",
+            minWidth: "350px",
+            background: "#fff",
+            borderRadius: 12,
+            boxShadow: "0 2px 8px #0001",
+            padding: 24,
+          }}
+        >
+          <h3 style={{ fontSize: "1.1rem", marginBottom: "1rem" }}>
+            Ticket Type Statistics
+          </h3>
+          <BarChart
+            data={barData}
+            keys={["count"]}
+            indexBy="ticketType"
+            axisBottomLegend="Ticket Type"
+            axisLeftLegend="Quantity"
+          />
+        </div>
+        <div
+          style={{
+            flex: "1 1 400px",
+            minWidth: "350px",
+            background: "#fff",
+            borderRadius: 12,
+            boxShadow: "0 2px 8px #0001",
+            padding: 24,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <h3 style={{ fontSize: "1.1rem", marginBottom: "1rem" }}>
+            Ticket Status Distribution
+          </h3>
+          <div style={{ width: "100%", height: "400px" }}>
+            <PieChart data={pieData} />
+          </div>
+        </div>
+      </div>
 
-        <Box>
-          <Button
-            sx={{
-              backgroundColor: colors.blueAccent[700],
-              color: colors.grey[100],
-              fontSize: "14px",
-              fontWeight: "bold",
-              padding: "10px 20px",
-            }}
-          >
-            <DownloadOutlinedIcon sx={{ mr: "10px" }} />
-            Download Reports
-          </Button>
-        </Box>
-      </Box>
-
-      {/* GRID & CHARTS */}
-      <Box
-        display="grid"
-        gridTemplateColumns="repeat(12, 1fr)"
-        gridAutoRows="140px"
-        gap="20px"
+      {/* Bảng tổng hợp doanh thu và số lượng vé */}
+      <div
+        style={{
+          marginTop: "2.5rem",
+          background: "#fff",
+          borderRadius: 12,
+          boxShadow: "0 2px 8px #0001",
+          padding: 24,
+          maxWidth: 900,
+        }}
       >
-        {/* ROW 1 */}
-        <Box
-          gridColumn="span 3"
-          backgroundColor={colors.primary[400]}
-          display="flex"
-          alignItems="center"
-          justifyContent="center"
-        >
-          <StatBox
-            title="12,361"
-            subtitle="Emails Sent"
-            progress="0.75"
-            increase="+14%"
-            icon={
-              <EmailIcon
-                sx={{ color: colors.greenAccent[600], fontSize: "26px" }}
-              />
-            }
-          />
-        </Box>
-        <Box
-          gridColumn="span 3"
-          backgroundColor={colors.primary[400]}
-          display="flex"
-          alignItems="center"
-          justifyContent="center"
-        >
-          <StatBox
-            title="431,225"
-            subtitle="Sales Obtained"
-            progress="0.50"
-            increase="+21%"
-            icon={
-              <PointOfSaleIcon
-                sx={{ color: colors.greenAccent[600], fontSize: "26px" }}
-              />
-            }
-          />
-        </Box>
-        <Box
-          gridColumn="span 3"
-          backgroundColor={colors.primary[400]}
-          display="flex"
-          alignItems="center"
-          justifyContent="center"
-        >
-          <StatBox
-            title="32,441"
-            subtitle="New Clients"
-            progress="0.30"
-            increase="+5%"
-            icon={
-              <PersonAddIcon
-                sx={{ color: colors.greenAccent[600], fontSize: "26px" }}
-              />
-            }
-          />
-        </Box>
-        <Box
-          gridColumn="span 3"
-          backgroundColor={colors.primary[400]}
-          display="flex"
-          alignItems="center"
-          justifyContent="center"
-        >
-          <StatBox
-            title="1,325,134"
-            subtitle="Traffic Received"
-            progress="0.80"
-            increase="+43%"
-            icon={
-              <TrafficIcon
-                sx={{ color: colors.greenAccent[600], fontSize: "26px" }}
-              />
-            }
-          />
-        </Box>
-
-        {/* ROW 2 */}
-        <Box
-          gridColumn="span 8"
-          gridRow="span 2"
-          backgroundColor={colors.primary[400]}
-        >
-          <Box
-            mt="25px"
-            p="0 30px"
-            display="flex "
-            justifyContent="space-between"
-            alignItems="center"
-          >
-            <Box>
-              <Typography
-                variant="h5"
-                fontWeight="600"
-                color={colors.grey[100]}
-              >
-                Revenue Generated
-              </Typography>
-              <Typography
-                variant="h3"
-                fontWeight="bold"
-                color={colors.greenAccent[500]}
-              >
-                $59,342.32
-              </Typography>
-            </Box>
-            <Box>
-              <IconButton>
-                <DownloadOutlinedIcon
-                  sx={{ fontSize: "26px", color: colors.greenAccent[500] }}
-                />
-              </IconButton>
-            </Box>
-          </Box>
-          <Box height="250px" m="-20px 0 0 0">
-            <LineChart isDashboard={true} />
-          </Box>
-        </Box>
-        <Box
-          gridColumn="span 4"
-          gridRow="span 2"
-          backgroundColor={colors.primary[400]}
-          overflow="auto"
-        >
-          <Box
-            display="flex"
-            justifyContent="space-between"
-            alignItems="center"
-            borderBottom={`4px solid ${colors.primary[500]}`}
-            colors={colors.grey[100]}
-            p="15px"
-          >
-            <Typography color={colors.grey[100]} variant="h5" fontWeight="600">
-              Recent Transactions
-            </Typography>
-          </Box>
-          {mockTransactions.map((transaction, i) => (
-            <Box
-              key={`${transaction.txId}-${i}`}
-              display="flex"
-              justifyContent="space-between"
-              alignItems="center"
-              borderBottom={`4px solid ${colors.primary[500]}`}
-              p="15px"
-            >
-              <Box>
-                <Typography
-                  color={colors.greenAccent[500]}
-                  variant="h5"
-                  fontWeight="600"
-                >
-                  {transaction.txId}
-                </Typography>
-                <Typography color={colors.grey[100]}>
-                  {transaction.user}
-                </Typography>
-              </Box>
-              <Box color={colors.grey[100]}>{transaction.date}</Box>
-              <Box
-                backgroundColor={colors.greenAccent[500]}
-                p="5px 10px"
-                borderRadius="4px"
-              >
-                ${transaction.cost}
-              </Box>
-            </Box>
-          ))}
-        </Box>
-
-        {/* ROW 3 */}
-        <Box
-          gridColumn="span 4"
-          gridRow="span 2"
-          backgroundColor={colors.primary[400]}
-          p="30px"
-        >
-          <Typography variant="h5" fontWeight="600">
-            Campaign
-          </Typography>
-          <Box
-            display="flex"
-            flexDirection="column"
-            alignItems="center"
-            mt="25px"
-          >
-            <ProgressCircle size="125" />
-            <Typography
-              variant="h5"
-              color={colors.greenAccent[500]}
-              sx={{ mt: "15px" }}
-            >
-              $48,352 revenue generated
-            </Typography>
-            <Typography>Includes extra misc expenditures and costs</Typography>
-          </Box>
-        </Box>
-        <Box
-          gridColumn="span 4"
-          gridRow="span 2"
-          backgroundColor={colors.primary[400]}
-        >
-          <Typography
-            variant="h5"
-            fontWeight="600"
-            sx={{ padding: "30px 30px 0 30px" }}
-          >
-            Sales Quantity
-          </Typography>
-          <Box height="250px" mt="-20px">
-            <BarChart isDashboard={true} />
-          </Box>
-        </Box>
-        <Box
-          gridColumn="span 4"
-          gridRow="span 2"
-          backgroundColor={colors.primary[400]}
-          padding="30px"
-        >
-          <Typography
-            variant="h5"
-            fontWeight="600"
-            sx={{ marginBottom: "15px" }}
-          >
-            Geography Based Traffic
-          </Typography>
-          <Box height="200px">
-            <GeographyChart isDashboard={true} />
-          </Box>
-        </Box>
-      </Box>
-    </Box>
+        <h3 style={{ fontSize: "1.1rem", marginBottom: "1rem" }}>
+          Ticket Sales Summary
+        </h3>
+        <table style={{ width: "100%", borderCollapse: "collapse" }}>
+          <thead>
+            <tr style={{ background: "#f4f6f8" }}>
+              <th style={{ padding: 8, border: "1px solid #eee" }}>
+                Ticket Type
+              </th>
+              <th style={{ padding: 8, border: "1px solid #eee" }}>
+                Price (VND)
+              </th>
+              <th style={{ padding: 8, border: "1px solid #eee" }}>
+                Quantity Sold
+              </th>
+              <th style={{ padding: 8, border: "1px solid #eee" }}>
+                Total (VND)
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {ticketStats.map((row) => (
+              <tr key={row.code}>
+                <td style={{ padding: 8, border: "1px solid #eee" }}>
+                  {row.displayName}
+                </td>
+                <td style={{ padding: 8, border: "1px solid #eee" }}>
+                  {row.price.toLocaleString()}
+                </td>
+                <td style={{ padding: 8, border: "1px solid #eee" }}>
+                  {row.quantity}
+                </td>
+                <td style={{ padding: 8, border: "1px solid #eee" }}>
+                  {row.money.toLocaleString()}
+                </td>
+              </tr>
+            ))}
+            <tr style={{ fontWeight: "bold", background: "#f9fafb" }}>
+              <td style={{ padding: 8, border: "1px solid #eee" }}>Total</td>
+              <td style={{ padding: 8, border: "1px solid #eee" }}></td>
+              <td style={{ padding: 8, border: "1px solid #eee" }}>
+                {totalTickets}
+              </td>
+              <td style={{ padding: 8, border: "1px solid #eee" }}>
+                {totalRevenue.toLocaleString()}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
   );
 };
 

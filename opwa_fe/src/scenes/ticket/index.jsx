@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Button,
@@ -12,16 +12,13 @@ import {
   FormControlLabel,
   FormLabel,
 } from "@mui/material";
-
-// Mock ticket types (would be fetched from PAWA system)
-const ticketTypes = [
-  { value: "DAILY", label: "Daily Ticket", price: 40000 },
-  { value: "WEEKLY", label: "Weekly Ticket", price: 200000 },
-  { value: "MONTHLY", label: "Monthly Ticket", price: 600000 },
-  { value: "STUDENT", label: "Student Ticket", price: 300000 },
-  { value: "SENIOR", label: "Senior Ticket", price: 250000 },
-  { value: "TOURIST", label: "Tourist Ticket", price: 100000 },
-];
+import Autocomplete from "@mui/material/Autocomplete";
+import {
+  fetchTicketPolicies,
+  fetchPassengerIds,
+  purchaseTicket,
+  createTicket,
+} from "./ticketAPI";
 
 const paymentMethods = [
   { value: "ewallet", label: "e-Wallet (Registered Passenger Only)" },
@@ -37,6 +34,36 @@ const TicketPurchase = () => {
     paymentMethod: "cash",
     cashReceived: "",
   });
+  const [ticketTypes, setTicketTypes] = useState([]);
+  const [passengerIds, setPassengerIds] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  // Lấy token từ localStorage
+  const token = localStorage.getItem("token");
+
+  // Lấy danh sách loại vé và passenger id
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const [tickets, passengers] = await Promise.all([
+          fetchTicketPolicies(token),
+          fetchPassengerIds(token),
+        ]);
+        setTicketTypes(
+          tickets.map((t) => ({
+            value: t.code,
+            id: t.id, // hoặc t.ticketId nếu backend trả về tên này
+            displayName: t.displayName,
+            price: t.price,
+          }))
+        );
+        setPassengerIds(passengers);
+      } catch (err) {
+        alert("Lỗi tải dữ liệu: " + err.message);
+      }
+    }
+    fetchData();
+  }, [token]);
 
   // Get selected ticket price
   const selectedTicket = ticketTypes.find((t) => t.value === form.ticketType);
@@ -57,10 +84,48 @@ const TicketPurchase = () => {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // TODO: Send purchase data to backend
-    alert("Ticket purchased!\n" + JSON.stringify(form, null, 2));
+    setLoading(true);
+    try {
+      const selectedTicket = ticketTypes.find(
+        (t) => t.value === form.ticketType
+      );
+
+      // 1. Tạo vé trước
+      const ticketCreateData = {
+        ticketPolicyId: selectedTicket.id, // id của policy
+        // các trường khác nếu cần, ví dụ:
+        nationalId: form.idType === "national" ? form.nationalId : undefined,
+        passengerId: form.idType === "passenger" ? form.passengerId : undefined,
+      };
+      const ticket = await createTicket(ticketCreateData, token);
+
+      // 2. Thanh toán vé vừa tạo
+      const paymentData = {
+        ticketId: ticket.id || ticket._id, // id của vé vừa tạo
+        paymentMethod: form.paymentMethod,
+        amount: ticketPrice,
+      };
+      if (form.paymentMethod === "cash") {
+        paymentData.cashReceived = form.cashReceived;
+      }
+      await purchaseTicket(paymentData, token);
+
+      alert("Ticket purchased successfully!");
+      setForm({
+        idType: "national",
+        nationalId: "",
+        passengerId: "",
+        ticketType: "",
+        paymentMethod: "cash",
+        cashReceived: "",
+      });
+    } catch (err) {
+      alert("Mua vé thất bại: " + err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -141,14 +206,36 @@ const TicketPurchase = () => {
               required
             />
           ) : (
-            <TextField
+            <Autocomplete
+              options={passengerIds}
+              value={
+                passengerIds.find((p) => p.passengerId === form.passengerId) ||
+                null
+              }
+              onChange={(_, value) =>
+                setForm({
+                  ...form,
+                  passengerId: value ? value.passengerId : "",
+                })
+              }
+              getOptionLabel={(option) =>
+                typeof option === "string"
+                  ? option
+                  : `${option.name || ""} : ${option.passengerId || ""}`
+              }
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="Passenger ID"
+                  margin="normal"
+                  required
+                />
+              )}
               fullWidth
-              margin="normal"
-              label="Passenger ID"
-              name="passengerId"
-              value={form.passengerId}
-              onChange={handleChange}
-              required
+              isOptionEqualToValue={(option, value) =>
+                (typeof option === "object" ? option.passengerId : option) ===
+                (typeof value === "object" ? value.passengerId : value)
+              }
             />
           )}
 
@@ -164,15 +251,21 @@ const TicketPurchase = () => {
           >
             {ticketTypes.map((option) => (
               <MenuItem key={option.value} value={option.value}>
-                {option.label} ({option.price.toLocaleString()} VND)
+                {option.displayName} ({option.price?.toLocaleString()} VND)
               </MenuItem>
             ))}
           </TextField>
 
-          <Typography sx={{ mt: 1, mb: 2 }}>
-            <b>Ticket Price:</b>{" "}
-            {ticketPrice ? ticketPrice.toLocaleString() + " VND" : "--"}
-          </Typography>
+          {/* Hiện giá tiền động khi chọn loại vé */}
+          {form.ticketType && (
+            <Typography sx={{ mt: 1, mb: 2 }}>
+              <b>Ticket Price:</b>{" "}
+              {ticketTypes
+                .find((t) => t.value === form.ticketType)
+                ?.price?.toLocaleString() || "--"}{" "}
+              VND
+            </Typography>
+          )}
 
           <TextField
             select
@@ -229,6 +322,7 @@ const TicketPurchase = () => {
             fullWidth
             sx={{ mt: 3, py: 1.3, fontWeight: "bold", borderRadius: 2 }}
             disabled={
+              loading ||
               !form.ticketType ||
               (form.idType === "national" && !form.nationalId) ||
               (form.idType === "passenger" && !form.passengerId) ||
@@ -237,7 +331,7 @@ const TicketPurchase = () => {
                   parseInt(form.cashReceived, 10) < ticketPrice))
             }
           >
-            Purchase Ticket
+            {loading ? "Processing..." : "Purchase Ticket"}
           </Button>
         </Box>
       </Box>

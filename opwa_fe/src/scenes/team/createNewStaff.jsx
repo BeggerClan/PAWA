@@ -12,7 +12,7 @@ import * as yup from "yup";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import Header from "../../components/Header";
 import { useNavigate } from "react-router-dom";
-import { addUser } from "./teamapi";
+import { addUserPermitAll } from "./teamapi";
 
 const roles = [
   { value: "ADMIN", label: "Admin" },
@@ -139,16 +139,11 @@ const AddStaff = () => {
 
   const handleFormSubmit = async (values, { setSubmitting, resetForm }) => {
     try {
-      // Convert role and shift to enum values
-      const payload = {
-        ...values,
-        role: values.role,
-        shift: values.shift,
-      };
-      await addUser(payload);
+      const payload = { ...values, role: values.role, shift: values.shift };
+      await addUserPermitAll(payload);
       alert("Staff created successfully!");
       resetForm();
-      navigate("/dashboard/team");
+      navigate("/");
     } catch (error) {
       alert(error.message || "Failed to create staff");
       setSubmitting(false);
@@ -176,15 +171,6 @@ const AddStaff = () => {
           width: "100%",
         }}
       >
-        <Button
-          variant="outlined"
-          color="secondary"
-          sx={{ mb: 2, alignSelf: "flex-start", ml: 4 }}
-          onClick={() => navigate("/dashboard/team")}
-        >
-          Back
-        </Button>
-
         <Header title="CREATE STAFF" subtitle="Create a New Staff Profile" />
 
         <Box

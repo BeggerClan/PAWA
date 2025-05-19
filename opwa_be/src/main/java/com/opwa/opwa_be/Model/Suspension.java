@@ -15,7 +15,7 @@ public class Suspension {
     private String metroLineId;
     private String lineName;
     private List<String> affectedStationIds;
-    private String reason; // "EMERGENCY" or "MAINTENANCE"
+    private String reason;
     private String description;
     private LocalDateTime startTime;
     private LocalDateTime expectedEndTime;
@@ -27,5 +27,13 @@ public class Suspension {
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
         this.isActive = true;
+    }
+
+    public String getId() {
+        return suspensionId;
+    }
+
+    public void setId(String suspensionId) {
+        this.suspensionId = suspensionId;
     }
 }

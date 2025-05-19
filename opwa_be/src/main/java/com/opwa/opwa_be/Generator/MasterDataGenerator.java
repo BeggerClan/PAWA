@@ -14,8 +14,8 @@ public class MasterDataGenerator {
     public void generateAll() {
         try {
             System.out.println("⚡ Starting data generation...");
-            metroLineGenerator.run();
-            stationGenerator.run();
+            stationGenerator.run(); // Generate stations first!
+            metroLineGenerator.run(); // Then generate lines using those stations
             System.out.println("✅ All data generated successfully!");
         } catch (Exception e) {
             System.err.println("❌ Data generation failed: " + e.getMessage());

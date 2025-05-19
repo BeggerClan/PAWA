@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 @Service
@@ -73,16 +74,35 @@ public class SuspensionService {
         return suspensionRepo.findByAffectedStationIdsContaining(stationId);
     }
 
+    // Add this field to your service (or use a DB sequence for production)
+    private static final AtomicLong SUSP_SEQ = new AtomicLong(1);
+
+    private String generateSuspensionId(String metroLineId) {
+        // Example: SUSP-LN3-20240517-0001
+        String datePart = java.time.LocalDate.now().toString().replace("-", "");
+        long seq = SUSP_SEQ.getAndIncrement();
+        return String.format("SUSP-%s-%s-%04d", metroLineId, datePart, seq);
+    }
+
     public Suspension createSuspension(Suspension suspension) {
+        // Generate a clean ID if not set
+        if (suspension.getId() == null || suspension.getId().isEmpty()) {
+            suspension.setId(generateSuspensionId(suspension.getMetroLineId()));
+        }
         suspension.setStartTime(LocalDateTime.now());
         suspension.setActive(true);
 
-        // Update metro line status
+        // Update metro line status and active flag
         metroLineRepo.findById(suspension.getMetroLineId()).ifPresent(line -> {
             line.setSuspended(true);
             line.setSuspensionReason(suspension.getReason());
             line.setSuspensionStartTime(suspension.getStartTime());
             line.setSuspensionEndTime(suspension.getExpectedEndTime());
+            if (suspension.getAffectedStationIds() != null && suspension.getAffectedStationIds().size() >= 3) {
+                line.setActive(false);
+            } else {
+                line.setActive(true);
+            }
             metroLineRepo.save(line);
         });
 
@@ -152,6 +172,15 @@ public class SuspensionService {
 
             suspension.setAffectedStationIds(currentStations);
             suspension.setUpdatedAt(LocalDateTime.now());
+
+            // Update metro line active status if needed
+            metroLineRepo.findById(suspension.getMetroLineId()).ifPresent(line -> {
+                if (currentStations.size() >= 3) {
+                    line.setActive(false);
+                    metroLineRepo.save(line);
+                }
+            });
+
             return suspensionRepo.save(suspension);
         }).orElseThrow(() -> new RuntimeException("Suspension not found"));
     }
@@ -201,6 +230,36 @@ public class SuspensionService {
                 });
             }
             suspensionRepo.deleteById(suspensionId);
+        });
+    }
+
+    public void deleteAllSuspensions() {
+        suspensionRepo.deleteAll();
+    }
+
+    public void deleteAllSuspensionsByLineId(String lineId) {
+        suspensionRepo.deleteAll(suspensionRepo.findByMetroLineId(lineId));
+    }
+
+    public void updateMetroLineSuspendedStatus(String metroLineId) {
+        // Get all active suspensions for this metro line
+        List<Suspension> activeSuspensions = suspensionRepo.findByMetroLineIdAndIsActive(metroLineId, true);
+
+        // Count total unique affected stations across all active suspensions
+        int affectedStationCount = activeSuspensions.stream()
+            .flatMap(s -> s.getAffectedStationIds() != null ? s.getAffectedStationIds().stream() : java.util.stream.Stream.empty())
+            .collect(java.util.stream.Collectors.toSet())
+            .size();
+
+        metroLineRepo.findById(metroLineId).ifPresent(line -> {
+            if (affectedStationCount == 0) {
+                line.setSuspended(false);
+            } else {
+                line.setSuspended(true);
+            }
+            // Optionally, also update "active" status if you want to keep logic together:
+            line.setActive(affectedStationCount < 3);
+            metroLineRepo.save(line);
         });
     }
 }

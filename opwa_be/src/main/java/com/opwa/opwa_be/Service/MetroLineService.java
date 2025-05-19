@@ -60,6 +60,8 @@ public class MetroLineService {
                 .orElse(0);
             metroLine.setLineId(String.format("LN%d", maxNumber + 1));
         }
+        // Automatically calculate totalDuration
+        metroLine.setTotalDuration(calculateTotalDuration(metroLine));
         metroLine.setUpdatedAt(LocalDateTime.now());
         return metroLineRepo.save(metroLine);
     }
@@ -276,5 +278,84 @@ public class MetroLineService {
         } catch (NumberFormatException e) {
             return 10; // default to 10 minutes if parsing fails
         }
+    }
+
+    public void deleteMetroLine(String id) {
+        metroLineRepo.deleteById(id);
+    }
+
+    public MetroLine updateMetroLine(String id, MetroLine updatedLine) {
+        MetroLine existing = metroLineRepo.findById(id)
+            .orElseThrow(() -> new RuntimeException("Metro line not found with id: " + id));
+
+        boolean changed = false;
+
+        if (!java.util.Objects.equals(existing.getLineName(), updatedLine.getLineName())) {
+            existing.setLineName(updatedLine.getLineName());
+            changed = true;
+        }
+        if (!java.util.Objects.equals(existing.getFrequencyMinutes(), updatedLine.getFrequencyMinutes()) ||
+            !java.util.Objects.equals(existing.getStationIds(), updatedLine.getStationIds())) {
+            // Recalculate totalDuration if frequency or stations changed
+            existing.setFrequencyMinutes(updatedLine.getFrequencyMinutes());
+            existing.setStationIds(updatedLine.getStationIds());
+            existing.setTotalDuration(calculateTotalDuration(existing));
+            changed = true;
+        }
+        if (existing.isActive() != updatedLine.isActive()) {
+            existing.setActive(updatedLine.isActive());
+            changed = true;
+        }
+        if (!java.util.Objects.equals(existing.getFirstDeparture(), updatedLine.getFirstDeparture())) {
+            existing.setFirstDeparture(updatedLine.getFirstDeparture());
+            changed = true;
+        }
+
+        if (changed) {
+            existing.setUpdatedAt(java.time.LocalDateTime.now());
+        }
+
+        return metroLineRepo.save(existing);
+    }
+
+    public List<Trip> getTripsForLine(String lineId) {
+        return tripRepo.findByLineId(lineId);
+    }
+
+    public List<Trip> getTripsForStationInLine(String lineId, String stationId) {
+        return tripRepo.findByLineId(lineId).stream()
+            .filter(trip -> trip.getSegments().stream()
+                .anyMatch(segment ->
+                    segment.getFromStationId().equals(stationId) ||
+                    segment.getToStationId().equals(stationId)
+                )
+            )
+            .map(trip -> {
+                Trip filteredTrip = new Trip();
+                filteredTrip.setTripId(trip.getTripId());
+                filteredTrip.setLineId(trip.getLineId());
+                filteredTrip.setDepartureTime(trip.getDepartureTime());
+                filteredTrip.setArrivalTime(trip.getArrivalTime());
+                filteredTrip.setReturnTrip(trip.isReturnTrip());
+                List<Trip.TripSegment> filteredSegments = trip.getSegments().stream()
+                    .filter(segment ->
+                        segment.getFromStationId().equals(stationId) ||
+                        segment.getToStationId().equals(stationId)
+                    )
+                    .toList();
+                filteredTrip.setSegments(filteredSegments);
+                return filteredTrip;
+            })
+            .collect(Collectors.toList());
+    }
+
+    public void deleteAllTrips() {
+        tripRepo.deleteAll();
+    }
+
+    private int calculateTotalDuration(MetroLine metroLine) {
+        int numStations = metroLine.getStationIds() != null ? metroLine.getStationIds().size() : 0;
+        int freq = parseFrequency(metroLine.getFrequencyMinutes());
+        return numStations > 1 ? (numStations - 1) * freq : 0;
     }
 }

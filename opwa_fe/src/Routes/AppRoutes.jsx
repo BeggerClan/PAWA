@@ -1,4 +1,3 @@
-// src/routes/AppRoutes.jsx
 import { useState } from "react";
 import { Routes, Route } from "react-router-dom";
 import { Box } from "@mui/material";
@@ -15,7 +14,16 @@ import Bar from "../scenes/bar";
 import Pie from "../scenes/pie";
 import Line from "../scenes/line";
 import Geography from "../scenes/geography";
-import Metroline from "../metroline"; // <-- import Metroline
+import ViewStaff from "../scenes/team/viewStaff";
+import BookingRecords from "../scenes/bar/BookingRecords";
+import CreateNewStaff from "../scenes/team/createNewStaff";
+
+
+import Station from "../station"; // <-- add this import
+
+import Metroline from "../metroline";
+import ProtectedRoute from "./ProtectedRoute";
+
 
 const SIDEBAR_WIDTH = 250;
 const SIDEBAR_COLLAPSED_WIDTH = 80;
@@ -56,6 +64,7 @@ export default function AppRoutes() {
   return (
     <Routes>
       <Route path="/" element={<LoginPage />} />
+      <Route path="/create_for_new_staff" element={<CreateNewStaff />} />
       <Route
         path="/dashboard/*"
         element={
@@ -65,13 +74,17 @@ export default function AppRoutes() {
               <Route path="dashboard" element={<Dashboard />} />
               <Route path="team" element={<Team />} />
               <Route path="team/addStaff" element={<AddStaff />} />
-              <Route path="team/updateStaff" element={<UpdateStaff />} />
+              <Route path="team/updateStaff/:id" element={<UpdateStaff />} />
               <Route path="ticket" element={<TicketPurchase />} />
               <Route path="bar" element={<Bar />} />
               <Route path="pie" element={<Pie />} />
-              <Route path="line" element={<Line />} />
+           
               <Route path="geography" element={<Geography />} />
-              <Route path="metroline" element={<Metroline />} /> {/* <-- add this */}
+              <Route path="metroline" element={<Metroline />} />
+              <Route path="station" element={<Station />} /> {/* <-- add this */}
+              <Route path="team/view/:id" element={<ViewStaff />} />
+              <Route path="booking-records" element={<BookingRecords />} />
+               {/* <-- add this */}
               {/* <Route path="contacts" element={<Contacts />} /> */}
             </Routes>
           </DashboardLayout>

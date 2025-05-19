@@ -14,8 +14,8 @@ import java.util.function.Function;
 
 @Service
 public class JwtService {
-    private static final String SECRET_KEY = "mgj7NHBcEu6Wt4xJX4B/oM0y7eI/aKNJmmN62S8+sEJ8Kb7J+QqzBc/AIRXfWRXP";
 
+    private static final String SECRET_KEY = "i5q9Y0k2QzV4T3V5Q2p4V0s1bWs3R2l3c2Z4bW4xazg=";
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
     }
@@ -27,8 +27,8 @@ public class JwtService {
 
     public String generateTokenWithRoles(UserDetails userDetails, List<String> roles) {
         Map<String, Object> extraClaims = new HashMap<>();
-        // Prefix roles with "ROLE_"
-        extraClaims.put("roles", roles.stream().map(role -> role.startsWith("ROLE_") ? role : "ROLE_" + role).toList());
+        // Không thêm ROLE_
+        extraClaims.put("roles", roles.stream().map(role -> role.replaceFirst("^ROLE_", "")).toList());
         return Jwts.builder()
                 .setClaims(extraClaims)
                 .setSubject(userDetails.getUsername())
