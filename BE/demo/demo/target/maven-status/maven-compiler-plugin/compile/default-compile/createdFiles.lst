@@ -1,0 +1,5 @@
+com\begger\pawa\demo\Passenger\PassengerRegistrationRequest.class
+com\begger\pawa\demo\Passenger\Passenger.class
+com\begger\pawa\demo\Passenger\PassengerRepository.class
+com\begger\pawa\demo\PawaApplication.class
+com\begger\pawa\demo\Configuration\SecurityConfig.class
