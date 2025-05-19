@@ -6,6 +6,16 @@ public class PaymentRequest {
     private String paymentMethod; // "WALLET" or "CASH"
     private Long paymentAmount;
     private Long cashReceived;
+	private String nationalId; // Add this near the top
+
+	public String getNationalId() {
+		return nationalId;
+	}
+
+	public void setNationalId(String nationalId) {
+		this.nationalId = nationalId;
+	}
+
 
 	public String getPassengerId() {
 		return this.passengerId;

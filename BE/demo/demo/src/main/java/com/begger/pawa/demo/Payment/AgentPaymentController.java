@@ -77,29 +77,28 @@ public class AgentPaymentController {
 
         // 2. Validate payment method
         if (req.getPaymentMethod() == null || req.getPaymentMethod().isBlank()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Payment method is required");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Payment method is required.");
         }
 
         String method = req.getPaymentMethod().toUpperCase();
 
-        // 3. Handle wallet payment
+        // 3. Handle WALLET payment
         if ("WALLET".equals(method)) {
             if (req.getPassengerId() == null || req.getPassengerId().isBlank()) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "WALLET payments require a valid passengerId");
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "WALLET payments require a valid passengerId.");
             }
 
             ObjectId passengerId;
             try {
                 passengerId = new ObjectId(req.getPassengerId());
             } catch (IllegalArgumentException e) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid passengerId format");
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid passengerId format.");
             }
 
             PassengerWallet wallet = walletRepo.findByPassengerId(passengerId.toHexString())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Wallet not found for this passenger"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Wallet not found for this passenger."));
 
             long balance = wallet.getBalance();
-
             if (balance < expectedPrice) {
                 long shortfall = expectedPrice - balance;
                 return ResponseEntity.status(HttpStatus.PAYMENT_REQUIRED).body(
@@ -114,13 +113,16 @@ public class AgentPaymentController {
             return ResponseEntity.ok(new PaymentResponse(wallet.getBalance(), "eWallet payment successful"));
         }
 
-        // 4. Handle cash payment
+        // 4. Handle CASH payment (works for guest or passenger)
         else if ("CASH".equals(method)) {
-            Long cash = req.getCashReceived();
-            if (cash == null) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cash amount must be provided");
+            // Guests must provide nationalId
+            if ((req.getPassengerId() == null || req.getPassengerId().isBlank()) &&
+                (req.getNationalId() == null || req.getNationalId().isBlank())) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Guest must provide nationalId for cash payment.");
             }
-            if (cash < expectedPrice) {
+
+            Long cash = req.getCashReceived();
+            if (cash == null || cash < expectedPrice) {
                 return ResponseEntity.badRequest().body(
                     new PaymentResponse(0, "Insufficient cash. Ticket price is " + expectedPrice + " VND")
                 );
@@ -130,11 +132,12 @@ public class AgentPaymentController {
             return ResponseEntity.ok(new PaymentResponse(change, "Cash payment successful. Change: " + change + " VND"));
         }
 
-        // 5. Invalid method
+        // 5. Unsupported method
         return ResponseEntity.badRequest().body(
             new PaymentResponse(0, "Unsupported payment method: " + method)
         );
     }
+
 
     
 
