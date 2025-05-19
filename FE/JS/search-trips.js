@@ -1,423 +1,727 @@
-// js/search-trips.js - Enhanced trip search functionality
+// search-trips.js - Handles metro trip search functionality
 
-document.addEventListener('DOMContentLoaded', function() {
-    // Initialize station dropdowns
-    populateStationDropdowns();
-    
-    // Set default date and time values
-    setDefaultDateAndTime();
-    
-    // Add event listener to the search form
-    const searchForm = document.getElementById('trip-search-form');
-    if (searchForm) {
-        searchForm.addEventListener('submit', handleTripSearch);
-    }
+document.addEventListener("DOMContentLoaded", function () {
+  // Get all required form elements
+  const fromStationSelect = document.getElementById("from-station");
+  const toStationSelect = document.getElementById("to-station");
+  const departureDate = document.getElementById("departure-date");
+  const departureTime = document.getElementById("departure-time");
+  const searchForm = document.getElementById("trip-search-form");
+  const searchError = document.getElementById("search-error");
+  const searchResults = document.getElementById("search-results");
+
+  // Set today's date as the default departure date
+  const today = new Date();
+  const formattedDate = today.toISOString().substring(0, 10);
+  if (departureDate) {
+    departureDate.value = formattedDate;
+  }
+
+  // Set current time as the default departure time (rounded to nearest 15 min)
+  const hours = today.getHours();
+  const minutes = Math.ceil(today.getMinutes() / 15) * 15;
+  const formattedHours = hours.toString().padStart(2, "0");
+  const formattedMinutes = (minutes % 60).toString().padStart(2, "0");
+  if (departureTime) {
+    departureTime.value = `${formattedHours}:${formattedMinutes}`;
+  }
+
+  // Fetch metro lines with embedded station data to populate the dropdown selectors
+  fetchMetroLinesWithStations();
+
+  // Add event listener to search form
+  if (searchForm) {
+    searchForm.addEventListener("submit", function (e) {
+      e.preventDefault();
+      searchTrips();
+    });
+  }
 });
 
 /**
- * Populates the From Station and To Station dropdowns with station data
+ * Fetches metro lines with stations from the API to populate dropdown menus
  */
-async function populateStationDropdowns() {
-    try {
-        // Fetch all metro lines and their stations from the API
-        const response = await fetch('http://localhost:8081/api/metro-lines/full-details');
-        if (!response.ok) {
-            throw new Error('Failed to fetch station data');
-        }
-        
-        const metroLines = await response.json();
-        const fromSelect = document.getElementById('from-station');
-        const toSelect = document.getElementById('to-station');
-        
-        if (!fromSelect || !toSelect) return;
-        
-        // Clear existing options except the first one
-        fromSelect.innerHTML = '<option value="">Select departure station</option>';
-        toSelect.innerHTML = '<option value="">Select arrival station</option>';
-        
-        // Process all stations from all lines
-        const processedStations = new Set(); // To track unique stations
-        
-        metroLines.forEach(line => {
-            if (line.stations && line.stations.length > 0) {
-                // Create an optgroup for each line
-                const fromGroup = document.createElement('optgroup');
-                fromGroup.label = line.lineName;
-                
-                const toGroup = document.createElement('optgroup');
-                toGroup.label = line.lineName;
-                
-                line.stations.forEach(station => {
-                    const stationKey = station.stationId + '-' + station.stationName;
-                    
-                    // Only add if we haven't seen this station yet
-                    if (!processedStations.has(stationKey)) {
-                        processedStations.add(stationKey);
-                        
-                        // Create option elements for both dropdowns
-                        const fromOption = document.createElement('option');
-                        fromOption.value = JSON.stringify({
-                            id: station.stationId,
-                            name: station.stationName,
-                            line: line.lineId,
-                            lineName: line.lineName
-                        });
-                        fromOption.textContent = `${station.stationName} (${line.lineName})`;
-                        fromGroup.appendChild(fromOption);
-                        
-                        const toOption = document.createElement('option');
-                        toOption.value = JSON.stringify({
-                            id: station.stationId,
-                            name: station.stationName,
-                            line: line.lineId,
-                            lineName: line.lineName
-                        });
-                        toOption.textContent = `${station.stationName} (${line.lineName})`;
-                        toGroup.appendChild(toOption);
-                    }
-                });
-                
-                if (fromGroup.children.length > 0) {
-                    fromSelect.appendChild(fromGroup);
-                    toSelect.appendChild(toGroup);
-                }
-            }
+async function fetchMetroLinesWithStations() {
+  try {
+    // Fetch metro lines with stations from full-details API
+    const response = await fetch(
+      "http://localhost:8081/api/metro-lines/full-details"
+    );
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch metro lines: ${response.status}`);
+    }
+
+    const metroLines = await response.json();
+
+    // Extract all stations from metro lines
+    const allStations = extractStationsFromMetroLines(metroLines);
+
+    // Populate the 'from' and 'to' station dropdowns
+    populateStationDropdowns(allStations);
+
+    // Store metro lines data for later use in trip search
+    window.metroLinesData = metroLines;
+  } catch (error) {
+    console.error("Error fetching metro lines with stations:", error);
+  }
+}
+
+/**
+ * Extracts station data from metro lines
+ * @param {Array} metroLines - List of metro line objects
+ * @returns {Array} - List of station objects with line information
+ */
+function extractStationsFromMetroLines(metroLines) {
+  const allStations = [];
+
+  metroLines.forEach((line) => {
+    if (line.stations && Array.isArray(line.stations)) {
+      line.stations.forEach((station) => {
+        // Add line information to each station
+        allStations.push({
+          ...station,
+          lineName: line.lineName,
+          lineId: line.lineId || line.id,
+          mapMarker: line.lineName
+            ? line.lineName.split(" ")[0].toLowerCase()
+            : "default",
         });
-    } catch (error) {
-        console.error('Error loading stations:', error);
-        // Show error message
-        const searchError = document.getElementById('search-error');
-        if (searchError) {
-            searchError.textContent = 'Unable to load stations. Please try again later.';
-            searchError.style.display = 'block';
-        }
+      });
     }
+  });
+
+  // Remove duplicates based on stationId
+  const uniqueStations = [];
+  const seenIds = new Set();
+
+  allStations.forEach((station) => {
+    if (!seenIds.has(station.stationId)) {
+      seenIds.add(station.stationId);
+      uniqueStations.push(station);
+    }
+  });
+
+  return uniqueStations;
 }
 
 /**
- * Sets default date and time values for the search form
+ * Populates station dropdown selectors with data
+ * @param {Array} stations - List of station objects
  */
-function setDefaultDateAndTime() {
-    const dateInput = document.getElementById('departure-date');
-    const timeInput = document.getElementById('departure-time');
-    
-    if (dateInput) {
-        // Set today's date as default
-        const today = new Date();
-        const year = today.getFullYear();
-        const month = String(today.getMonth() + 1).padStart(2, '0');
-        const day = String(today.getDate()).padStart(2, '0');
-        dateInput.value = `${year}-${month}-${day}`;
+function populateStationDropdowns(stations) {
+  const fromStationSelect = document.getElementById("from-station");
+  const toStationSelect = document.getElementById("to-station");
+
+  if (!fromStationSelect || !toStationSelect || !stations) return;
+
+  // First, get all unique metro lines for grouping
+  const metroLines = new Set();
+  const stationsByLine = {};
+
+  stations.forEach((station) => {
+    if (station.mapMarker) {
+      if (!metroLines.has(station.mapMarker)) {
+        metroLines.add(station.mapMarker);
+        stationsByLine[station.mapMarker] = [];
+      }
+
+      stationsByLine[station.mapMarker].push(station);
     }
-    
-    if (timeInput) {
-        // Set current time as default
-        const now = new Date();
-        const hours = String(now.getHours()).padStart(2, '0');
-        const minutes = String(now.getMinutes()).padStart(2, '0');
-        timeInput.value = `${hours}:${minutes}`;
-    }
+  });
+
+  // Clear existing options (except the first placeholder)
+  while (fromStationSelect.options.length > 1) {
+    fromStationSelect.remove(1);
+  }
+
+  while (toStationSelect.options.length > 1) {
+    toStationSelect.remove(1);
+  }
+
+  // Add options, grouped by metro line
+  metroLines.forEach((line) => {
+    // Create option groups
+    const lineLabel = line.charAt(0).toUpperCase() + line.slice(1) + " Line";
+
+    const fromOptGroup = document.createElement("optgroup");
+    fromOptGroup.label = lineLabel;
+
+    const toOptGroup = document.createElement("optgroup");
+    toOptGroup.label = lineLabel;
+
+    // Add stations to the option groups
+    stationsByLine[line].forEach((station) => {
+      // Create options for 'from'
+      const fromOption = document.createElement("option");
+      fromOption.value = station.stationId;
+      fromOption.textContent = station.stationName;
+      fromOption.dataset.line = line;
+      fromOptGroup.appendChild(fromOption);
+
+      // Create options for 'to'
+      const toOption = document.createElement("option");
+      toOption.value = station.stationId;
+      toOption.textContent = station.stationName;
+      toOption.dataset.line = line;
+      toOptGroup.appendChild(toOption);
+    });
+
+    // Add option groups to the selects
+    fromStationSelect.appendChild(fromOptGroup);
+    toStationSelect.appendChild(toOptGroup);
+  });
 }
 
 /**
- * Handles the trip search form submission
- * @param {Event} e - The form submit event
+ * Searches for trips matching the user's criteria
  */
-async function handleTripSearch(e) {
-    e.preventDefault();
-    
-    // Get form values
-    const fromStationJSON = document.getElementById('from-station').value;
-    const toStationJSON = document.getElementById('to-station').value;
-    const departureDate = document.getElementById('departure-date').value;
-    const departureTime = document.getElementById('departure-time').value;
-    
-    const searchResults = document.getElementById('search-results');
-    const searchError = document.getElementById('search-error');
-    searchError.style.display = 'none';
-    
-    // Clear previous results and show loading
+async function searchTrips() {
+  const fromStationSelect = document.getElementById("from-station");
+  const toStationSelect = document.getElementById("to-station");
+  const departureDate = document.getElementById("departure-date");
+  const departureTime = document.getElementById("departure-time");
+  const searchError = document.getElementById("search-error");
+  const searchResults = document.getElementById("search-results");
+
+  if (
+    !fromStationSelect ||
+    !toStationSelect ||
+    !departureDate ||
+    !departureTime
+  )
+    return;
+
+  // Get selected values
+  const fromStation = fromStationSelect.value;
+  const toStation = toStationSelect.value;
+  const date = departureDate.value;
+  const time = departureTime.value;
+
+  // Validate inputs
+  if (!fromStation || !toStation) {
+    displaySearchError("Please select both departure and arrival stations.");
+    return;
+  }
+
+  if (fromStation === toStation) {
+    displaySearchError("Departure and arrival stations cannot be the same.");
+    return;
+  }
+
+  if (!date || !time) {
+    displaySearchError("Please specify both departure date and time.");
+    return;
+  }
+
+  // Clear previous error and results
+  if (searchError) searchError.style.display = "none";
+  if (searchResults) searchResults.innerHTML = "";
+
+  try {
+    // Show loading state
     searchResults.innerHTML = `
-        <div class="text-center my-4">
-            <div class="spinner-border text-primary" role="status">
-                <span class="visually-hidden">Searching trips...</span>
-            </div>
-            <p class="mt-2">Searching available trips...</p>
-        </div>
-    `;
-    
-    // Validate inputs
-    if (!fromStationJSON || !toStationJSON) {
-        searchError.textContent = 'Please select both departure and arrival stations.';
-        searchError.style.display = 'block';
-        searchResults.innerHTML = '';
-        return;
-    }
-    
-    try {
-        // Parse station data
-        const fromStation = JSON.parse(fromStationJSON);
-        const toStation = JSON.parse(toStationJSON);
-        
-        // Check if same station selected
-        if (fromStation.id === toStation.id) {
-            searchError.textContent = 'Departure and arrival stations cannot be the same.';
-            searchError.style.display = 'block';
-            searchResults.innerHTML = '';
-            return;
-        }
-        
-        // Format time for API
-        const formattedTime = departureTime + ":00";
-        
-        // Call API to search for trips
-        const response = await fetch(`http://localhost:8081/api/metro-lines/search-trips?fromStationId=${fromStation.id}&toStationId=${toStation.id}&approximateTime=${formattedTime}`);
-        
-        if (!response.ok) {
-            throw new Error(`Error searching for trips: ${response.status}`);
-        }
-        
-        const trips = await response.json();
-        
-        // Display results
-        displayTripResults(trips, fromStation, toStation, departureDate);
-        
-    } catch (error) {
-        console.error('Error searching for trips:', error);
-        searchResults.innerHTML = `
-            <div class="alert alert-danger">
-                <i class="fas fa-exclamation-triangle me-2"></i>
-                Failed to search for trips. Please try again later.
-                <small class="d-block mt-1">${error.message}</small>
+            <div class="col-12 text-center my-5">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading trips...</span>
+                </div>
+                <p class="mt-2">Searching for available trips...</p>
             </div>
         `;
+
+    // Check if we have metro lines data in memory
+    if (!window.metroLinesData) {
+      // If not, fetch it
+      const response = await fetch(
+        "http://localhost:8081/api/metro-lines/full-details"
+      );
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch metro lines: ${response.status}`);
+      }
+
+      window.metroLinesData = await response.json();
     }
+
+    // Find trips that match the criteria
+    const trips = findTripsFromMetroLines(
+      window.metroLinesData,
+      fromStation,
+      toStation,
+      time
+    );
+
+    // Display the search results
+    displaySearchResults(trips, fromStation, toStation, date, time);
+  } catch (error) {
+    console.error("Error searching for trips:", error);
+    displaySearchError(`Failed to search for trips: ${error.message}`);
+  }
 }
 
 /**
- * Displays the trip search results
- * @param {Array} trips - Array of trip objects
- * @param {Object} fromStation - Departure station info
- * @param {Object} toStation - Arrival station info
- * @param {string} departureDate - The selected departure date
+ * Find trips from metro lines data
+ * @param {Array} metroLines - Metro lines with trips data
+ * @param {string} fromStationId - Departure station ID
+ * @param {string} toStationId - Arrival station ID
+ * @param {string} approximateTime - Departure time (HH:MM)
+ * @returns {Array} - Matching trips
  */
-function displayTripResults(trips, fromStation, toStation, departureDate) {
-    const searchResults = document.getElementById('search-results');
-    
-    // Format the date for display
-    const formattedDate = new Date(departureDate).toLocaleDateString('en-US', {
-        weekday: 'short',
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric'
-    });
-    
-    // If no trips found
-    if (!trips || trips.length === 0) {
-        searchResults.innerHTML = `
-            <div class="alert alert-info bg-dark text-light border-primary">
-                <i class="fas fa-info-circle me-2"></i>
-                <strong>No trips found between ${fromStation.name} and ${toStation.name} on ${formattedDate}.</strong>
-                <p class="m-0 mt-2">Try a different time or date, or check another departure time.</p>
-            </div>
-        `;
-        return;
+function findTripsFromMetroLines(
+  metroLines,
+  fromStationId,
+  toStationId,
+  approximateTime
+) {
+  // Convert the target time to minutes for easier comparison
+  const targetTimeMinutes = timeToMinutes(approximateTime);
+  let matchingTrips = [];
+
+  metroLines.forEach((line) => {
+    // Skip inactive or suspended lines
+    if (line.active === false || line.suspended === true) return;
+
+    // Check if both stations are on this line
+    const fromStationIndex = findStationIndexInLine(line, fromStationId);
+    const toStationIndex = findStationIndexInLine(line, toStationId);
+
+    // Skip if either station is not on this line
+    if (fromStationIndex === -1 || toStationIndex === -1) return;
+
+    // Generate trips for this line
+    const lineTrips = generateTripsForLine(
+      line,
+      fromStationIndex,
+      toStationIndex,
+      targetTimeMinutes
+    );
+
+    // Add all found trips
+    if (lineTrips.length > 0) {
+      matchingTrips = matchingTrips.concat(lineTrips);
     }
-    
-    // Display trip results header
+  });
+
+  // Sort trips by departure time
+  matchingTrips.sort((a, b) => {
+    return (
+      timeToMinutes(a.segments[0].departureTime) -
+      timeToMinutes(b.segments[0].departureTime)
+    );
+  });
+
+  return matchingTrips;
+}
+
+/**
+ * Find the index of a station in a metro line
+ * @param {Object} line - Metro line object
+ * @param {string} stationId - Station ID to find
+ * @returns {number} - Index of station or -1 if not found
+ */
+function findStationIndexInLine(line, stationId) {
+  if (!line.stations || !Array.isArray(line.stations)) return -1;
+
+  for (let i = 0; i < line.stations.length; i++) {
+    if (line.stations[i].stationId === stationId) {
+      return i;
+    }
+  }
+
+  return -1;
+}
+
+/**
+ * Generate trips for a metro line based on the first departure time and frequency
+ * @param {Object} line - Metro line object
+ * @param {number} fromStationIndex - Index of departure station in line.stations
+ * @param {number} toStationIndex - Index of arrival station in line.stations
+ * @param {number} targetTimeMinutes - Target departure time in minutes since midnight
+ * @returns {Array} - Generated trips
+ */
+function generateTripsForLine(
+  line,
+  fromStationIndex,
+  toStationIndex,
+  targetTimeMinutes
+) {
+  const trips = [];
+
+  // Check if the line has the required scheduling information
+  if (!line.firstDeparture || !line.frequencyMinutes) return trips;
+
+  // Convert frequency to number
+  const frequency = parseInt(line.frequencyMinutes, 10);
+  if (isNaN(frequency) || frequency <= 0) return trips;
+
+  // Parse first departure time
+  const firstDepartureTime = line.firstDeparture.substring(11, 16); // Extract HH:MM
+  const firstDepartureMinutes = timeToMinutes(firstDepartureTime);
+
+  // Calculate travel time between stations (assumes uniform spacing for simplicity)
+  const totalDuration = parseInt(line.totalDuration, 10) || 0;
+  const totalStations = line.stations.length;
+  const minutesPerSegment = totalDuration / (totalStations - 1);
+
+  // Direction check - we need to handle both forward and reverse directions
+  const isForward = fromStationIndex < toStationIndex;
+
+  // Calculate departure and arrival times based on station indices
+  const stationsToTravel = Math.abs(toStationIndex - fromStationIndex);
+  const tripDuration = Math.round(minutesPerSegment * stationsToTravel);
+
+  // Find all departure times that are close to the target time
+  // Start from the first departure and increment by frequency
+  let currentDepartureMinutes = firstDepartureMinutes;
+
+  // Find the first departure time after the target time - 2 hours
+  while (currentDepartureMinutes < targetTimeMinutes - 120) {
+    currentDepartureMinutes += frequency;
+  }
+
+  // Generate up to 10 trips starting from 2 hours before the target time
+  for (let i = 0; i < 10; i++) {
+    // Calculate actual departure time for this station
+    const stationOffsetMinutes = fromStationIndex * minutesPerSegment;
+    const actualDepartureMinutes =
+      currentDepartureMinutes + stationOffsetMinutes;
+
+    // Calculate arrival time
+    const arrivalMinutes = actualDepartureMinutes + tripDuration;
+
+    // Create trip object
+    const trip = {
+      lineId: line.lineId || line.id,
+      lineName: line.lineName,
+      segments: [
+        {
+          fromStationId: line.stations[fromStationIndex].stationId,
+          toStationId: line.stations[toStationIndex].stationId,
+          departureTime: minutesToTime(actualDepartureMinutes),
+          arrivalTime: minutesToTime(arrivalMinutes),
+          durationMinutes: tripDuration,
+        },
+      ],
+    };
+
+    trips.push(trip);
+
+    // Increment for next trip
+    currentDepartureMinutes += frequency;
+  }
+
+  return trips;
+}
+
+/**
+ * Displays the search results
+ * @param {Array} trips - List of trip objects
+ * @param {string} fromStation - Departure station ID
+ * @param {string} toStation - Arrival station ID
+ * @param {string} date - Departure date
+ * @param {string} time - Departure time
+ */
+function displaySearchResults(trips, fromStation, toStation, date, time) {
+  const searchResults = document.getElementById("search-results");
+
+  if (!searchResults) return;
+
+  // Clear previous results
+  searchResults.innerHTML = "";
+
+  // Get station names
+  const fromStationName = getSelectedOptionText("from-station");
+  const toStationName = getSelectedOptionText("to-station");
+
+  // Make sure we found station names
+  const safefromStationName = fromStationName || "Departure Station";
+  const safeToStationName = toStationName || "Arrival Station";
+
+  // Check if trips were found
+  if (!trips || trips.length === 0) {
     searchResults.innerHTML = `
-        <div class="search-results-header mb-4">
-            <h3>
-                <i class="fas fa-subway me-2"></i>
-                ${fromStation.name} to ${toStation.name}
-            </h3>
-            <p class="lead">Trips on ${formattedDate}</p>
-        </div>
-        <div class="search-results-container" id="trips-container"></div>
-    `;
-    
-    const tripsContainer = document.getElementById('trips-container');
-    
-    // Sort trips by departure time
-    trips.sort((a, b) => {
-        return new Date('2000-01-01T' + a.departureTime) - new Date('2000-01-01T' + b.departureTime);
-    });
-    
-    // Display the first three trips
-    const tripsToShow = trips.slice(0, 3);
-    
-    tripsToShow.forEach(trip => {
-        // Format times
-        const departureTime = formatTime(trip.departureTime);
-        const arrivalTime = formatTime(trip.arrivalTime);
-        
-        // Find the relevant segments for this trip
-        let relevantSegment = null;
-        
-        if (trip.segments) {
-            trip.segments.forEach(segment => {
-                if (segment.fromStationId === fromStation.id && segment.toStationId === toStation.id) {
-                    relevantSegment = segment;
-                }
-            });
-        }
-        
-        // Create trip card
-        const tripCard = document.createElement('div');
-        tripCard.className = 'trip-card';
-        
-        tripCard.innerHTML = `
-            <div class="trip-header">
-                <span class="trip-line-badge">${fromStation.lineName}</span>
-                <div class="trip-times">
-                    <div class="trip-departure">
-                        <strong>${departureTime}</strong>
-                        <div>${fromStation.name}</div>
-                    </div>
-                    <div class="trip-duration">
-                        <div class="trip-duration-line"></div>
-                        <div class="trip-duration-time">${relevantSegment ? relevantSegment.durationMinutes : trip.totalDuration || '45'} min</div>
-                    </div>
-                    <div class="trip-arrival">
-                        <strong>${arrivalTime}</strong>
-                        <div>${toStation.name}</div>
-                    </div>
+            <div class="col-12 my-4">
+                <div class="alert alert-info bg-dark">
+                    <i class="fas fa-info-circle me-2"></i>
+                    No trips found between ${safefromStationName} and ${safeToStationName} on ${formatDateForDisplay(
+      date
+    )} at around ${formatTimeForDisplay(time)}.
+                    <br>
+                    Try a different time or date, or check another departure station.
                 </div>
             </div>
-            <div class="trip-footer">
-                <button class="btn btn-primary book-trip-btn">
-                    <i class="fas fa-ticket-alt me-2"></i>Book This Trip
-                </button>
-            </div>
         `;
-        
-        // Add event listener to book button
-        const bookButton = tripCard.querySelector('.book-trip-btn');
-        bookButton.addEventListener('click', () => {
-            // Either redirect to ticket purchase page or add to cart
-            const tripInfo = {
-                fromStation: fromStation.name,
-                toStation: toStation.name,
-                departureTime: departureTime,
-                arrivalTime: arrivalTime,
-                lineId: fromStation.line,
-                lineName: fromStation.lineName,
-                tripId: trip.tripId,
-                departureDate: departureDate
-            };
-            
-            // Store in sessionStorage to retrieve on ticket page
-            sessionStorage.setItem('selectedTrip', JSON.stringify(tripInfo));
-            
-            // Redirect to ticket purchase page
-            window.location.href = 'my-tickets.html';
-        });
-        
-        tripsContainer.appendChild(tripCard);
-    });
-    
-    // Add "Load More" button if there are more trips
-    if (trips.length > 3) {
-        const loadMoreBtn = document.createElement('button');
-        loadMoreBtn.className = 'btn btn-outline-primary load-more-btn';
-        loadMoreBtn.innerHTML = '<i class="fas fa-plus-circle me-2"></i>Load More Trips';
-        
-        loadMoreBtn.addEventListener('click', () => {
-            // Remove current load more button
-            loadMoreBtn.remove();
-            
-            // Get the next set of trips
-            const nextTrips = trips.slice(tripsContainer.querySelectorAll('.trip-card').length, 
-                                         tripsContainer.querySelectorAll('.trip-card').length + 3);
-            
-            // Add the next batch of trips
-            nextTrips.forEach(trip => {
-                const departureTime = formatTime(trip.departureTime);
-                const arrivalTime = formatTime(trip.arrivalTime);
-                
-                // Find the relevant segments for this trip
-                let relevantSegment = null;
-                if (trip.segments) {
-                    trip.segments.forEach(segment => {
-                        if (segment.fromStationId === fromStation.id && segment.toStationId === toStation.id) {
-                            relevantSegment = segment;
-                        }
-                    });
-                }
-                
-                const tripCard = document.createElement('div');
-                tripCard.className = 'trip-card fade-in';
-                
-                tripCard.innerHTML = `
-                    <div class="trip-header">
-                        <span class="trip-line-badge">${fromStation.lineName}</span>
-                        <div class="trip-times">
-                            <div class="trip-departure">
-                                <strong>${departureTime}</strong>
-                                <div>${fromStation.name}</div>
-                            </div>
-                            <div class="trip-duration">
-                                <div class="trip-duration-line"></div>
-                                <div class="trip-duration-time">${relevantSegment ? relevantSegment.durationMinutes : trip.totalDuration || '45'} min</div>
-                            </div>
-                            <div class="trip-arrival">
-                                <strong>${arrivalTime}</strong>
-                                <div>${toStation.name}</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="trip-footer">
-                        <button class="btn btn-primary book-trip-btn">
-                            <i class="fas fa-ticket-alt me-2"></i>Book This Trip
-                        </button>
-                    </div>
-                `;
-                
-                const bookButton = tripCard.querySelector('.book-trip-btn');
-                bookButton.addEventListener('click', () => {
-                    const tripInfo = {
-                        fromStation: fromStation.name,
-                        toStation: toStation.name,
-                        departureTime: departureTime,
-                        arrivalTime: arrivalTime,
-                        lineId: fromStation.line,
-                        lineName: fromStation.lineName,
-                        tripId: trip.tripId,
-                        departureDate: departureDate
-                    };
-                    
-                    sessionStorage.setItem('selectedTrip', JSON.stringify(tripInfo));
-                    window.location.href = 'my-tickets.html';
-                });
-                
-                tripsContainer.appendChild(tripCard);
-            });
-            
-            // Add load more button again if there are still more trips
-            if (tripsContainer.querySelectorAll('.trip-card').length < trips.length) {
-                tripsContainer.appendChild(loadMoreBtn);
-            }
-        });
-        
-        tripsContainer.appendChild(loadMoreBtn);
+    return;
+  }
+
+  // Create results header
+  const headerElement = document.createElement("div");
+  headerElement.className = "col-12 search-results-header";
+  headerElement.innerHTML = `
+        <h3><i class="fas fa-route me-2"></i>Available Trips</h3>
+        <p class="lead">From ${safefromStationName} to ${safeToStationName} on ${formatDateForDisplay(
+    date
+  )}</p>
+    `;
+  searchResults.appendChild(headerElement);
+
+  // Create results container
+  const resultsContainer = document.createElement("div");
+  resultsContainer.className = "col-12";
+  searchResults.appendChild(resultsContainer);
+
+  // Display first 3 trips
+  const tripsToShow = Math.min(trips.length, 3);
+  for (let i = 0; i < tripsToShow; i++) {
+    displayTripCard(trips[i], resultsContainer, fromStation, toStation);
+  }
+
+  // Add "Load More" button if there are more than 3 trips
+  if (trips.length > 3) {
+    const loadMoreElement = document.createElement("div");
+    loadMoreElement.className = "col-12 my-3";
+    loadMoreElement.innerHTML = `
+            <button class="load-more-btn">
+                <i class="fas fa-arrow-down me-2"></i>Load more trips
+            </button>
+        `;
+
+    // Add event listener to load more button
+    const loadMoreBtn = loadMoreElement.querySelector(".load-more-btn");
+    if (loadMoreBtn) {
+      loadMoreBtn.addEventListener("click", function () {
+        // Display 3 more trips
+        const currentCount =
+          resultsContainer.querySelectorAll(".trip-card").length;
+        const nextCount = Math.min(trips.length, currentCount + 3);
+
+        for (let i = currentCount; i < nextCount; i++) {
+          displayTripCard(trips[i], resultsContainer, fromStation, toStation);
+        }
+
+        // Remove button if all trips are displayed
+        if (nextCount >= trips.length) {
+          loadMoreElement.remove();
+        }
+      });
     }
+
+    searchResults.appendChild(loadMoreElement);
+  }
+
+  // Scroll to results
+  headerElement.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
 /**
- * Formats a time string from "HH:MM:SS" to "HH:MM AM/PM"
- * @param {string} timeString - Time string in format "HH:MM:SS"
- * @returns {string} - Formatted time string
+ * Displays a single trip card
+ * @param {Object} trip - Trip object
+ * @param {HTMLElement} container - Container for the card
+ * @param {string} fromStation - Departure station ID
+ * @param {string} toStation - Arrival station ID
  */
-function formatTime(timeString) {
-    if (!timeString) return '';
-    
-    const [hours, minutes] = timeString.split(':');
-    let h = parseInt(hours);
-    const m = minutes;
-    const ampm = h >= 12 ? 'PM' : 'AM';
-    
-    h = h % 12;
-    h = h ? h : 12; // Handle midnight (0 hour)
-    
-    return `${h}:${m} ${ampm}`;
+function displayTripCard(trip, container, fromStation, toStation) {
+  if (!container || !trip) return;
+
+  // Find the relevant segment for this route
+  let relevantSegment = null;
+  let fromIndex = -1;
+  let toIndex = -1;
+
+  // Look through segments to find our route
+  if (trip.segments && trip.segments.length > 0) {
+    for (let i = 0; i < trip.segments.length; i++) {
+      if (trip.segments[i].fromStationId === fromStation) {
+        fromIndex = i;
+      }
+      if (trip.segments[i].toStationId === toStation) {
+        toIndex = i;
+        break;
+      }
+    }
+
+    // Case when we found a segment from Source directly to Dest
+    if (fromIndex !== -1 && toIndex === fromIndex) {
+      relevantSegment = trip.segments[fromIndex];
+    }
+  }
+
+  // Exit if we can't find a route
+  if (!relevantSegment && (fromIndex === -1 || toIndex === -1)) {
+    return;
+  }
+
+  // Get departure and arrival times
+  let departureTime, arrivalTime, duration;
+  if (relevantSegment) {
+    // Direct segment case
+    departureTime = relevantSegment.departureTime;
+    arrivalTime = relevantSegment.arrivalTime;
+    duration = relevantSegment.durationMinutes;
+  } else {
+    // Multi-segment case
+    departureTime = trip.segments[fromIndex].departureTime;
+    arrivalTime = trip.segments[toIndex].arrivalTime;
+
+    // Calculate duration across segments
+    const depMinutes = timeToMinutes(departureTime);
+    const arrMinutes = timeToMinutes(arrivalTime);
+    duration = arrMinutes - depMinutes;
+  }
+
+  // Create card element
+  const cardElement = document.createElement("div");
+  cardElement.className = "trip-card fade-in";
+
+  // Create card content
+  cardElement.innerHTML = `
+        <div class="trip-header">
+            <span class="trip-line-badge">Line ${trip.lineId.replace(
+              "LN",
+              ""
+            )}</span>
+            
+            <div class="trip-times">
+                <div class="trip-departure">
+                    <strong>${formatTimeForDisplay(departureTime)}</strong>
+                    <div>Departure</div>
+                </div>
+                
+                <div class="trip-duration">
+                    <div class="trip-duration-line"></div>
+                    <div class="trip-duration-time">${duration} min</div>
+                </div>
+                
+                <div class="trip-arrival">
+                    <strong>${formatTimeForDisplay(arrivalTime)}</strong>
+                    <div>Arrival</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="trip-footer">
+            <button class="btn btn-primary book-trip-btn">
+                <i class="fas fa-ticket-alt me-2"></i>Book Ticket
+            </button>
+        </div>
+    `;
+
+  // Add event listener to "Book Ticket" button
+  const bookBtn = cardElement.querySelector(".book-trip-btn");
+  if (bookBtn) {
+    bookBtn.addEventListener("click", function () {
+      // If we implement a ticketing system, this is where we would add that functionality
+      alert("Ticket booking will be available in a future update!");
+    });
+  }
+
+  // Add to container
+  container.appendChild(cardElement);
+}
+
+/**
+ * Displays a search error message
+ * @param {string} message - Error message to display
+ */
+function displaySearchError(message) {
+  const searchError = document.getElementById("search-error");
+  if (!searchError) return;
+
+  searchError.textContent = message;
+  searchError.style.display = "block";
+}
+
+/**
+ * Gets the text of the selected option in a select element
+ * @param {string} selectId - ID of the select element
+ * @returns {string} - Text of the selected option
+ */
+function getSelectedOptionText(selectId) {
+  const select = document.getElementById(selectId);
+  if (!select || select.selectedIndex === -1) return "Unknown Station";
+
+  return select.options[select.selectedIndex].text;
+}
+
+/**
+ * Formats a time string for display (e.g. "14:30" to "2:30 PM")
+ * @param {string} timeString - Time string in format "HH:MM"
+ * @returns {string} - Formatted time
+ */
+function formatTimeForDisplay(timeString) {
+  if (!timeString) return "N/A";
+
+  try {
+    // Create a date object to parse the time
+    const date = new Date();
+    const [hours, minutes] = timeString.split(":");
+    date.setHours(parseInt(hours, 10));
+    date.setMinutes(parseInt(minutes, 10));
+
+    // Format using toLocaleTimeString to get the 12-hour format
+    return date.toLocaleTimeString("en-US", {
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+    });
+  } catch (e) {
+    return timeString;
+  }
+}
+
+/**
+ * Formats a date string for display (e.g. "2025-05-19" to "May 19, 2025")
+ * @param {string} dateString - Date string in format "YYYY-MM-DD"
+ * @returns {string} - Formatted date
+ */
+function formatDateForDisplay(dateString) {
+  if (!dateString) return "N/A";
+
+  try {
+    const date = new Date(dateString);
+
+    // Format using toLocaleDateString
+    return date.toLocaleDateString("en-US", {
+      month: "long",
+      day: "numeric",
+      year: "numeric",
+    });
+  } catch (e) {
+    return dateString;
+  }
+}
+
+/**
+ * Converts time string to minutes since midnight
+ * @param {string} timeString - Time string in format "HH:MM"
+ * @returns {number} - Minutes since midnight
+ */
+function timeToMinutes(timeString) {
+  if (!timeString) return 0;
+
+  try {
+    const [hours, minutes] = timeString.split(":");
+    return parseInt(hours, 10) * 60 + parseInt(minutes, 10);
+  } catch (e) {
+    return 0;
+  }
+}
+
+/**
+ * Converts minutes since midnight to time string
+ * @param {number} minutes - Minutes since midnight
+ * @returns {string} - Time string in format "HH:MM"
+ */
+function minutesToTime(minutes) {
+  if (minutes === undefined || minutes === null) return "00:00";
+
+  // Handle overflow (minutes > 24 hours)
+  minutes = minutes % (24 * 60);
+
+  const hours = Math.floor(minutes / 60);
+  const mins = minutes % 60;
+
+  return `${hours.toString().padStart(2, "0")}:${mins
+    .toString()
+    .padStart(2, "0")}`;
 }

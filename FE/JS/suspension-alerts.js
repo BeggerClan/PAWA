@@ -1,270 +1,167 @@
-// js/suspension-alerts.js - Handles real-time suspension alerts
+// suspension-alerts.js - Handles the display of real-time metro line suspension alerts
 
-/**
- * Global variables for suspension alert functionality
- */
-let suspensionCheckInterval;
-const POLLING_INTERVAL = 30000; // 30 seconds
-
-/**
- * Initializes the suspension alert system
- */
-function initSuspensionAlerts() {
-    // Create a container for suspension alerts if it doesn't exist
-    createAlertContainer();
+document.addEventListener('DOMContentLoaded', function() {
+    // Create container for suspension alerts
+    const alertsContainer = document.createElement('div');
+    alertsContainer.className = 'row suspension-alerts-container';
     
-    // Start polling for alerts
-    startSuspensionAlertPolling();
+    // Add it after the header but before the metro lines container
+    const metroLinesContainer = document.getElementById('metro-lines-container');
+    metroLinesContainer.parentNode.insertBefore(alertsContainer, metroLinesContainer);
     
-    console.log('Suspension alert system initialized');
-}
+    // Fetch suspension alerts from API
+    fetchSuspensionAlerts();
+
+    // Set up polling for real-time updates (every 60 seconds)
+    setInterval(fetchSuspensionAlerts, 60000);
+});
 
 /**
- * Creates a container for suspension alerts if it doesn't exist
+ * Fetches current suspension alerts from the API
  */
-function createAlertContainer() {
-    if (!document.querySelector('.suspension-alerts-container')) {
-        const container = document.createElement('div');
-        container.className = 'suspension-alerts-container';
-        container.style.marginBottom = '2rem';
-        
-        // Insert the container at the top of the page content
-        const mainContent = document.querySelector('.container.mt-5.pt-5');
-        if (mainContent) {
-            mainContent.insertBefore(container, mainContent.firstChild);
-        }
-    }
-}
-
-/**
- * Starts polling for suspension alerts
- */
-function startSuspensionAlertPolling() {
-    // Clear any existing interval
-    if (suspensionCheckInterval) {
-        clearInterval(suspensionCheckInterval);
-    }
+async function fetchSuspensionAlerts() {
+    const container = document.querySelector('.suspension-alerts-container');
+    if (!container) return;
     
-    // Check for suspension alerts immediately
-    checkForSuspensionAlerts();
-    
-    // Then check periodically
-    suspensionCheckInterval = setInterval(checkForSuspensionAlerts, POLLING_INTERVAL);
-}
-
-/**
- * Checks for active suspension alerts from the OPWA API
- */
-async function checkForSuspensionAlerts() {
     try {
-        const response = await fetch('http://localhost:8081/api/suspensions?active=true');
+        // Make API request to get active suspensions
+        const response = await fetch('http://localhost:8081/api/suspensions?active=true', {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json'
+            },
+            // Don't throw errors for 403 responses - handle them gracefully
+            credentials: 'omit'
+        });
         
         if (!response.ok) {
-            console.error('Failed to fetch suspension alerts:', response.status);
+            // If response is not OK but not 403, log error
+            if (response.status !== 403) {
+                console.warn(`Failed to fetch suspension alerts: ${response.status}`);
+            }
             return;
         }
         
         const suspensions = await response.json();
         
-        // If there are active suspensions, display alerts
-        if (suspensions && suspensions.length > 0) {
-            displaySuspensionAlerts(suspensions);
-            
-            // Send acknowledgment to OPWA
-            acknowledgeAlerts(suspensions);
-        } else {
-            // Remove any existing alerts if there are no active suspensions
-            removeAllAlerts();
-        }
-    } catch (error) {
-        console.error('Error checking for suspension alerts:', error);
-    }
-}
-
-/**
- * Removes all suspension alerts from the page
- */
-function removeAllAlerts() {
-    const existingAlerts = document.querySelectorAll('.suspension-alert');
-    existingAlerts.forEach(alert => {
-        alert.remove();
-    });
-}
-
-/**
- * Displays suspension alerts on the page
- * @param {Array} suspensions - Array of suspension objects
- */
-function displaySuspensionAlerts(suspensions) {
-    // Get container for alerts
-    const alertsContainer = document.querySelector('.suspension-alerts-container');
-    
-    // Process each suspension
-    suspensions.forEach(suspension => {
-        // Check if this alert is already displayed
-        const existingAlert = document.getElementById(`suspension-${suspension.suspensionId}`);
-        if (existingAlert) {
-            // Update existing alert if needed
-            updateExistingAlert(existingAlert, suspension);
+        // Clear existing alerts
+        container.innerHTML = '';
+        
+        // If there are no active suspensions, exit
+        if (!suspensions || suspensions.length === 0) {
             return;
         }
         
-        // Create new alert element
-        const alertElement = document.createElement('div');
-        alertElement.className = 'suspension-alert fade-in';
-        alertElement.id = `suspension-${suspension.suspensionId}`;
+        // Add alert header if we have suspensions
+        const alertHeader = document.createElement('div');
+        alertHeader.className = 'col-12 mb-3';
+        alertHeader.innerHTML = `
+            <h3 class="text-center"><i class="fas fa-exclamation-triangle me-2"></i>Current Service Disruptions</h3>
+        `;
+        container.appendChild(alertHeader);
         
-        // Format times for display
-        const formattedTimes = formatSuspensionTimes(suspension);
+        // Create a new column for the alerts
+        const alertColumn = document.createElement('div');
+        alertColumn.className = 'col-12';
+        container.appendChild(alertColumn);
         
-        // Get affected stations if available
-        const affectedStationsInfo = getAffectedStationsInfo(suspension);
+        // Display each suspension alert
+        suspensions.forEach(suspension => {
+            displaySuspensionAlert(suspension, alertColumn);
+        });
         
-        // Alert content
-        alertElement.innerHTML = `
-            <div class="suspension-alert-icon">
-                <i class="fas fa-exclamation-triangle"></i>
-            </div>
-            <div class="suspension-alert-content">
-                <h4>Metro Line Service Disruption</h4>
-                <p><strong>${suspension.lineName}</strong> is currently experiencing a service disruption due to ${suspension.reason || 'operational issues'}.</p>
+    } catch (error) {
+        console.error('Error fetching suspension alerts:', error);
+    }
+}
+
+/**
+ * Displays a single suspension alert
+ * @param {Object} suspension - Suspension alert data
+ * @param {HTMLElement} container - Container to display the alert
+ */
+function displaySuspensionAlert(suspension, container) {
+    // Format dates for displaying
+    const startTime = formatDateTime(suspension.startTime);
+    const endTime = formatDateTime(suspension.expectedEndTime);
+    
+    // Create the alert element
+    const alertElement = document.createElement('div');
+    alertElement.className = 'suspension-alert fade-in';
+    alertElement.setAttribute('data-suspension-id', suspension.suspensionId || suspension.id);
+    
+    // Create alert content
+    alertElement.innerHTML = `
+        <div class="suspension-alert-icon">
+            <i class="fas fa-exclamation-triangle"></i>
+        </div>
+        
+        <div class="suspension-alert-content">
+            <h4>${suspension.lineName || 'Metro Line'} Service Disruption</h4>
+            <p>${suspension.reason || 'Service disruption due to maintenance.'}</p>
+            
+            <div class="suspension-alert-details">
+                <div class="suspension-alert-detail">
+                    <div class="suspension-alert-label">Affected Line:</div>
+                    <div class="suspension-alert-value">${suspension.lineName || 'Unknown'}</div>
+                </div>
                 
-                <div class="suspension-alert-details">
-                    <div class="suspension-alert-detail">
-                        <div class="suspension-alert-label">Affected Line:</div>
-                        <div class="suspension-alert-value">${suspension.lineName}</div>
-                    </div>
-                    ${affectedStationsInfo}
-                    <div class="suspension-alert-detail">
-                        <div class="suspension-alert-label">Reason:</div>
-                        <div class="suspension-alert-value">${suspension.reason || 'Operational issues'}</div>
-                    </div>
-                    <div class="suspension-alert-detail">
-                        <div class="suspension-alert-label">Started:</div>
-                        <div class="suspension-alert-value">${formattedTimes.startTime}</div>
-                    </div>
-                    <div class="suspension-alert-detail">
-                        <div class="suspension-alert-label">Expected Resolution:</div>
-                        <div class="suspension-alert-value">${formattedTimes.endTime}</div>
-                    </div>
+                <div class="suspension-alert-detail">
+                    <div class="suspension-alert-label">Affected Stations:</div>
+                    <div class="suspension-alert-value">${suspension.affectedStationIds ? suspension.affectedStationIds.length : 0} stations affected</div>
+                </div>
+                
+                <div class="suspension-alert-detail">
+                    <div class="suspension-alert-label">Started:</div>
+                    <div class="suspension-alert-value">${startTime}</div>
+                </div>
+                
+                <div class="suspension-alert-detail">
+                    <div class="suspension-alert-label">Expected Resolution:</div>
+                    <div class="suspension-alert-value">${endTime}</div>
                 </div>
             </div>
-        `;
+        </div>
         
-        // Add close button to dismiss the alert
-        const closeButton = document.createElement('button');
-        closeButton.className = 'btn-close btn-close-white';
-        closeButton.setAttribute('aria-label', 'Close');
-        closeButton.style.position = 'absolute';
-        closeButton.style.top = '1rem';
-        closeButton.style.right = '1rem';
-        
-        closeButton.addEventListener('click', () => {
-            alertElement.remove();
-        });
-        
-        alertElement.appendChild(closeButton);
-        
-        // Add the alert to the page
-        alertsContainer.appendChild(alertElement);
-    });
-}
-
-/**
- * Updates an existing alert element with new suspension info
- * @param {HTMLElement} alertElement - The existing alert element
- * @param {Object} suspension - Updated suspension info
- */
-function updateExistingAlert(alertElement, suspension) {
-    // Update relevant parts if needed (like expected end time)
-    const formattedTimes = formatSuspensionTimes(suspension);
-    const endTimeElement = alertElement.querySelector('.suspension-alert-detail:last-child .suspension-alert-value');
+        <button type="button" class="btn-close btn-close-white suspension-alert-dismiss" aria-label="Close"></button>
+    `;
     
-    if (endTimeElement) {
-        endTimeElement.textContent = formattedTimes.endTime;
-    }
-    
-    // Could update other parts as needed
-}
-
-/**
- * Gets HTML for affected stations if available
- * @param {Object} suspension - Suspension object
- * @returns {string} - HTML for displaying affected stations
- */
-function getAffectedStationsInfo(suspension) {
-    if (suspension.affectedStationIds && suspension.affectedStationIds.length > 0) {
-        return `
-            <div class="suspension-alert-detail">
-                <div class="suspension-alert-label">Affected Stations:</div>
-                <div class="suspension-alert-value">${suspension.affectedStationIds.length} stations affected</div>
-            </div>
-        `;
-    }
-    return '';
-}
-
-/**
- * Formats suspension times for display
- * @param {Object} suspension - Suspension object
- * @returns {Object} - Object containing formatted start and end times
- */
-function formatSuspensionTimes(suspension) {
-    let startTimeDisplay = 'Unknown';
-    if (suspension.startTime) {
-        const startTime = new Date(suspension.startTime);
-        startTimeDisplay = startTime.toLocaleDateString('en-US', {
-            weekday: 'short',
-            month: 'short',
-            day: 'numeric',
-            hour: 'numeric',
-            minute: 'numeric'
+    // Add dismiss functionality
+    const dismissButton = alertElement.querySelector('.suspension-alert-dismiss');
+    if (dismissButton) {
+        dismissButton.addEventListener('click', function() {
+            alertElement.style.opacity = '0';
+            setTimeout(() => {
+                alertElement.remove();
+            }, 300);
         });
     }
     
-    let endTimeDisplay = 'Unknown';
-    if (suspension.expectedEndTime) {
-        const endTime = new Date(suspension.expectedEndTime);
-        endTimeDisplay = endTime.toLocaleDateString('en-US', {
-            weekday: 'short',
-            month: 'short',
-            day: 'numeric',
-            hour: 'numeric',
-            minute: 'numeric'
-        });
-    }
-    
-    return {
-        startTime: startTimeDisplay,
-        endTime: endTimeDisplay
-    };
+    // Add to container
+    container.appendChild(alertElement);
 }
 
 /**
- * Sends acknowledgment to OPWA for the alerts
- * @param {Array} suspensions - Array of suspension objects
+ * Formats a date string for display
+ * @param {string} dateString - ISO date string
+ * @returns {string} - Formatted date string
  */
-async function acknowledgeAlerts(suspensions) {
+function formatDateTime(dateString) {
+    if (!dateString) return 'Unknown';
+    
     try {
-        // For each suspension, send acknowledgment to OPWA
-        for (const suspension of suspensions) {
-            await fetch(`http://localhost:8081/api/suspensions/${suspension.suspensionId}/acknowledge`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    acknowledged: true,
-                    passengerApp: 'PAWA',
-                    timestamp: new Date().toISOString()
-                })
-            });
-            console.log(`Acknowledged suspension alert ${suspension.suspensionId}`);
-        }
-    } catch (error) {
-        console.error('Error acknowledging suspension alerts:', error);
+        const date = new Date(dateString);
+        
+        // Format for display: Mon, May 19, 7:42 PM
+        return date.toLocaleDateString('en-US', {
+            weekday: 'short',
+            month: 'short', 
+            day: 'numeric',
+            hour: 'numeric',
+            minute: '2-digit',
+            hour12: true
+        });
+    } catch (e) {
+        return 'Invalid date';
     }
 }
-
-// Initialize suspension alerts when the DOM is loaded
-document.addEventListener('DOMContentLoaded', initSuspensionAlerts);

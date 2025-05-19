@@ -102,10 +102,18 @@ function displayMetroLines(metroLines, container) {
             statusBadge = `<span class="status-badge status-inactive">Inactive</span>`;
         }
         
+        // Determine line color based on name or ID
+        let lineBadgeColor = 'primary-blue';
+        if (line.lineName && line.lineName.toLowerCase().includes('red')) {
+            lineBadgeColor = 'danger';
+        } else if (line.lineName && line.lineName.toLowerCase().includes('blue')) {
+            lineBadgeColor = 'primary';
+        }
+        
         // Create the card header with line name
         const cardHeader = document.createElement('div');
         cardHeader.className = 'metro-card-header';
-        cardHeader.innerHTML = `<i class="fas fa-subway me-2"></i>${line.lineName}`;
+        cardHeader.innerHTML = `<i class="fas fa-subway me-2"></i>${line.lineName || 'Metro Line'}`;
         
         // Create the card body with line details
         const cardBody = document.createElement('div');
@@ -127,12 +135,20 @@ function displayMetroLines(metroLines, container) {
             </div>
             <div class="metro-info-row">
                 <div class="metro-info-label">Total Duration:</div>
-                <div class="metro-info-value">${line.totalDuration} minutes</div>
+                <div class="metro-info-value">${line.totalDuration || 'N/A'} minutes</div>
             </div>
             <div class="metro-info-row">
                 <div class="metro-info-label">Total Stations:</div>
                 <div class="metro-info-value">${totalStations}</div>
             </div>
+            
+            ${isSuspended ? `
+            <div class="metro-info-row">
+                <div class="metro-info-label">Suspension Reason:</div>
+                <div class="metro-info-value">${line.suspensionReason || 'Maintenance'}</div>
+            </div>
+            ` : ''}
+            
             <button class="btn btn-outline-primary mt-3 toggle-stations-btn">
                 <i class="fas fa-list me-2"></i>View Stations
             </button>
@@ -167,6 +183,7 @@ function displayMetroLines(metroLines, container) {
         });
     });
 }
+
 
 /**
  * Generates HTML for the station list
