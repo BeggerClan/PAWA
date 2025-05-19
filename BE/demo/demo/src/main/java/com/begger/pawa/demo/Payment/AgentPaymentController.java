@@ -1,5 +1,7 @@
 package com.begger.pawa.demo.Payment;
 
+import com.begger.pawa.demo.Passenger.Passenger;
+import com.begger.pawa.demo.Passenger.PassengerRepository;
 import com.begger.pawa.demo.Ticket.Ticket;
 import com.begger.pawa.demo.Ticket.TicketRepository;
 import com.begger.pawa.demo.TicketType.TicketType;
@@ -16,21 +18,25 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 @RestController
-@RequestMapping("/api/agent")
+@RequestMapping("/api/opwa/agent")
 public class AgentPaymentController {
 
     private final TicketRepository ticketRepo;
     private final WalletRepository walletRepo;
     private final TicketTypeRepository ticketTypeRepo;
+    private final PassengerRepository passengerRepo;
+
 
 
     public AgentPaymentController(TicketRepository ticketRepo,
                                WalletRepository walletRepo,
-                               TicketTypeRepository ticketTypeRepo) {
+                               TicketTypeRepository ticketTypeRepo, PassengerRepository passengerRepo) {
     this.ticketRepo = ticketRepo;
     this.walletRepo = walletRepo;
     this.ticketTypeRepo = ticketTypeRepo;
+    this.passengerRepo = passengerRepo;
     }
+
 
     @PostMapping("/topup")
     public ResponseEntity<PaymentResponse> topUpWallet(@RequestBody AgentTopUpRequest req) {
@@ -128,4 +134,29 @@ public class AgentPaymentController {
         );
     }
 
+    // Lấy tất cả passengerId có trong hệ thống
+    @GetMapping("/passenger-ids")
+    public ResponseEntity<?> getAllPassengerIdsAndNames() {
+        var wallets = walletRepo.findAll();
+        var result = wallets.stream()
+                .map(w -> passengerRepo.findById(w.getPassengerId())
+                    .map(p -> {
+                        String fullName = String.join(" ",
+                            p.getFirstName() != null ? p.getFirstName() : "",
+                            p.getMiddleName() != null ? p.getMiddleName() : "",
+                            p.getLastName() != null ? p.getLastName() : ""
+                        ).trim();
+                        return java.util.Map.of(
+                            "passengerId", p.getPassengerId(),
+                            "name", fullName
+                        );
+                    })
+                    .orElse(java.util.Map.of(
+                        "passengerId", w.getPassengerId(),
+                        "name", ""
+                    ))
+                )
+                .toList();
+        return ResponseEntity.ok(result);
+    }
 }
