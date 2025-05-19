@@ -1,5 +1,6 @@
 package com.begger.pawa.demo.Payment;
 
+import com.begger.pawa.demo.Ticket.TicketService;
 import com.begger.pawa.demo.Transaction.TransactionService;
 import com.begger.pawa.demo.Wallet.PassengerWallet;
 import com.begger.pawa.demo.Wallet.WalletRepository;
@@ -10,6 +11,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
+
+import com.begger.pawa.demo.Ticket.TicketResponse;
+import org.springframework.lang.Nullable;
 
 import jakarta.validation.Valid;
 
@@ -24,12 +28,14 @@ public class PaymentController {
     private final StripePaymentClient stripe;
     private final TransactionService txService;
     private final WalletRepository walletRepo;
+    private final TicketService ticketService;
 
     public PaymentController(StripePaymentClient stripe,
-                             TransactionService txService, WalletRepository walletRepo) {
+                             TransactionService txService, WalletRepository walletRepo, TicketService ticketService) {
         this.stripe    = stripe;
         this.txService = txService;
         this.walletRepo = walletRepo;
+        this.ticketService = ticketService;
     }
 
     // buy ticket through stripe
@@ -93,5 +99,51 @@ public class PaymentController {
                    HttpStatus.BAD_REQUEST , "Top-up fail" + e.getMessage()
            );
        }
+    }
+
+
+    @PostMapping("/direct")
+    public ResponseEntity<TicketResponse> purchaseTicketDirect(
+            @Valid @RequestBody DirectTicketPurchaseRequest req,
+            @RequestHeader(value = "Authorization", required = false) String authHeader,
+            @Nullable Principal principal
+    ) {
+        try {
+            // Charge via Stripe
+            Charge charge = stripe.charge(req.getAmount(), req.getPaymentToken());
+            if (!charge.getPaid()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Payment failed");
+            }
+
+            // 2) Log the raw transaction (no wallet)
+            ObjectId txId = txService.logTransaction(
+                    null,              // walletId = null
+                    req.getAmount(),
+                    "PURCHASE"
+            );
+
+            // Build identities for service
+            String passengerId = (principal != null ? principal.getName() : null);
+            String token       = (authHeader != null && authHeader.startsWith("Bearer "))
+                    ? authHeader.replace("Bearer ", "")
+                    : null;
+
+            // Delegate to service to create + persist ticket + history
+            TicketResponse resp = ticketService.purchaseDirectTicket(
+                    passengerId,
+                    req.getTicketTypeCode(),
+                    req.getFromStation(),
+                    req.getToStation(),
+                    txId
+            );
+
+            return ResponseEntity.ok(resp);
+
+        } catch (StripeException e) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Payment failed: " + e.getMessage()
+            );
+        }
     }
 }

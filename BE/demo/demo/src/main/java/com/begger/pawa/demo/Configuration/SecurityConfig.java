@@ -50,7 +50,7 @@ public class SecurityConfig {
                                 HttpMethod.POST,
                                 "/api/passengers/register",
                                 "/api/auth/login",
-                                "/api/payments/tickets"
+                                "/api/payments/tickets/**"
                         ).permitAll()
                         .requestMatchers("/error").permitAll()
                         // direct purchase ticket endpoint for all
