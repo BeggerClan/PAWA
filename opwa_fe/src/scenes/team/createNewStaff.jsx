@@ -17,7 +17,7 @@ import { addUserPermitAll } from "./teamapi";
 const roles = [
   { value: "ADMIN", label: "Admin" },
   { value: "OPERATOR", label: "Operator" },
-  { value: "TICKET", label: "Ticket Agent" },
+  { value: "TICKET_AGENT", label: "Ticket Agent" },
 ];
 
 const shifts = [
@@ -109,7 +109,7 @@ const checkoutSchema = yup.object().shape({
   employed: yup.boolean().required("Required"),
   role: yup
     .string()
-    .oneOf(["ADMIN", "OPERATOR", "TICKET"])
+    .oneOf(["ADMIN", "OPERATOR", "TICKET_AGENT"])
     .required("Required"),
   shift: yup.string().oneOf(["DAY", "EVENING", "NIGHT"]).required("Required"),
 });
