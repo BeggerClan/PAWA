@@ -1,7 +1,21 @@
 import React, { useEffect, useState } from "react";
 import { getAllTrips, getAllMetroLines, getAllStations } from "../../../services/metroLineApi";
 
-const formatTime = (time) => (time ? time : "-");
+// Helper to format 'HH:mm:ss' as 'HH:mm', fallback to '-'
+const formatTime = (time) => {
+  if (!time) return '-';
+  // If already a Date, format as time
+  if (time instanceof Date) return time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  // If string in HH:mm:ss
+  if (/^\d{2}:\d{2}:\d{2}$/.test(time)) {
+    const [h, m] = time.split(":");
+    return `${h}:${m}`;
+  }
+  // If ISO string
+  const d = new Date(time);
+  if (!isNaN(d)) return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  return '-';
+};
 
 const MetroLineTripsOverview = () => {
   const [tripsByLine, setTripsByLine] = useState({});

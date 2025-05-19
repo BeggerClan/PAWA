@@ -4,7 +4,21 @@ import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper
 
 const PAGE_SIZE = 10;
 
-const formatTime = (time) => (time ? new Date(time).toLocaleString() : '-');
+// Helper to format 'HH:mm:ss' as 'HH:mm', fallback to '-'
+const formatTime = (time) => {
+  if (!time) return '-';
+  // If already a Date, format as time
+  if (time instanceof Date) return time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  // If string in HH:mm:ss
+  if (/^\d{2}:\d{2}:\d{2}$/.test(time)) {
+    const [h, m] = time.split(":");
+    return `${h}:${m}`;
+  }
+  // If ISO string
+  const d = new Date(time);
+  if (!isNaN(d)) return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  return '-';
+};
 
 const MetroLineTripsGrid = ({ lineId }) => {
   const [trips, setTrips] = useState([]);

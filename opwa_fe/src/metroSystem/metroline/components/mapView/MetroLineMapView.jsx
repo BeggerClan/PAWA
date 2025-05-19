@@ -51,17 +51,20 @@ const MapFocusHandler = ({ focusPosition }) => {
   return null;
 };
 
-const MetroLineMapView = ({ selectedLineId, refresh, focusPosition }) => {
+const MetroLineMapView = ({ selectedLineId, refresh, focusPosition, visibleLineIds }) => {
   const [lines, setLines] = useState([]);
 
   useEffect(() => {
     getAllMetroLines().then(res => setLines(res.data));
   }, [selectedLineId, refresh]);
 
-  // Filter lines if a line is selected
-  const displayedLines = selectedLineId
-    ? lines.filter(line => String(line.lineId) === String(selectedLineId))
-    : lines;
+  // Filter lines if a line is selected or visibleLineIds is provided
+  let displayedLines = lines;
+  if (Array.isArray(visibleLineIds) && visibleLineIds.length > 0) {
+    displayedLines = lines.filter(line => visibleLineIds.includes(line.lineId));
+  } else if (selectedLineId) {
+    displayedLines = lines.filter(line => String(line.lineId) === String(selectedLineId));
+  }
 
   // Prepare polylines: always use the color of the first station's mapMarker
   const polylines = displayedLines.map(line => {

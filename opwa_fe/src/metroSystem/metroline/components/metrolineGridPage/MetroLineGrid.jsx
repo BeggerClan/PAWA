@@ -68,7 +68,11 @@ const MetroLineGrid = ({ onShowStations }) => {
     setFormData({
       lineName: line.lineName,
       totalDuration: line.totalDuration,
-      firstDeparture: line.firstDeparture ? line.firstDeparture.split('T')[0] : '',
+      firstDeparture: line.firstDeparture ?
+        (typeof line.firstDeparture === 'string' && line.firstDeparture.includes('T')
+          ? line.firstDeparture.slice(0, 16) // 'YYYY-MM-DDTHH:mm'
+          : line.firstDeparture)
+        : '',
       frequencyMinutes: line.frequencyMinutes,
       isSuspended: line.isSuspended || false,
       suspensionReason: line.suspensionReason || "",
@@ -98,7 +102,7 @@ const MetroLineGrid = ({ onShowStations }) => {
     try {
       let data = {
         ...formData,
-        firstDeparture: formData.firstDeparture ? `${formData.firstDeparture}T00:00:00` : null,
+        firstDeparture: formData.firstDeparture ? formData.firstDeparture : null,
         isActive: !(formData.isSuspended && affectedStations.length >= 2)
       };
       if (currentLine) {
@@ -156,6 +160,7 @@ const MetroLineGrid = ({ onShowStations }) => {
     const line = metroLines.find(l => l.lineId === lineId);
     setSelectedLineName(line ? line.lineName : '');
     setSelectedView('stations');
+    if (onShowStations) onShowStations(lineId);
   };
 
   const handleBackToGrid = () => {
@@ -280,9 +285,6 @@ const MetroLineGrid = ({ onShowStations }) => {
 
       {selectedLineId && (
         <Box sx={{ mt: 4, mb: 4, p: 2, border: '2px solid #1976d2', borderRadius: 2, background: '#f8fafd' }}>
-          <Button variant="outlined" onClick={handleBackToGrid} sx={{ mb: 2 }}>
-            Back to Metro Lines
-          </Button>
           <h2 style={{ color: '#1976d2', marginBottom: 16 }}>Metro Line: {selectedLineName} ({selectedLineId})</h2>
           <Tabs
             value={selectedView}

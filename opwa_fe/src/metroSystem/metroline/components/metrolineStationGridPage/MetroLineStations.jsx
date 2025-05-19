@@ -10,6 +10,8 @@ import {
 import DeleteIcon from "@mui/icons-material/Delete";
 import PauseCircleIcon from "@mui/icons-material/PauseCircle";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import AddIcon from '@mui/icons-material/Add';
 
 const MetroLineStations = ({ lineId, onBack, onStationChanged, onStationSelect }) => {
   if (!lineId) return null;
@@ -94,15 +96,29 @@ const MetroLineStations = ({ lineId, onBack, onStationChanged, onStationSelect }
 
   return (
     <div style={{ padding: 32 }}>
-      <Button variant="outlined" onClick={onBack} sx={{ mb: 2 }}>
-        Back
-      </Button>
       <Typography variant="h5" gutterBottom>
         Stations for Metro Line {lineId}
       </Typography>
-      <Button variant="contained" color="primary" onClick={handleAdd} sx={{ mb: 2 }}>
-        Add Station
-      </Button>
+      <div style={{ display: 'flex', gap: 16, alignItems: 'center', marginBottom: 24 }}>
+      <Button
+          variant="contained"
+          color="secondary"
+          startIcon={<ArrowBackIcon />}
+          onClick={onBack}
+          sx={{ borderRadius: 2, fontWeight: 600, letterSpacing: 0.5 }}
+        >
+          Back to Metro Lines
+        </Button>
+        <Button
+          variant="contained"
+          color="primary"
+          startIcon={<AddIcon />}
+          onClick={handleAdd}
+          sx={{ boxShadow: 2, borderRadius: 2, fontWeight: 600, letterSpacing: 0.5 }}
+        >
+          Add Station
+        </Button>
+      </div>
       <TableContainer component={Paper}>
         <Table size="small" sx={{ border: 1, borderColor: 'divider' }}>
           <TableHead>

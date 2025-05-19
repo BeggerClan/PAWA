@@ -3,19 +3,28 @@ import MetroLineGrid from "./components/metrolineGridPage/MetroLineGrid";
 import MetroLineStations from "./components/metrolineStationGridPage/MetroLineStations";
 import MetroLineMapView from "./components/mapView/MetroLineMapView";
 import MetroLineTripsOverview from "./components/tripPage/MetroLineTripsOverview";
+import AllTripsGridPage from "./components/tripPage/AllTripsGridPage";
 import "./indexMapModal.css";
 
 const Index = () => {
   const [selectedLineId, setSelectedLineId] = useState(null);
   const [showOverview, setShowOverview] = useState(false);
+  const [showAllTrips, setShowAllTrips] = useState(false);
   const [mapModalOpen, setMapModalOpen] = useState(false);
+  const [visibleLineIds, setVisibleLineIds] = useState(null);
 
   const handleShowStations = (lineId) => {
     setSelectedLineId(lineId);
+    setShowOverview(false);
+    setShowAllTrips(false);
   };
 
   const handleBack = () => {
     setSelectedLineId(null);
+  };
+
+  const handleVisibleLinesChange = (ids) => {
+    setVisibleLineIds(ids);
   };
 
   return (
@@ -33,11 +42,11 @@ const Index = () => {
         <div style={{ flex: 2, minWidth: 0 }}>
           <div style={{ display: "flex", gap: 16, marginBottom: 16 }}>
             <button
-              onClick={() => { setShowOverview(false); setSelectedLineId(null); }}
+              onClick={() => { setShowOverview(false); setShowAllTrips(false); setSelectedLineId(null); }}
               style={{
                 padding: "8px 20px",
-                background: !showOverview ? "#2d98da" : "#f5f6fa",
-                color: !showOverview ? "#fff" : "#2d98da",
+                background: !showOverview && !showAllTrips ? "#2d98da" : "#f5f6fa",
+                color: !showOverview && !showAllTrips ? "#fff" : "#2d98da",
                 border: "1px solid #2d98da",
                 borderRadius: 4,
                 cursor: "pointer"
@@ -46,7 +55,7 @@ const Index = () => {
               Metro Lines
             </button>
             <button
-              onClick={() => { setShowOverview(true); setSelectedLineId(null); }}
+              onClick={() => { setShowOverview(true); setShowAllTrips(false); setSelectedLineId(null); }}
               style={{
                 padding: "8px 20px",
                 background: showOverview ? "#2d98da" : "#f5f6fa",
@@ -58,15 +67,30 @@ const Index = () => {
             >
               Trips Overview
             </button>
+            <button
+              onClick={() => { setShowOverview(false); setShowAllTrips(true); setSelectedLineId(null); }}
+              style={{
+                padding: "8px 20px",
+                background: showAllTrips ? "#2d98da" : "#f5f6fa",
+                color: showAllTrips ? "#fff" : "#2d98da",
+                border: "1px solid #2d98da",
+                borderRadius: 4,
+                cursor: "pointer"
+              }}
+            >
+              All Trips
+            </button>
           </div>
-          {!showOverview ? (
+          {!showOverview && !showAllTrips ? (
             !selectedLineId ? (
               <MetroLineGrid onShowStations={handleShowStations} />
             ) : (
               <MetroLineStations lineId={selectedLineId} onBack={handleBack} />
             )
-          ) : (
+          ) : showOverview ? (
             <MetroLineTripsOverview />
+          ) : (
+            <AllTripsGridPage onVisibleLinesChange={handleVisibleLinesChange} />
           )}
         </div>
         {/* Mini Map on the right */}
@@ -81,7 +105,11 @@ const Index = () => {
                 <span style={{ fontSize: 20, color: "#2d98da" }}>⤢</span>
               </button>
             </div>
-            <MetroLineMapView selectedLineId={selectedLineId} />
+            <MetroLineMapView
+              key={showAllTrips ? (visibleLineIds ? visibleLineIds.join(',') : 'all') : selectedLineId || 'all'}
+              selectedLineId={showAllTrips ? null : selectedLineId}
+              visibleLineIds={showAllTrips ? visibleLineIds : null}
+            />
           </div>
         </div>
         {/* Map Modal */}
@@ -97,7 +125,12 @@ const Index = () => {
               </button>
             </div>
             <div className="map-modal-box" onClick={e => e.stopPropagation()}>
-              <MetroLineMapView selectedLineId={selectedLineId} style={{ width: "80vw", height: "70vh" }} />
+              <MetroLineMapView
+                key={showAllTrips ? (visibleLineIds ? visibleLineIds.join(',') : 'all') : selectedLineId || 'all'}
+                selectedLineId={showAllTrips ? null : selectedLineId}
+                visibleLineIds={showAllTrips ? visibleLineIds : null}
+                style={{ width: "80vw", height: "70vh" }}
+              />
             </div>
           </div>
         )}

@@ -16,10 +16,22 @@ const MetroLineForm = ({
 }) => {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value
-    });
+    if (name === 'firstDeparture') {
+      // If we have an existing date, preserve it and only update the time
+      const existingDate = formData.firstDeparture ? new Date(formData.firstDeparture) : new Date();
+      const [hours, minutes] = value.split(':');
+      existingDate.setHours(parseInt(hours, 10));
+      existingDate.setMinutes(parseInt(minutes, 10));
+      setFormData({
+        ...formData,
+        [name]: existingDate.toISOString()
+      });
+    } else {
+      setFormData({
+        ...formData,
+        [name]: value
+      });
+    }
   };
 
   return (
@@ -49,12 +61,12 @@ const MetroLineForm = ({
         <TextField
           margin="dense"
           name="firstDeparture"
-          label="First Departure"
-          type="date"
+          label="First Departure Time"
+          type="time"
           fullWidth
           variant="standard"
           InputLabelProps={{ shrink: true }}
-          value={formData.firstDeparture}
+          value={formData.firstDeparture ? new Date(formData.firstDeparture).toTimeString().slice(0, 5) : ''}
           onChange={handleInputChange}
         />
         {/* Suspension controls removed */}

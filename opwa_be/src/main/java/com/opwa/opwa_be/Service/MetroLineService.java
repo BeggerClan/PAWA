@@ -374,11 +374,6 @@ public class MetroLineService {
 
         boolean changed = false;
 
-        if (!java.util.Objects.equals(existing.getLineName(), updatedLine.getLineName())) {
-            existing.setLineName(updatedLine.getLineName());
-            changed = true;
-        }
-
         boolean freqChanged = false;
         if (!java.util.Objects.equals(existing.getFrequencyMinutes(), updatedLine.getFrequencyMinutes())) {
             existing.setFrequencyMinutes(updatedLine.getFrequencyMinutes());
@@ -395,8 +390,15 @@ public class MetroLineService {
             existing.setTotalDuration(calculateTotalDuration(existing));
         }
 
+        boolean firstDepartureChanged = false;
         if (!java.util.Objects.equals(existing.getFirstDeparture(), updatedLine.getFirstDeparture())) {
             existing.setFirstDeparture(updatedLine.getFirstDeparture());
+            firstDepartureChanged = true;
+            changed = true;
+        }
+
+        if (!java.util.Objects.equals(existing.getLineName(), updatedLine.getLineName())) {
+            existing.setLineName(updatedLine.getLineName());
             changed = true;
         }
 
@@ -413,7 +415,14 @@ public class MetroLineService {
             existing.setUpdatedAt(java.time.LocalDateTime.now());
         }
 
-        return metroLineRepo.save(existing);
+        MetroLine saved = metroLineRepo.save(existing);
+
+        // If any of the trip-affecting fields changed, regenerate trips
+        if (freqChanged || stationsChanged || firstDepartureChanged) {
+            generateTripsForLine(saved);
+        }
+
+        return saved;
     }
 
     public List<Trip> getTripsForLine(String lineId) {
