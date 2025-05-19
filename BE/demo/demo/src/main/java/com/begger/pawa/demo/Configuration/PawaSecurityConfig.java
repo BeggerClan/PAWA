@@ -62,7 +62,7 @@ public class PawaSecurityConfig {
                     "/api/payments/tickets/wallet/top-up/credit-card"
                 ).hasRole("PASSENGER")
 
-                        .requestMatchers("/api/opwa/agent/**").hasAnyRole("OPERATOR", "ADMIN")
+                        .requestMatchers("/api/opwa/agent/**").hasAnyRole("OPERATOR", "ADMIN","TiCKET_AGENT")
 
                 .anyRequest().authenticated()
             )
