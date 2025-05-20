@@ -524,6 +524,28 @@ h1, h2, h3, h4, h5, h6, p, .lead, .metro-info-value, .station-item {
     margin-bottom: 2rem;
 }
 
+.affected-stations-list {
+    background-color: rgba(0, 0, 0, 0.1);
+    border-radius: 4px;
+    padding: 0.75rem;
+    margin-top: 0.75rem;
+}
+
+.affected-stations-list ul li {
+    margin-bottom: 0.5rem;
+    color: var(--light-text);
+}
+
+.affected-stations-list ul li:last-child {
+    margin-bottom: 0;
+}
+
+/* Animated warning styles */
+@keyframes pulse {
+    0% { opacity: 0.6; }
+    50% { opacity: 1; }
+    100% { opacity: 0.6; }
+}
 .suspension-alert {
     background-color: rgba(220, 53, 69, 0.1);
     border-left: 4px solid #dc3545;
@@ -538,6 +560,7 @@ h1, h2, h3, h4, h5, h6, p, .lead, .metro-info-value, .station-item {
 
 .suspension-alert-icon {
     font-size: 1.5rem;
+    animation: pulse 2s infinite;
     color: #dc3545;
     margin-right: 1rem;
     margin-top: 0.25rem;
