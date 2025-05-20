@@ -107,63 +107,8 @@ function renderCart() {
       return;
     }
 
-    const payload = {
-      items: cart.map(item => ({
-        code: item.code,
-        quantity: item.quantity
-      }))
-    };
-
-    const token = sessionStorage.getItem('jwtToken');
-    let method = 'stripe';
-
-    if (token) {
-      const choice = prompt("Choose payment method: 'wallet' or 'stripe'").toLowerCase();
-      if (choice === 'wallet') {
-        method = 'wallet';
-      } else if (choice === 'stripe') {
-        method = 'stripe';
-      } else {
-        alert('Invalid method. Try again.');
-        return;
-      }
-    }
-
-    // Add fake token for Stripe
-    if (method === 'stripe') {
-      payload.paymentToken = 'test-token';
-    }
-
-    const endpoint =
-      method === 'wallet'
-        ? 'http://localhost:8080/api/payments/tickets/wallet'
-        : 'http://localhost:8080/api/payments/tickets';
-
-    fetch(endpoint, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(token && { Authorization: `Bearer ${token}` })
-      },
-      body: JSON.stringify(payload)
-    })
-      .then(async res => {
-        if (!res.ok) {
-          const error = await res.text();
-          throw new Error(`Checkout failed: ${res.status} ${error}`);
-        }
-        return res.json();
-      })
-      .then(data => {
-        alert('Purchase successful!');
-        localStorage.removeItem('cart');
-        renderCart();
-        updateCartBadge?.();
-      })
-      .catch(err => {
-        alert(err.message);
-        console.error(err);
-      });
+    const modal = new bootstrap.Modal(document.getElementById('cartPurchaseModal'));
+    modal.show();
   });
 }
 
@@ -200,4 +145,92 @@ function updateCartBadge() {
   document.querySelectorAll('.cart-count').forEach(badge => {
     badge.textContent = totalQty;
   });
+}
+
+document.getElementById('cartWalletBtn').addEventListener('click', () => {
+  const token = localStorage.getItem('jwtToken');
+  if (!token) {
+    if (confirm("You must sign in to use eWallet. Redirect now?")) {
+      window.location.href = 'signin.html';
+    }
+    return;
+  }
+  submitCartPurchase('wallet');
+});
+
+document.getElementById('cartStripeBtn').addEventListener('click', () => {
+  submitCartPurchase('stripe');
+});
+
+async function submitCartPurchase(method) {
+  const cart = JSON.parse(localStorage.getItem('cart')) || [];
+  if (cart.length === 0) return;
+
+  const token = localStorage.getItem('jwtToken');
+  const useStripe = method === 'stripe';
+  const paymentMode = useStripe ? 'STRIPE' : 'EWALLET';
+
+  const items = cart.map(item => ({
+    ticketType: item.code,
+    quantity: item.quantity,
+    fromStation: null,
+    toStation: null
+  }));
+
+  const updatePayload = { items };
+  const purchasePayload = {
+    paymentMode,
+    fromStation: null,
+    toStation: null
+  };
+  if (useStripe) {
+    purchasePayload.paymentToken = 'test-token';
+  }
+
+  document.getElementById('cartCheckoutFeedback').textContent = '⏳ Updating cart...';
+
+  try {
+    // ✅ Step 1: Update server-side cart
+    const updateRes = await fetch('http://localhost:8080/api/cart/update', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token && { Authorization: `Bearer ${token}` })
+      },
+      body: JSON.stringify(updatePayload)
+    });
+
+    if (!updateRes.ok) {
+      const err = await updateRes.text();
+      throw new Error(`Failed to update cart: ${err}`);
+    }
+
+    // ✅ Step 2: Proceed with purchase
+    document.getElementById('cartCheckoutFeedback').textContent = '⏳ Processing payment...';
+
+    const purchaseRes = await fetch('http://localhost:8080/api/tickets/purchase-cart', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token && { Authorization: `Bearer ${token}` })
+      },
+      body: JSON.stringify(purchasePayload)
+    });
+
+    bootstrap.Modal.getInstance(document.getElementById('cartPurchaseModal'))?.hide();
+
+    if (purchaseRes.ok) {
+      alert('✅ Purchase successful!');
+      localStorage.removeItem('cart');
+      renderCart();
+      updateCartBadge?.();
+    } else {
+      const err = await purchaseRes.text();
+      document.getElementById('cartCheckoutFeedback').textContent = `❌ Failed: ${err}`;
+    }
+
+  } catch (err) {
+    console.error(err);
+    document.getElementById('cartCheckoutFeedback').textContent = `❌ Error: ${err.message}`;
+  }
 }

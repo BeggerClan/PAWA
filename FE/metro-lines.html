@@ -16,7 +16,7 @@
     />
     <!-- Custom CSS -->
     <link rel="stylesheet" href="CSS/home.css" />
-    <link rel="stylesheet" href="CSS/metro-lines.css" />
+    <link rel="stylesheet" href="CSS/metro-lines-merged.css" />
   </head>
   <body>
     <nav
@@ -118,105 +118,91 @@
 
     <!-- Main Content -->
     <div class="container mt-5 pt-5">
-      <div class="metro-header text-center mb-4">
-        <h1 class="display-4">HCMC Metro Lines</h1>
-        <p class="lead">View current metro lines, stations, and schedules</p>
-      </div>
-
-      <!-- Search Section -->
-      <div class="card search-card mb-4">
-        <div class="card-body">
-          <h3 class="card-title">
-            <i class="fas fa-search me-2"></i>Plan Your Journey
-          </h3>
-          <form id="search-form" class="mt-3">
-            <div class="row g-3">
-              <div class="col-md-4">
-                <label for="from-station" class="form-label">From</label>
-                <select id="from-station" class="form-select">
-                  <option value="" selected disabled>
-                    Select departure station
-                  </option>
-                  <option value="ben-thanh">Ben Thanh</option>
-                  <option value="opera-house">Opera House</option>
-                  <option value="ba-son">Ba Son</option>
-                  <option value="van-thanh-park">Van Thanh Park</option>
-                  <option value="tan-cang">Tan Cang</option>
-                  <option value="thao-dien">Thao Dien</option>
-                  <option value="an-phu">An Phu</option>
-                  <option value="rach-chiec">Rach Chiec</option>
-                  <option value="phuoc-long">Phuoc Long</option>
-                  <option value="binh-thai">Binh Thai</option>
-                  <option value="thu-duc">Thu Duc</option>
-                  <option value="saigon-hi-tech-park">
-                    Saigon Hi-tech Park
-                  </option>
-                  <option value="national-university">
-                    National University
-                  </option>
-                  <option value="suoi-tien">Suoi Tien Terminal</option>
-                </select>
-              </div>
-              <div class="col-md-4">
-                <label for="to-station" class="form-label">To</label>
-                <select id="to-station" class="form-select">
-                  <option value="" selected disabled>
-                    Select arrival station
-                  </option>
-                  <option value="ben-thanh">Ben Thanh</option>
-                  <option value="opera-house">Opera House</option>
-                  <option value="ba-son">Ba Son</option>
-                  <option value="van-thanh-park">Van Thanh Park</option>
-                  <option value="tan-cang">Tan Cang</option>
-                  <option value="thao-dien">Thao Dien</option>
-                  <option value="an-phu">An Phu</option>
-                  <option value="rach-chiec">Rach Chiec</option>
-                  <option value="phuoc-long">Phuoc Long</option>
-                  <option value="binh-thai">Binh Thai</option>
-                  <option value="thu-duc">Thu Duc</option>
-                  <option value="saigon-hi-tech-park">
-                    Saigon Hi-tech Park
-                  </option>
-                  <option value="national-university">
-                    National University
-                  </option>
-                  <option value="suoi-tien">Suoi Tien Terminal</option>
-                </select>
-              </div>
-              <div class="col-md-4">
-                <label for="travel-time" class="form-label">When</label>
-                <input
-                  type="datetime-local"
-                  id="travel-time"
-                  class="form-control"
-                />
-              </div>
-              <div class="col-12 text-center">
-                <button type="submit" class="btn btn-primary px-4 py-2">
-                  <i class="fas fa-search me-2"></i>Find Routes
-                </button>
-              </div>
-            </div>
-          </form>
-        </div>
-      </div>
-
-      <!-- Metro Line Information -->
       <div class="row">
+        <div class="metro-header text-center mb-4">
+            <h1 class="display-4">HCMC Metro Lines</h1>
+            <p class="lead">View current metro lines, stations, and schedules</p>
+          </div>
+        <!-- Left side: Metro lines, Search, Results -->
         <div class="col-lg-8">
-          <!-- Metro lines will be dynamically inserted here -->
-          <div class="text-center my-5">
-            <div class="spinner-border text-primary" role="status">
-              <span class="visually-hidden">Loading...</span>
+          <!-- Metro Lines -->
+          <div class="row">
+            <div class="col-12" id="metro-lines-container">
+              <div class="text-center my-5">
+                <div class="spinner-border text-primary" role="status">
+                  <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-2">Loading metro lines...</p>
+              </div>
             </div>
-            <p class="mt-2">Loading metro lines...</p>
+          </div>
+
+          <!-- Search Trip -->
+          <div class="row mt-5">
+            <div class="col-12">
+              <h2 class="text-center mb-4">Find Your Trip</h2>
+              <div class="search-container">
+                <form id="trip-search-form" class="search-form">
+                  <div class="form-group">
+                    <label for="from-station">From Station</label>
+                    <select id="from-station" name="from-station" required>
+                      <option value="">Select departure station</option>
+                    </select>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="to-station">To Station</label>
+                    <select id="to-station" name="to-station" required>
+                      <option value="">Select arrival station</option>
+                    </select>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="departure-date">Departure Date</label>
+                    <input
+                      type="date"
+                      id="departure-date"
+                      name="departure-date"
+                      required
+                    />
+                  </div>
+
+                  <div class="form-group">
+                    <label for="departure-time">Departure Time</label>
+                    <input
+                      type="time"
+                      id="departure-time"
+                      name="departure-time"
+                      required
+                    />
+                  </div>
+
+                  <div class="search-actions">
+                    <div
+                      id="search-error"
+                      class="alert alert-danger"
+                      style="display: none; margin-right: auto"
+                    ></div>
+                    <button type="submit" class="btn btn-primary">
+                      <i class="fas fa-search me-2"></i>Find Trips
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+
+          <!-- Search Results -->
+          <div class="row">
+            <div class="col-12" id="search-results"></div>
           </div>
         </div>
 
+        <!-- Right side: Ticket Types -->
         <div class="col-lg-4">
           <!-- Ticket Types Card -->
-          <div class="card mb-4">
-            <div class="card-header bg-primary text-white">
+          <div class="card metro-card mb-4">
+            <div class="metro-card-header">
               <h3 class="card-title mb-0">
                 <i class="fas fa-ticket-alt me-2"></i>Ticket Types
               </h3>
@@ -224,40 +210,14 @@
             <div class="card-body ticket-types">
               <p>Loading ticket types...</p>
             </div>
-
-
-          <!-- System Alerts Card -->
-          <div class="card mb-4">
-            <div class="card-header bg-danger text-white">
-              <h3 class="card-title mb-0">
-                <i class="fas fa-exclamation-triangle me-2"></i>System Alerts
-              </h3>
-            </div>
-            <div class="card-body">
-              <div class="alert-item">
-                <div class="alert-time">May 3, 2025 - 06:15 AM</div>
-                <h5 class="alert-title">Minor Delay on Line 1</h5>
-                <p>
-                  Due to routine maintenance, trains may experience delays of
-                  5-10 minutes between Thao Dien and An Phu stations until 8:00
-                  AM.
-                </p>
-              </div>
-              <hr />
-              <div class="alert-item">
-                <div class="alert-time">May 2, 2025 - 4:30 PM</div>
-                <h5 class="alert-title">Weekend Schedule Adjustment</h5>
-                <p>
-                  This weekend (May 4-5), Line 1 will operate with 15-minute
-                  intervals instead of the usual 10-minute intervals due to
-                  scheduled system updates.
-                </p>
-              </div>
-            </div>
           </div>
+
+          <!-- 📍 Add this: suspension alerts container (moved from JS logic) -->
+          <div class="suspension-alerts-container"></div>
         </div>
       </div>
-    </div>
+</div>
+
 
     <!-- Footer Section -->
     <footer class="container-fluid bg-dark text-white mt-5 py-4">
@@ -331,38 +291,71 @@
       </div>
     </footer>
 
-    <!-- One-way Ticket Purchase Modal -->
-    <div class="modal fade" id="oneWayTicketModal" tabindex="-1" aria-labelledby="oneWayTicketModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-        <form class="modal-content" id="oneWayTicketForm">
-            <div class="modal-header">
-            <h5 class="modal-title">Purchase One-way Ticket</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+    <!-- Ticket Purchase Modal -->
+    <div class="modal fade" id="ticketPurchaseModal" tabindex="-1" aria-labelledby="ticketPurchaseModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <form class="modal-content" id="ticketPurchaseForm">
+          <div class="modal-header">
+            <h5 class="modal-title" id="ticketPurchaseModalLabel">Purchase Ticket</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <!-- Shown only for ONE_WAY types -->
+            <div id="fromToFields" class="mb-3">
+              <label for="modalFromStation" class="form-label">From Station</label>
+              <select class="form-select" id="modalFromStation"></select>
+
+              <label for="modalToStation" class="form-label mt-2">To Station</label>
+              <select class="form-select" id="modalToStation"></select>
             </div>
-            <div class="modal-body">
-            <div class="mb-3">
-                <label for="modalFromStation" class="form-label">From Station</label>
-                <select class="form-select" id="modalFromStation" required></select>
+
+            <p id="ticketTypeLabel" class="fw-bold text-primary mb-2"></p>
+
+            <!-- Quantity Control -->
+            <div class="mb-3 text-center">
+              <label class="form-label d-block">Quantity</label>
+              <div class="d-flex justify-content-center align-items-center gap-3">
+                <button type="button" class="btn btn-outline-secondary" id="decreasePurchaseQty">−</button>
+                <span id="purchaseQty" class="fw-bold text-dark">1</span>
+                <button type="button" class="btn btn-outline-secondary" id="increasePurchaseQty">+</button>
+              </div>
             </div>
-            <div class="mb-3">
-                <label for="modalToStation" class="form-label">To Station</label>
-                <select class="form-select" id="modalToStation" required></select>
-            </div>
-            <div class="mb-3">
-                <label for="modalPaymentMode" class="form-label">Payment Mode</label>
-                <select class="form-select" id="modalPaymentMode">
-                <option value="EWALLET">eWallet</option>
-                <option value="CASH">Cash</option>
-                </select>
-            </div>
-            <div id="purchaseFeedback" class="text-danger small"></div>
-            </div>
-            <div class="modal-footer">
-            <button type="submit" class="btn btn-primary">Confirm Purchase</button>
-            </div>
+
+            <div id="purchaseFeedback" class="text-danger small text-center"></div>
+          </div>
+          <div class="modal-footer d-flex justify-content-between">
+            <button type="button" class="btn btn-outline-primary" id="walletPurchaseBtn">Pay with Wallet</button>
+            <button type="button" class="btn btn-outline-success" id="stripePurchaseBtn">Pay with Stripe</button>
+          </div>
         </form>
-        </div>
+      </div>
     </div>
+
+    <!-- Add to Cart Modal -->
+    <div class="modal fade" id="addToCartModal" tabindex="-1" aria-labelledby="addToCartModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="addToCartModalLabel">Add Ticket to Cart</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <p id="cartTicketLabel" class="fw-bold text-primary"></p>
+            <div class="d-flex align-items-center justify-content-center mb-3">
+              <button class="btn btn-outline-secondary" id="decreaseQty">−</button>
+              <span class="mx-3 text-dark fw-bold" id="cartQuantity">1</span>
+              <button class="btn btn-outline-secondary" id="increaseQty">+</button>
+            </div>
+            <div id="cartFeedback" class="text-danger small text-center"></div>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-primary" id="confirmAddToCart">Confirm Add to Cart</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
   
 
     <!-- Bootstrap JS -->
@@ -370,5 +363,7 @@
     <!-- Custom JS -->
     <script src="js/auth-utils.js"></script>
     <script src="js/metro-lines.js"></script>
+    <script src="js/search-trips.js"></script>
+    <script src="js/suspension-alerts.js"></script>
   </body>
 </html>
