@@ -12,16 +12,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (buyTicketBtn) {
         buyTicketBtn.addEventListener('click', function(e) {
             e.preventDefault();
-            
-            if (isAuthenticated) {
-                // If logged in, go to tickets page
-                window.location.href = 'my-tickets.html';
-            } else {
-                // If not logged in, prompt to sign in
-                if (confirm('You need to sign in to purchase tickets. Would you like to sign in now?')) {
-                    window.location.href = 'signin.html';
-                }
-            }
+             window.location.href = 'metro-lines.html';
         });
     }
 });
@@ -56,12 +47,8 @@ function updateHomeUI(isAuthenticated) {
     // Update Buy Tickets button
     const buyTicketBtn = document.querySelector('.buy-ticket-btn');
     if (buyTicketBtn) {
-        if (isAuthenticated) {
             buyTicketBtn.textContent = '🎫 Buy Tickets';
-            buyTicketBtn.href = 'my-tickets.html';
-        } else {
-            buyTicketBtn.textContent = '🎫 Buy Tickets';
+            buyTicketBtn.href = 'metro-lines.html';
             // We'll handle this in the click event
         }
-    }
 }
