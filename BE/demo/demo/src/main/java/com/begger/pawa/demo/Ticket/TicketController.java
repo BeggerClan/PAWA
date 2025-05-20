@@ -8,7 +8,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
-import org.springframework.lang.Nullable;
 
 import java.security.Principal;
 import java.time.Instant;
@@ -33,8 +32,8 @@ public class TicketController {
     @PostMapping("/purchase")
     public ResponseEntity<TicketResponse> purchaseTicket(
             @RequestParam String ticketTypeCode,
-            @RequestParam (required = false) @Nullable String fromStation,
-            @RequestParam (required = false) @Nullable String toStation,
+            @RequestParam String fromStation,
+            @RequestParam String toStation,
             @RequestHeader("Authorization") String authHeader,
             Principal principal) {
 
@@ -92,24 +91,12 @@ public class TicketController {
         // activate if not already
         if (ticket.getActivationTime() == null) {
             ticket.setActivationTime(now);
-
-            // look up the ticket type once
+            // for types validFrom=ACTIVATION, set expiry now
             TicketType type = ticketTypeRepo.findByCode(ticket.getTicketTypeId())
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR));
-
-            String code = type.getCode();
-            // for these one-way codes, expiry == activation
-            if ("ONE_WAY_4".equals(code) ||
-                     "ONE_WAY_8".equals(code) ||
-                     "ONE_WAY_UNL".equals(code)) {
-                ticket.setExpiryTime(now);
-
-                // otherwise, if it’s ACTIVATION-based, roll forward by its validity hours
-            } else if (type.getValidFrom() == ValidFrom.ACTIVATION) {
+            if (type.getValidFrom() == ValidFrom.ACTIVATION) {
                 ticket.setExpiryTime(now.plus(type.getValidityDurationHours(), ChronoUnit.HOURS));
             }
-            // else (PURCHASE-based types) leave the pre-set expiry alone
-
             ticketRepo.save(ticket);
         }
 

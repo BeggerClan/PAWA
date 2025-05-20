@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api/opwa/operator")
+@RequestMapping("/api/operator")
 public class OperatorBookingController {
 
     private final TicketRepository ticketRepo;

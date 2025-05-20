@@ -18,17 +18,6 @@ function isLoggedIn() {
   return true;
 }
 
-// Update Navigation Bar based on login/logout
-function updateNavigation(isLoggedIn) {
-    if (isLoggedIn) {
-        document.querySelector('.auth-menu').style.display = 'flex';
-        document.querySelector('.guest-menu').style.display = 'none';
-    } else {
-        document.querySelector('.auth-menu').style.display = 'none';
-        document.querySelector('.guest-menu').style.display = 'flex';
-    }
-}
-
 // Function to log out
 function logout() {
   // Add fade-out animation to the body
