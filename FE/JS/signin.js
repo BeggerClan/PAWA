@@ -42,8 +42,8 @@ document.addEventListener('DOMContentLoaded', function() {
             const data = await response.json();
             
             // Store JWT token
-            sessionStorage.setItem('jwtToken', data.token);
-            sessionStorage.setItem('tokenExpiry', Date.now() + (data.expiresIn * 1000));
+            localStorage.setItem('jwtToken', data.token);
+            localStorage.setItem('tokenExpiry', Date.now() + (data.expiresIn * 1000));
             
             // Show success state
             submitButton.textContent = 'Success!';
