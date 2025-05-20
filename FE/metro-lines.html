@@ -16,10 +16,9 @@
     />
     <!-- Custom CSS -->
     <link rel="stylesheet" href="CSS/home.css" />
-    <link rel="stylesheet" href="CSS/metro-lines.css" />
+    <link rel="stylesheet" href="CSS/metro-lines-merged.css" />
   </head>
   <body>
-    <!-- Navbar matching homepage -->
     <nav
       class="navbar navbar-expand-lg navbar-dark custom-navbar fixed-top px-4"
     >
@@ -86,6 +85,16 @@
                 >Announcements</a
               >
             </li>
+            <li class="nav-item position-relative">
+              <a class="nav-link nav-hover" href="cart.html">
+                <i class="fas fa-shopping-cart"></i>
+                <span
+                  class="cart-count badge bg-danger rounded-circle position-absolute top-0 start-100 translate-middle"
+                >
+                  0
+                </span>
+              </a>
+            </li>
             <li class="nav-item">
               <a href="signin.html" class="btn btn-outline-light btn-sm me-2"
                 >Sign In</a
@@ -100,32 +109,83 @@
     </nav>
     <!-- Main Content -->
     <div class="container mt-5 pt-5">
-      <!-- Suspension Alerts Section -->
-      <div id="current-service-disruptions" class="mb-4" style="display: none">
-        <h2 class="mb-3">
-          <i class="fas fa-exclamation-triangle text-danger me-2"></i>
-          Current Service Disruptions
-        </h2>
-        <div class="suspension-alerts-container">
-          <!-- Suspension alerts will be dynamically added here -->
-        </div>
-      </div>
       <div class="row">
-        <div class="col-12 text-center mb-4">
-          <h1 class="display-5">HCMC Metro Lines</h1>
-          <p class="lead">View available metro lines and stations</p>
-        </div>
-      </div>
-
-      <!-- Metro Lines Container -->
-      <div class="row">
-        <div class="col-12" id="metro-lines-container">
-          <!-- Loading spinner -->
-          <div class="text-center my-5">
-            <div class="spinner-border text-primary" role="status">
-              <span class="visually-hidden">Loading...</span>
+        <div class="metro-header text-center mb-4">
+            <h1 class="display-4">HCMC Metro Lines</h1>
+            <p class="lead">View current metro lines, stations, and schedules</p>
+          </div>
+        <!-- Left side: Metro lines, Search, Results -->
+        <div class="col-lg-8">
+          <!-- Metro Lines -->
+          <div class="row">
+            <div class="col-12" id="metro-lines-container">
+              <div class="text-center my-5">
+                <div class="spinner-border text-primary" role="status">
+                  <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-2">Loading metro lines...</p>
+              </div>
             </div>
-            <p class="mt-2">Loading metro lines...</p>
+          </div>
+
+          <!-- Search Trip -->
+          <div class="row mt-5">
+            <div class="col-12">
+              <h2 class="text-center mb-4">Find Your Trip</h2>
+              <div class="search-container">
+                <form id="trip-search-form" class="search-form">
+                  <div class="form-group">
+                    <label for="from-station">From Station</label>
+                    <select id="from-station" name="from-station" required>
+                      <option value="">Select departure station</option>
+                    </select>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="to-station">To Station</label>
+                    <select id="to-station" name="to-station" required>
+                      <option value="">Select arrival station</option>
+                    </select>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="departure-date">Departure Date</label>
+                    <input
+                      type="date"
+                      id="departure-date"
+                      name="departure-date"
+                      required
+                    />
+                  </div>
+
+                  <div class="form-group">
+                    <label for="departure-time">Departure Time</label>
+                    <input
+                      type="time"
+                      id="departure-time"
+                      name="departure-time"
+                      required
+                    />
+                  </div>
+
+                  <div class="search-actions">
+                    <div
+                      id="search-error"
+                      class="alert alert-danger"
+                      style="display: none; margin-right: auto"
+                    ></div>
+                    <button type="submit" class="btn btn-primary">
+                      <i class="fas fa-search me-2"></i>Find Trips
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+
+          <!-- Search Results -->
+          <div class="row">
+            <div class="col-12" id="search-results"></div>
           </div>
         </div>
       </div>
@@ -142,54 +202,26 @@
                 </select>
               </div>
 
-              <div class="form-group">
-                <label for="to-station">To Station</label>
-                <select id="to-station" name="to-station" required>
-                  <option value="">Select arrival station</option>
-                </select>
-              </div>
-
-              <div class="form-group">
-                <label for="departure-date">Departure Date</label>
-                <input
-                  type="date"
-                  id="departure-date"
-                  name="departure-date"
-                  required
-                />
-              </div>
-
-              <div class="form-group">
-                <label for="departure-time">Departure Time</label>
-                <input
-                  type="time"
-                  id="departure-time"
-                  name="departure-time"
-                  required
-                />
-              </div>
-
-              <div class="search-actions">
-                <div
-                  id="search-error"
-                  class="alert alert-danger"
-                  style="display: none; margin-right: auto"
-                ></div>
-                <button type="submit" class="btn btn-primary">
-                  <i class="fas fa-search me-2"></i>Find Trips
-                </button>
-              </div>
-            </form>
+        <!-- Right side: Ticket Types -->
+        <div class="col-lg-4">
+          <!-- Ticket Types Card -->
+          <div class="card metro-card mb-4">
+            <div class="metro-card-header">
+              <h3 class="card-title mb-0">
+                <i class="fas fa-ticket-alt me-2"></i>Ticket Types
+              </h3>
+            </div>
+            <div class="card-body ticket-types">
+              <p>Loading ticket types...</p>
+            </div>
           </div>
-        </div>
-      </div>
 
-      <div class="row">
-        <div class="col-12" id="search-results">
-          <!-- Trip search results will be displayed here -->
+          <!-- 📍 Add this: suspension alerts container (moved from JS logic) -->
+          <div class="suspension-alerts-container"></div>
         </div>
       </div>
-    </div>
+</div>
+
 
     <!-- Footer Section -->
     <footer class="container-fluid bg-dark text-white mt-5 py-4">
@@ -255,6 +287,73 @@
         </div>
       </div>
     </footer>
+
+    <!-- Ticket Purchase Modal -->
+    <div class="modal fade" id="ticketPurchaseModal" tabindex="-1" aria-labelledby="ticketPurchaseModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <form class="modal-content" id="ticketPurchaseForm">
+          <div class="modal-header">
+            <h5 class="modal-title" id="ticketPurchaseModalLabel">Purchase Ticket</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <!-- Shown only for ONE_WAY types -->
+            <div id="fromToFields" class="mb-3">
+              <label for="modalFromStation" class="form-label">From Station</label>
+              <select class="form-select" id="modalFromStation"></select>
+
+              <label for="modalToStation" class="form-label mt-2">To Station</label>
+              <select class="form-select" id="modalToStation"></select>
+            </div>
+
+            <p id="ticketTypeLabel" class="fw-bold text-primary mb-2"></p>
+
+            <!-- Quantity Control -->
+            <div class="mb-3 text-center">
+              <label class="form-label d-block">Quantity</label>
+              <div class="d-flex justify-content-center align-items-center gap-3">
+                <button type="button" class="btn btn-outline-secondary" id="decreasePurchaseQty">−</button>
+                <span id="purchaseQty" class="fw-bold text-dark">1</span>
+                <button type="button" class="btn btn-outline-secondary" id="increasePurchaseQty">+</button>
+              </div>
+            </div>
+
+            <div id="purchaseFeedback" class="text-danger small text-center"></div>
+          </div>
+          <div class="modal-footer d-flex justify-content-between">
+            <button type="button" class="btn btn-outline-primary" id="walletPurchaseBtn">Pay with Wallet</button>
+            <button type="button" class="btn btn-outline-success" id="stripePurchaseBtn">Pay with Stripe</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Add to Cart Modal -->
+    <div class="modal fade" id="addToCartModal" tabindex="-1" aria-labelledby="addToCartModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="addToCartModalLabel">Add Ticket to Cart</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <p id="cartTicketLabel" class="fw-bold text-primary"></p>
+            <div class="d-flex align-items-center justify-content-center mb-3">
+              <button class="btn btn-outline-secondary" id="decreaseQty">−</button>
+              <span class="mx-3 text-dark fw-bold" id="cartQuantity">1</span>
+              <button class="btn btn-outline-secondary" id="increaseQty">+</button>
+            </div>
+            <div id="cartFeedback" class="text-danger small text-center"></div>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-primary" id="confirmAddToCart">Confirm Add to Cart</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+  
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>

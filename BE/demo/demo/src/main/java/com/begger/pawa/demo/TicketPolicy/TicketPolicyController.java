@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api/agent")
+@RequestMapping("/api/opwa/agent")
 public class TicketPolicyController {
 
     private final TicketTypeRepository typeRepo;

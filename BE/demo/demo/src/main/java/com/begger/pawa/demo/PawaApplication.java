@@ -12,7 +12,7 @@ public class PawaApplication {
 
     public static void main(String[] args) {
         Dotenv dotenv = Dotenv.configure()
-                     .directory("BE/demo/demo") // Path to the location of your .env file
+                    //  .directory("BE/demo/demo") // Path to the location of your .env file
                      .load();
         System.setProperty("STRIPE_API_KEY", dotenv.get("STRIPE_API_KEY"));
         SpringApplication.run(PawaApplication.class, args);

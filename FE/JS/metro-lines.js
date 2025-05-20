@@ -1,3 +1,10 @@
+let selectedTicketCode = null;
+let isOneWay = false;
+let selectedPurchaseQty = 1;
+
+let selectedCartTicket = null;
+let selectedCartQty = 1;
+
 // metro-lines.js - Simple implementation focusing on I.PA.3 requirements
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -229,3 +236,252 @@ function generateStationList(metroLine) {
     return '<div class="alert alert-info mt-3">No stations available for this line.</div>';
   }
 }
+
+
+// TICKET TYPE
+document.addEventListener('DOMContentLoaded', () => {
+    fetchAndRenderTicketTypes();
+    updateCartBadge();
+});
+
+document.addEventListener('DOMContentLoaded', fetchAndRenderTicketTypes);
+
+async function fetchAndRenderTicketTypes() {
+    const container = document.querySelector('.ticket-types');
+    if (!container) return;
+
+    try {
+        const response = await fetch('http://localhost:8080/api/ticket-types', {
+            credentials: 'include'
+        });
+
+        if (!response.ok) {
+            const text = await response.text();
+            throw new Error(`Status ${response.status}: ${text}`);
+        }
+
+        const ticketTypes = await response.json();
+        container.innerHTML = '';
+
+        ticketTypes.forEach(ticket => {
+            const card = document.createElement('div');
+            card.className = 'ticket-type mb-4';
+
+            const isOneWayType = ticket.code.startsWith("ONE_WAY");
+
+            card.innerHTML = `
+                <h5>${ticket.displayName}</h5>
+                <p>Valid for ${ticket.validityDurationHours} hours after ${ticket.validFrom.toLowerCase()}.</p>
+                <div class="d-flex justify-content-between align-items-center text-white">
+                <div><strong>${ticket.price.toLocaleString('vi-VN')}đ</strong></div>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-outline-primary btn-sm add-to-cart-btn">
+                    <i class="fas fa-cart-plus"></i>
+                    </button>
+                    <button class="btn btn-outline-success btn-sm purchase-btn">
+                    Purchase
+                    </button>
+                </div>
+                </div>
+            `;
+
+            container.appendChild(card);
+
+            // Add to cart
+            card.querySelector('.add-to-cart-btn').addEventListener('click', () => {
+                selectedCartTicket = ticket;
+                selectedCartQty = 1;
+
+                document.getElementById('cartTicketLabel').textContent = `Selected: ${ticket.displayName}`;
+                document.getElementById('cartQuantity').textContent = selectedCartQty;
+                document.getElementById('cartFeedback').textContent = '';
+
+                const cartModal = new bootstrap.Modal(document.getElementById('addToCartModal'));
+                cartModal.show();
+            });
+
+            // Handle purchase modal trigger
+            card.querySelector('.purchase-btn').addEventListener('click', () => {
+                selectedTicketCode = ticket.code;
+                selectedPurchaseQty = 1;
+                document.getElementById('purchaseQty').textContent = selectedPurchaseQty;
+
+                isOneWay = isOneWayType;
+
+                // Update modal UI
+                document.getElementById('ticketTypeLabel').textContent = `Selected: ${ticket.displayName}`;
+                document.getElementById('fromToFields').style.display = isOneWay ? 'block' : 'none';
+
+                if (isOneWay) {
+                    const options = `
+                        <option value="ben-thanh">Ben Thanh</option>
+                        <option value="opera-house">Opera House</option>
+                        <option value="ba-son">Ba Son</option>
+                        <option value="suoi-tien">Suoi Tien Terminal</option>
+                    `;
+                    document.getElementById('modalFromStation').innerHTML = options;
+                    document.getElementById('modalToStation').innerHTML = options;
+                }
+
+                const modal = new bootstrap.Modal(document.getElementById('ticketPurchaseModal'));
+                modal.show();
+            });
+        });
+    } catch (error) {
+        console.error('Error fetching ticket types:', error);
+        container.innerHTML = `<p class="text-danger">Unable to load ticket types. (${error.message})</p>`;
+    }
+}
+
+  
+
+// Add to cart
+function addToCart(ticket) {
+    const cart = JSON.parse(localStorage.getItem('cart')) || [];
+
+    const index = cart.findIndex(item => item.code === ticket.code);
+    if (index !== -1) {
+        cart[index].quantity += 1;
+    } else {
+        cart.push({
+            code: ticket.code,
+            name: ticket.displayName,
+            price: ticket.price,
+            quantity: 1
+        });
+    }
+
+    localStorage.setItem('cart', JSON.stringify(cart));
+    updateCartBadge();
+}
+
+// Update cart badge
+function updateCartBadge() {
+    const cart = JSON.parse(localStorage.getItem('cart')) || [];
+    const totalQty = cart.reduce((sum, item) => sum + item.quantity, 0);
+
+    // Update all elements with class 'cart-count'
+    document.querySelectorAll('.cart-count').forEach(badge => {
+    badge.textContent = totalQty;
+    });
+}
+
+document.getElementById('walletPurchaseBtn').addEventListener('click', () => {
+  if (!isLoggedIn()) {
+    if (confirm("You need to sign in to use eWallet. Redirect to sign in?")) {
+      window.location.href = "signin.html";
+    }
+    return;
+  }
+
+  submitPurchase('EWALLET');
+});
+
+document.getElementById('stripePurchaseBtn').addEventListener('click', () => {
+    submitPurchase('STRIPE');
+});
+
+async function submitPurchase(paymentMode) {
+  if (!selectedTicketCode) {
+    alert("No ticket selected.");
+    return;
+  }
+
+  const fromStation = isOneWay ? document.getElementById('modalFromStation').value : null;
+  const toStation = isOneWay ? document.getElementById('modalToStation').value : null;
+
+  const modal = bootstrap.Modal.getInstance(document.getElementById('ticketPurchaseModal'));
+  document.getElementById('purchaseFeedback').textContent = "";
+
+  let successCount = 0;
+  let failureCount = 0;
+
+  for (let i = 0; i < selectedPurchaseQty; i++) {
+    const response = await fetch(`http://localhost:8080/api/tickets/purchase?ticketTypeCode=${selectedTicketCode}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('jwtToken')}`
+      },
+      body: JSON.stringify({
+        fromStation,
+        toStation,
+        paymentMode,
+        freeRide: false
+      })
+    });
+
+    if (response.ok) {
+      successCount++;
+    } else {
+      failureCount++;
+      const text = await response.text();
+      console.error(`❌ Purchase ${i + 1} failed:`, text);
+    }
+  }
+
+  if (successCount > 0) {
+    modal.hide();
+    alert(`✅ Successfully purchased ${successCount} ticket(s).`);
+  }
+
+  if (failureCount > 0) {
+    document.getElementById('purchaseFeedback').textContent =
+      `⚠️ ${failureCount} ticket(s) failed to purchase. Check console for details.`;
+  }
+}
+
+
+document.getElementById('increaseQty').addEventListener('click', () => {
+    selectedCartQty++;
+    document.getElementById('cartQuantity').textContent = selectedCartQty;
+});
+
+document.getElementById('decreaseQty').addEventListener('click', () => {
+    if (selectedCartQty > 1) {
+        selectedCartQty--;
+        document.getElementById('cartQuantity').textContent = selectedCartQty;
+    }
+});
+
+document.getElementById('confirmAddToCart').addEventListener('click', () => {
+    if (!selectedCartTicket) {
+        document.getElementById('cartFeedback').textContent = "No ticket selected.";
+        return;
+    }
+
+    const cart = JSON.parse(localStorage.getItem('cart')) || [];
+    const index = cart.findIndex(item => item.code === selectedCartTicket.code);
+
+    if (index !== -1) {
+        cart[index].quantity += selectedCartQty;
+    } else {
+        cart.push({
+        code: selectedCartTicket.code,
+        name: selectedCartTicket.displayName,
+        price: selectedCartTicket.price,
+        quantity: selectedCartQty
+        });
+    }
+
+    localStorage.setItem('cart', JSON.stringify(cart));
+    updateCartBadge();
+
+    const modal = bootstrap.Modal.getInstance(document.getElementById('addToCartModal'));
+    modal.hide();
+
+    // Optional: alert or toast
+    alert("✅ Ticket added to cart.");
+});
+
+document.getElementById('increasePurchaseQty').addEventListener('click', () => {
+  selectedPurchaseQty++;
+  document.getElementById('purchaseQty').textContent = selectedPurchaseQty;
+});
+
+document.getElementById('decreasePurchaseQty').addEventListener('click', () => {
+  if (selectedPurchaseQty > 1) {
+    selectedPurchaseQty--;
+    document.getElementById('purchaseQty').textContent = selectedPurchaseQty;
+  }
+});

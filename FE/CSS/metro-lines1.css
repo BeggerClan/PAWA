@@ -1,0 +1,735 @@
+/* metro-lines.css - Styles for HCMC Metro Lines page */
+
+:root {
+    --gradient-start: #00e5bb;
+    --gradient-end: #00a1e5;
+    --primary-blue: #1a73e8;
+    --dark-bg: #171e27;
+    --light-text: #ffffff;
+    --secondary-text: #b0b8c1;
+    --box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    --hover-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+    --border-radius: 8px;
+    --transition: all 0.3s ease;
+}
+
+body {
+    background-color: var(--dark-bg);
+    color: var(--light-text);
+    padding-top: 70px;
+}
+
+/* Main container styles */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Metro line card styles */
+.metro-card {
+    background-color: #212a36;
+    border-radius: var(--border-radius);
+    margin-bottom: 1.5rem;
+    box-shadow: var(--box-shadow);
+    overflow: hidden;
+    transition: var(--transition);
+}
+
+.metro-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--hover-shadow);
+}
+
+.metro-card-header {
+    background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+    color: #000000;
+    padding: 1rem 1.5rem;
+    font-size: 1.25rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+}
+
+.metro-card-header i {
+    margin-right: 0.75rem;
+    font-size: 1.25rem;
+}
+
+.metro-card-body {
+    padding: 1.5rem;
+    color: var(--light-text);
+}
+
+/* Metro line info styles */
+.metro-info-row {
+    display: flex;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid #2d3748;
+}
+
+.metro-info-row:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+.metro-info-label {
+    width: 150px;
+    font-weight: 600;
+    color: var(--secondary-text);
+}
+
+.metro-info-value {
+    flex: 1;
+    color: var(--light-text);
+}
+
+/* Station list styles */
+.station-list {
+    margin-top: 1rem;
+    padding: 1rem;
+    background-color: #212a36;
+    border-radius: var(--border-radius);
+    display: none; /* Hidden by default */
+    border: 1px solid #2d3748;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.station-item {
+    padding: 0.75rem 0.5rem;
+    border-bottom: 1px dashed #2d3748;
+    transition: background-color 0.2s ease;
+    color: var(--light-text);
+}
+
+.station-item:last-child {
+    border-bottom: none;
+}
+
+.station-item:hover {
+    background-color: #2d3748;
+}
+
+.station-item strong {
+    display: inline-block;
+    width: 2rem;
+    color: var(--primary-blue);
+}
+
+/* Toggle button styles */
+.toggle-stations-btn {
+    width: 100%;
+    padding: 0.75rem;
+    background-color: var(--primary-blue);
+    color: var(--light-text);
+    border: none;
+    border-radius: var(--border-radius);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    transition: var(--transition);
+    font-weight: 500;
+    margin-top: 1rem;
+}
+
+.toggle-stations-btn:hover {
+    background-color: #1557b0;
+    color: white;
+}
+
+.toggle-stations-btn i {
+    font-size: 0.875rem;
+}
+
+.toggle-stations-btn.active {
+    background-color: #0c3f7c;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .metro-info-row {
+        flex-direction: column;
+    }
+    
+    .metro-info-label {
+        width: 100%;
+        margin-bottom: 0.25rem;
+    }
+    
+    .toggle-stations-btn {
+        padding: 0.5rem;
+    }
+}
+
+/* Animation for displaying station list */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.station-list.show {
+    display: block;
+    animation: fadeIn 0.3s ease forwards;
+}
+
+/* Status indicators */
+.status-badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 50px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.status-operational {
+    background-color: #e6f7ed;
+    color: #0c7b3d;
+}
+
+.status-inactive {
+    background-color: #e8eaed;
+    color: #5f6368;
+}
+
+.status-suspended {
+    background-color: #fce8e6;
+    color: #c5221f;
+}
+
+/* Custom navbar styles */
+.custom-navbar {
+    background: linear-gradient(to right, var(--gradient-start), var(--gradient-end)) !important;
+    z-index: 1030;
+}
+
+.logo-left {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    padding-left: 1rem;
+}
+
+.brand-center-text {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+.navbar-nav .nav-link.nav-hover {
+    transition: background-color 0.3s ease;
+    border-radius: 4px;
+    padding: 8px 12px;
+}
+
+.navbar-nav .nav-link.nav-hover:hover {
+    background-color: rgba(0, 0, 0, 0.1);
+    color: white !important;
+}
+
+.navbar-nav .nav-link.active {
+    font-weight: 600;
+}
+
+.metro-line-header {
+    display: flex;
+    align-items: center;
+    background-color: var(--primary-blue);
+    padding: 10px 15px;
+    color: white;
+    font-weight: bold;
+    border-radius: 4px 4px 0 0;
+}
+
+.metro-line-header i {
+    margin-right: 10px;
+}
+
+.metro-info-table {
+    width: 100%;
+    background-color: #212a36;
+    border-radius: 0 0 4px 4px;
+    overflow: hidden;
+}
+
+.metro-info-table td {
+    padding: 8px 15px;
+    border-bottom: 1px solid #2d3748;
+}
+
+.metro-info-table tr:last-child td {
+    border-bottom: none;
+}
+
+.view-stations-button, .hide-stations-button {
+    width: 100%;
+    padding: 8px;
+    background-color: var(--primary-blue);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 10px;
+}
+
+.view-stations-button i, .hide-stations-button i {
+    margin-right: 5px;
+}
+
+.view-stations-button:hover, .hide-stations-button:hover {
+    background-color: #1557b0;
+}
+
+.stations-list {
+    list-style-type: none;
+    padding: 0;
+    margin: 10px 0 0 0;
+    background-color: #212a36;
+    border-radius: 4px;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.stations-list li {
+    padding: 8px 15px;
+    border-bottom: 1px solid #2d3748;
+    display: flex;
+    align-items: center;
+}
+
+.stations-list li:last-child {
+    border-bottom: none;
+}
+
+.stations-list li strong {
+    display: inline-block;
+    width: 30px;
+    color: var(--primary-blue);
+}
+
+/* Improve visibility of text */
+h1, h2, h3, h4, h5, h6, p, .lead, .metro-info-value, .station-item {
+    color: var(--light-text) !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.status-operational,
+.status-inactive,
+.status-suspended {
+    text-shadow: none;
+}
+
+/* Trip line badge */
+.trip-line-badge {
+    background-color: rgba(0, 229, 187, 0.2);
+    color: var(--gradient-start);
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+}
+
+/* Trip stations names */
+.trip-stations-names {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.trip-stations-names div:first-child {
+    font-weight: 600;
+}
+
+.trip-stations-names div:last-child {
+    font-weight: 600;
+}
+
+/* Trip search results styling */
+.search-results-header {
+    background: #212a36;
+    padding: 1.5rem;
+    border-radius: var(--border-radius);
+    margin-bottom: 1.5rem;
+    box-shadow: var(--box-shadow);
+}
+
+.search-results-header h3 {
+    margin: 0;
+    color: var(--light-text);
+}
+
+.search-results-header .lead {
+    color: var(--secondary-text);
+    margin: 0.5rem 0 0 0;
+}
+
+.trip-card {
+    background-color: #212a36;
+    border-radius: var(--border-radius);
+    margin-bottom: 1.25rem;
+    box-shadow: var(--box-shadow);
+    overflow: hidden;
+    transition: var(--transition);
+    position: relative;
+}
+
+.trip-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--hover-shadow);
+}
+
+.trip-header {
+    padding: 1.25rem;
+    border-bottom: 1px solid #2d3748;
+    position: relative;
+}
+
+.trip-times {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 0.5rem;
+}
+
+.trip-departure, .trip-arrival {
+    text-align: center;
+    flex-basis: 30%;
+}
+
+.trip-departure strong, .trip-arrival strong {
+    font-size: 1.25rem;
+    color: var(--light-text);
+    display: block;
+    margin-bottom: 0.25rem;
+}
+
+.trip-departure div, .trip-arrival div {
+    color: var(--secondary-text);
+    font-size: 0.9rem;
+}
+
+.trip-duration {
+    flex-grow: 1;
+    text-align: center;
+    position: relative;
+    padding: 0 1rem;
+}
+
+.trip-duration-line {
+    height: 2px;
+    background-color: #2d3748;
+    width: 100%;
+    position: relative;
+}
+
+.trip-duration-line::before, .trip-duration-line::after {
+    content: '';
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: var(--primary-blue);
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.trip-duration-line::before {
+    left: 0;
+}
+
+.trip-duration-line::after {
+    right: 0;
+}
+
+.trip-duration-time {
+    position: absolute;
+    left: 50%;
+    top: -10px;
+    transform: translateX(-50%);
+    background-color: #2d3748;
+    padding: 2px 10px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    color: var(--secondary-text);
+}
+
+.trip-footer {
+    padding: 1rem 1.25rem;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.book-trip-btn {
+    background-color: var(--primary-blue);
+    color: var(--light-text);
+    border: none;
+    transition: var(--transition);
+}
+
+.book-trip-btn:hover {
+    background-color: #1557b0;
+    transform: translateY(-2px);
+}
+
+.trip-line-badge {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background-color: rgba(26, 115, 232, 0.2);
+    color: var(--primary-blue);
+    border-radius: 20px;
+    padding: 0.25rem 0.75rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.load-more-btn {
+    display: block;
+    width: 100%;
+    padding: 0.8rem;
+    margin-bottom: 2rem;
+    background-color: transparent;
+    color: var(--primary-blue);
+    border: 1px solid var(--primary-blue);
+    text-align: center;
+    transition: var(--transition);
+}
+
+.load-more-btn:hover {
+    background-color: rgba(26, 115, 232, 0.1);
+}
+
+/* Suspension alerts styling */
+.suspension-alerts-container {
+    margin-bottom: 2rem;
+}
+
+.suspension-alert {
+    background-color: rgba(220, 53, 69, 0.1);
+    border-left: 4px solid #dc3545;
+    border-radius: var(--border-radius);
+    padding: 1.25rem;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: flex-start;
+    position: relative;
+    box-shadow: var(--box-shadow);
+}
+
+.suspension-alert-icon {
+    font-size: 1.5rem;
+    color: #dc3545;
+    margin-right: 1rem;
+    margin-top: 0.25rem;
+}
+
+.suspension-alert-content {
+    flex: 1;
+}
+
+.suspension-alert h4 {
+    color: #dc3545;
+    margin: 0 0 0.5rem 0;
+    font-size: 1.1rem;
+}
+
+.suspension-alert p {
+    color: var(--light-text);
+    margin: 0;
+    font-size: 0.95rem;
+}
+
+.suspension-alert-details {
+    margin-top: 0.75rem;
+    background-color: rgba(255, 255, 255, 0.05);
+    padding: 0.75rem;
+    border-radius: 4px;
+}
+
+.suspension-alert-detail {
+    display: flex;
+    margin-bottom: 0.5rem;
+}
+
+.suspension-alert-detail:last-child {
+    margin-bottom: 0;
+}
+
+.suspension-alert-label {
+    font-weight: 600;
+    min-width: 140px;
+    color: var(--secondary-text);
+}
+
+.suspension-alert-value {
+    color: var(--light-text);
+}
+
+.btn-close-white {
+    color: #fff;
+    text-shadow: none;
+    opacity: 0.7;
+}
+
+.btn-close-white:hover {
+    opacity: 1;
+}
+
+/* Fix for error messages to ensure they're readable */
+.alert-info.bg-dark {
+    background-color: #1a212c !important;
+    border-color: #2d3748 !important;
+    color: var(--light-text) !important;
+}
+
+/* Animation for new cards and alerts */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fade-in {
+    animation: fadeIn 0.3s ease forwards;
+}
+
+/* Make search error messages more readable */
+#search-error {
+    background-color: rgba(220, 53, 69, 0.1);
+    color: #dc3545;
+    border-color: rgba(220, 53, 69, 0.3);
+    font-weight: 500;
+}
+
+/* Style the search container better */
+.search-container {
+    background-color: #212a36;
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: var(--box-shadow);
+}
+
+.search-form {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-gap: 1rem;
+}
+
+.search-form .form-group {
+    margin-bottom: 1rem;
+}
+
+.search-form label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: var(--secondary-text);
+}
+
+.search-form select,
+.search-form input {
+    width: 100%;
+    padding: 0.75rem;
+    border-radius: var(--border-radius);
+    border: 1px solid #2d3748;
+    background-color: #1a212c;
+    color: var(--light-text);
+}
+
+.search-form select:focus,
+.search-form input:focus {
+    outline: none;
+    border-color: var(--gradient-start);
+    box-shadow: 0 0 0 2px rgba(0, 229, 187, 0.2);
+}
+
+.search-form select option {
+    background-color: #1a212c;
+    color: var(--light-text);
+}
+
+.search-form select optgroup {
+    font-weight: bold;
+    color: var(--primary-blue);
+}
+
+.search-actions {
+    grid-column: span 2;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 0.5rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .search-form {
+        grid-template-columns: 1fr;
+    }
+    
+    .search-actions {
+        grid-column: span 1;
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .search-actions #search-error {
+        width: 100%;
+        margin-bottom: 1rem;
+    }
+    
+    .trip-times {
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+    
+    .trip-departure, .trip-arrival {
+        width: 100%;
+    }
+    
+    .trip-duration {
+        width: 100%;
+    }
+    
+    .suspension-alert {
+        flex-direction: column;
+    }
+    
+    .suspension-alert-icon {
+        margin-bottom: 1rem;
+    }
+    
+    .suspension-alert-detail {
+        flex-direction: column;
+    }
+    
+    .suspension-alert-label {
+        margin-bottom: 0.25rem;
+    }
+}
