@@ -18,19 +18,56 @@ document.addEventListener('DOMContentLoaded', async () => {
     container.innerHTML = '';
 
     history.forEach(ticket => {
-      const card = document.createElement('div');
-      card.className = 'ticket-card';
+        const card = document.createElement('div');
+        card.className = 'ticket-card';
 
-      card.innerHTML = `
+        card.innerHTML = `
         <h5>${ticket.ticketTypeCode || 'Unknown Ticket Type'}</h5>
         <p><strong>Ticket ID:</strong> ${ticket.ticketId}</p>
         <p><strong>Route:</strong> ${ticket.fromStation || '—'} → ${ticket.toStation || '—'}</p>
         <p><strong>Purchased:</strong> ${formatTime(ticket.purchaseTime)}</p>
         <p><strong>Expires:</strong> ${formatTime(ticket.expiryTime)}</p>
         <span class="badge ${getStatusClass(ticket.status)}">${ticket.status}</span>
-      `;
+        ${ticket.status === 'INACTIVE' ? `
+            <div class="mt-2">
+            <button class="btn btn-sm btn-outline-warning activate-btn" data-id="${ticket.ticketId}">
+                Activate
+            </button>
+            <div class="text-danger small mt-1" id="error-${ticket.ticketId}"></div>
+            </div>
+        ` : ''}
+        `;
 
-      container.appendChild(card);
+
+        container.appendChild(card);
+        if (ticket.status === 'INACTIVE') {
+            const activateBtn = card.querySelector('.activate-btn');
+            activateBtn.addEventListener('click', async () => {
+                const ticketId = activateBtn.dataset.id;
+
+                try {
+                const res = await fetch(`http://localhost:8080/api/tickets/${ticketId}/activate`, {
+                    method: 'POST',
+                    headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('jwtToken')}`
+                    }
+                });
+
+                if (!res.ok) {
+                    const msg = await res.text();
+                    document.getElementById(`error-${ticketId}`).textContent = msg || 'Activation failed';
+                    return;
+                }
+
+                alert('✅ Ticket activated successfully!');
+                location.reload();
+                } catch (err) {
+                console.error(err);
+                document.getElementById(`error-${ticketId}`).textContent = err.message || 'Activation failed';
+                }
+            });
+        }
+
     });
 
   } catch (err) {
