@@ -81,4 +81,9 @@ public class TicketHistory {
     public void setTotalAmountTicket(double totalAmountTicket) {
         this.totalAmountTicket = totalAmountTicket;
     }
+
+    public Object getId() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getId'");
+    }
 }

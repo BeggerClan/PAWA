@@ -6,6 +6,112 @@ document.addEventListener('DOMContentLoaded', () => {
   updateCartBadge();
 });
 
+// function renderCart() {
+//   const cart = JSON.parse(localStorage.getItem('cart')) || [];
+//   const container = document.getElementById('cart-container');
+//   container.innerHTML = '';
+
+//   if (cart.length === 0) {
+//     container.innerHTML = `
+//       <div class="alert alert-info">
+//         Your cart is empty. <a href="metro-lines.html">Browse tickets</a>.
+//       </div>
+//     `;
+//     return;
+//   }
+
+//   const table = document.createElement('table');
+//   table.className = 'table table-bordered';
+//   table.innerHTML = `
+//     <thead>
+//       <tr>
+//         <th>Ticket</th>
+//         <th>Price</th>
+//         <th>Quantity</th>
+//         <th>Subtotal</th>
+//         <th>Action</th>
+//       </tr>
+//     </thead>
+//     <tbody>
+//       ${cart.map(item => `
+//         <tr data-code="${item.code}">
+//           <td>${item.name}</td>
+//           <td>${item.price.toLocaleString('vi-VN')}đ</td>
+//           <td>
+//             <div class="d-flex align-items-center gap-2">
+//               <button class="btn btn-sm btn-outline-secondary decrease-btn" data-code="${item.code}">−</button>
+//               <span class="fw-bold">${item.quantity}</span>
+//               <button class="btn btn-sm btn-outline-secondary increase-btn" data-code="${item.code}">+</button>
+//             </div>
+//           </td>
+//           <td>${(item.price * item.quantity).toLocaleString('vi-VN')}đ</td>
+//           <td><button class="btn btn-sm btn-danger remove-btn">Remove</button></td>
+//         </tr>
+//       `).join('')}
+//     </tbody>
+//   `;
+
+//   const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+
+//   const summary = document.createElement('div');
+//   summary.innerHTML = `
+//     <div class="d-flex justify-content-between align-items-center mt-3">
+//       <h4>Total: <span class="text-success">${total.toLocaleString('vi-VN')}đ</span></h4>
+//       <div>
+//         <button class="btn btn-outline-danger btn-sm me-2" id="clear-cart">Clear All</button>
+//         <button class="btn btn-primary btn-sm" id="checkout-btn">Proceed to Checkout</button>
+//       </div>
+//     </div>
+//   `;
+
+//   container.appendChild(table);
+//   container.appendChild(summary);
+
+//   // Remove buttons
+//   document.querySelectorAll('.remove-btn').forEach(btn => {
+//     btn.addEventListener('click', () => {
+//       const code = btn.closest('tr').dataset.code;
+//       removeFromCart(code);
+//     });
+//   });
+
+//   // Increase quantity
+//   document.querySelectorAll('.increase-btn').forEach(btn => {
+//     btn.addEventListener('click', () => {
+//       const code = btn.dataset.code;
+//       updateQuantity(code, +1);
+//     });
+//   });
+
+//   // Decrease quantity
+//   document.querySelectorAll('.decrease-btn').forEach(btn => {
+//     btn.addEventListener('click', () => {
+//       const code = btn.dataset.code;
+//       updateQuantity(code, -1);
+//     });
+//   });
+
+//   // Clear All
+//   document.getElementById('clear-cart').addEventListener('click', () => {
+//     if (confirm('Clear all items from cart?')) {
+//       localStorage.removeItem('cart');
+//       renderCart();
+//     }
+//   });
+
+//   // Checkout button handler (inside renderCart!)
+//   document.getElementById('checkout-btn')?.addEventListener('click', () => {
+//     const cart = JSON.parse(localStorage.getItem('cart')) || [];
+//     if (cart.length === 0) {
+//       alert('Your cart is empty.');
+//       return;
+//     }
+
+//     const modal = new bootstrap.Modal(document.getElementById('cartPurchaseModal'));
+//     modal.show();
+//   });
+// }
+
 function renderCart() {
   const cart = JSON.parse(localStorage.getItem('cart')) || [];
   const container = document.getElementById('cart-container');
@@ -99,17 +205,77 @@ function renderCart() {
     }
   });
 
-  // Checkout button handler (inside renderCart!)
-  document.getElementById('checkout-btn')?.addEventListener('click', () => {
+  document.getElementById('checkout-btn').addEventListener('click', async () => {
     const cart = JSON.parse(localStorage.getItem('cart')) || [];
+  
     if (cart.length === 0) {
       alert('Your cart is empty.');
       return;
     }
-
-    const modal = new bootstrap.Modal(document.getElementById('cartPurchaseModal'));
-    modal.show();
+  
+    if (!isLoggedIn()) {
+      alert('Please sign in to proceed with checkout.');
+      window.location.href = 'signin.html';
+      return;
+    }
+  
+    // ✅ Step 1: Convert localStorage cart format to backend-compatible structure
+    const backendCart = {
+      items: cart.map(item => ({
+        ticketType: item.code,
+        quantity: item.quantity,
+        unitPrice: item.price,
+        fromStation: item.fromStation || "ben-thanh",   // Replace with real values if needed
+        toStation: item.toStation || "suoi-tien"        // Replace with real values if needed
+      }))
+    };
+  
+    // ✅ Step 2: Sync full cart to backend via /cart/update
+    try {
+      const updateRes = await fetch('http://localhost:8080/api/cart/update', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('jwtToken')}`
+        },
+        body: JSON.stringify(backendCart)
+      });
+  
+      if (!updateRes.ok) {
+        const err = await updateRes.text();
+        throw new Error(`Failed to sync cart: ${err}`);
+      }
+    } catch (err) {
+      console.error(err);
+      alert(err.message || 'Could not sync cart.');
+      return;
+    }
+  
+    // ✅ Step 3: Proceed with purchase
+    try {
+      const response = await fetch('http://localhost:8080/api/tickets/purchase-cart', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('jwtToken')}`
+        }
+      });
+  
+      if (!response.ok) {
+        const error = await response.text();
+        throw new Error(`Checkout failed: ${error}`);
+      }
+  
+      alert('🎉 Purchase successful!');
+      localStorage.removeItem('cart');
+      renderCart();
+      updateCartBadge?.();
+    } catch (err) {
+      console.error(err);
+      alert(err.message || 'Purchase failed. Please try again.');
+    }
   });
+  
 }
 
 function removeFromCart(code) {

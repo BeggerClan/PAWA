@@ -1,0 +1,57 @@
+body {
+  font-family: "Segoe UI", sans-serif;
+  background-color: #f8f9fa;
+  margin: 0;
+  padding: 2rem;
+}
+
+.container {
+  max-width: 900px;
+  margin: auto;
+  background: #fff;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+h1 {
+  color: #333;
+  margin-bottom: 1.5rem;
+}
+
+.ticket-card {
+  border-left: 4px solid #007bff;
+  background-color: #f1f5ff;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  border-radius: 6px;
+}
+
+.ticket-card .meta {
+  font-size: 0.9rem;
+  color: #555;
+}
+
+.status {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  border-radius: 4px;
+  text-transform: uppercase;
+  font-weight: bold;
+}
+
+.status.active {
+  background-color: #198754;
+  color: #fff;
+}
+
+.status.expired {
+  background-color: #dc3545;
+  color: #fff;
+}
+
+.status.inactive {
+  background-color: #6c757d;
+  color: #fff;
+}

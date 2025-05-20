@@ -1,5 +1,6 @@
 package com.begger.pawa.demo.Ticket;
 
+import com.begger.pawa.demo.Passenger.Passenger;
 import com.begger.pawa.demo.TicketType.TicketType;
 import com.begger.pawa.demo.TicketType.TicketTypeRepository;
 import com.begger.pawa.demo.TicketType.ValidFrom;

@@ -259,5 +259,42 @@ public class TicketService {
         ticketHistoryRepo.save(history);
     }
 
+    public TicketResponse purchaseDirectTicket(
+            String passengerId,
+            String ticketTypeCode,
+            String fromStation,
+            String toStation,
+            ObjectId transactionId
+    ) {
+        // 1) Lookup type & enforce eligibility
+        TicketType type = typeRepo.findByCode(ticketTypeCode)
+                .orElseThrow(() ->
+                        new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                                "Unknown ticket type: " + ticketTypeCode));
+
+        if (type.getEligibility() == Eligibility.STUDENT_ONLY) {
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN,
+                    "Monthly student tickets are only for registered students");
+        }
+        if (type.getEligibility() == Eligibility.FREE_ELIGIBLE) {
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN,
+                    "Free tickets require eligibility");
+        }
+
+        // 2) Create & save the Ticket entity
+        ObjectId passOid = (passengerId != null ? new ObjectId(passengerId) : null);
+        Ticket ticket = Ticket.createOnPurchase(
+                type, passOid, fromStation, toStation, /*freeRide=*/ false
+        );
+        ticketRepo.save(ticket);
+
+        // 3) Record history
+        saveTicketHistory(passengerId, transactionId, List.of(ticket), type.getPrice());
+
+        // 4) Build and return the DTO
+        return TicketResponse.fromEntity(ticket, type);
+    }
 
 }

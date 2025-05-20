@@ -1,169 +1,222 @@
-// suspension-alerts.js - Handles the display of real-time metro line suspension alerts
+// suspension-alerts.js - Enhanced to show affected station names
 
-document.addEventListener('DOMContentLoaded', function() {
-    // Create container for suspension alerts
-    const alertsContainer = document.createElement('div');
-    alertsContainer.className = 'row suspension-alerts-container';
-    
-    // Add it below Ticket Types
-    const alertsSlot = document.querySelector('.suspension-alerts-container');
-    if (alertsSlot) {
-    alertsSlot.appendChild(alertsContainer);
-    }
-
-    // Fetch suspension alerts from API
+document.addEventListener("DOMContentLoaded", function() {
+    // Fetch suspension alerts when the document loads
     fetchSuspensionAlerts();
-
-    // Set up polling for real-time updates (every 60 seconds)
-    setInterval(fetchSuspensionAlerts, 60000);
 });
 
 /**
- * Fetches current suspension alerts from the API
+ * Fetches active suspension alerts from the API and displays them
  */
 async function fetchSuspensionAlerts() {
     const container = document.querySelector('.suspension-alerts-container');
-    if (!container) return;
+    
+    if (!container) {
+        console.warn("Suspension alerts container not found");
+        return;
+    }
     
     try {
-        // Make API request to get active suspensions
-        const response = await fetch('http://localhost:8081/api/suspensions?active=true', {
-            method: 'GET',
-            headers: {
-                'Accept': 'application/json'
-            },
-            // Don't throw errors for 403 responses - handle them gracefully
-            credentials: 'omit'
+        // 1. First, fetch all metro lines to map IDs to names
+        const linesResponse = await fetch('http://localhost:8081/api/metro-lines/get-all-metro-lines');
+        if (!linesResponse.ok) {
+            throw new Error(`Failed to fetch metro lines: ${linesResponse.status}`);
+        }
+        
+        const metroLines = await linesResponse.json();
+        console.log("Metro lines data:", metroLines);
+        
+        // Create line name mapping for quick lookup
+        const lineNameMap = {};
+        metroLines.forEach(line => {
+            lineNameMap[line.lineId] = line.lineName;
         });
         
+        // 2. Fetch all stations to map station IDs to names
+        const stationsResponse = await fetch('http://localhost:8081/api/stations/get-all-stations');
+        if (!stationsResponse.ok) {
+            throw new Error(`Failed to fetch stations: ${stationsResponse.status}`);
+        }
+        
+        const stations = await stationsResponse.json();
+        console.log("Stations data:", stations);
+        
+        // Create station name mapping for quick lookup
+        const stationNameMap = {};
+        stations.forEach(station => {
+            stationNameMap[station.stationId] = station;
+        });
+        
+        // 3. Now fetch active suspensions
+        const response = await fetch('http://localhost:8081/api/suspensions?active=true');
+        
         if (!response.ok) {
-            // If response is not OK but not 403, log error
-            if (response.status !== 403) {
-                console.warn(`Failed to fetch suspension alerts: ${response.status}`);
+            throw new Error(`Failed to fetch suspension alerts: ${response.status}`);
+        }
+        
+        const suspensions = await response.json();
+        console.log("Suspension data:", suspensions);
+        
+        // Check if there are any active suspensions
+        if (!suspensions || suspensions.length === 0) {
+            // Hide the alerts section
+            const alertHeader = document.getElementById('current-service-disruptions');
+            if (alertHeader) {
+                alertHeader.style.display = 'none';
             }
             return;
         }
         
-        const suspensions = await response.json();
-        
-        // Clear existing alerts
+        // Clear any existing alerts
         container.innerHTML = '';
         
-        // If there are no active suspensions, exit
-        if (!suspensions || suspensions.length === 0) {
-            return;
+        // Process and display each suspension
+        for (const suspension of suspensions) {
+            // Look up the line name using metroLineId
+            if (suspension.metroLineId && lineNameMap[suspension.metroLineId]) {
+                // Use the looked-up line name from our map
+                suspension.displayLineName = lineNameMap[suspension.metroLineId];
+            } else {
+                // Fallback to the lineName in the suspension or 'Unknown'
+                suspension.displayLineName = suspension.lineName || 'Unknown';
+            }
+            
+            // Add the station details for each affected station ID
+            if (suspension.affectedStationIds && suspension.affectedStationIds.length > 0) {
+                suspension.affectedStations = suspension.affectedStationIds.map(stationId => {
+                    const station = stationNameMap[stationId];
+                    return station ? {
+                        id: stationId,
+                        name: station.stationName || `Station ${stationId}`,
+                        latitude: station.latitude,
+                        longitude: station.longitude
+                    } : {
+                        id: stationId,
+                        name: `Station ${stationId}`,
+                        latitude: null,
+                        longitude: null
+                    };
+                });
+            } else {
+                suspension.affectedStations = [];
+            }
+            
+            // Create and append the alert
+            container.appendChild(createSuspensionAlert(suspension));
         }
         
-        // Add alert header if we have suspensions
-        const alertHeader = document.createElement('div');
-        alertHeader.className = 'col-12 mb-3';
-        alertHeader.innerHTML = `
-            <h3 class="text-center"><i class="fas fa-exclamation-triangle me-2"></i>Current Service Disruptions</h3>
-        `;
-        container.appendChild(alertHeader);
-        
-        // Create a new column for the alerts
-        const alertColumn = document.createElement('div');
-        alertColumn.className = 'col-12';
-        container.appendChild(alertColumn);
-        
-        // Display each suspension alert
-        suspensions.forEach(suspension => {
-            displaySuspensionAlert(suspension, alertColumn);
-        });
+        // Show the alerts section
+        const alertHeader = document.getElementById('current-service-disruptions');
+        if (alertHeader) {
+            alertHeader.style.display = 'block';
+        }
         
     } catch (error) {
-        console.error('Error fetching suspension alerts:', error);
+        console.error("Error fetching suspension alerts:", error);
+        // Optionally show an error message in the UI
     }
 }
 
 /**
- * Displays a single suspension alert
- * @param {Object} suspension - Suspension alert data
- * @param {HTMLElement} container - Container to display the alert
+ * Creates a suspension alert DOM element
+ * @param {Object} suspension - The suspension data object
+ * @returns {HTMLElement} - The suspension alert element
  */
-function displaySuspensionAlert(suspension, container) {
-    // Format dates for displaying
-    const startTime = formatDateTime(suspension.startTime);
-    const endTime = formatDateTime(suspension.expectedEndTime);
+function createSuspensionAlert(suspension) {
+    const alertDiv = document.createElement('div');
+    alertDiv.className = 'suspension-alert fade-in';
     
-    // Create the alert element
-    const alertElement = document.createElement('div');
-    alertElement.className = 'suspension-alert fade-in';
-    alertElement.setAttribute('data-suspension-id', suspension.suspensionId || suspension.id);
+    // Format dates
+    const startTime = new Date(suspension.startTime);
+    const formattedStart = startTime.toLocaleString('en-US', { 
+        weekday: 'short', 
+        month: 'short', 
+        day: 'numeric', 
+        hour: 'numeric', 
+        minute: 'numeric' 
+    });
     
-    // Create alert content
-    alertElement.innerHTML = `
-        <div class="suspension-alert-icon">
-            <i class="fas fa-exclamation-triangle"></i>
-        </div>
-        
+    let formattedEnd = 'Unknown';
+    if (suspension.expectedEndTime) {
+        const endTime = new Date(suspension.expectedEndTime);
+        formattedEnd = endTime.toLocaleString('en-US', { 
+            weekday: 'short', 
+            month: 'short', 
+            day: 'numeric', 
+            hour: 'numeric', 
+            minute: 'numeric' 
+        });
+    }
+    
+    // Get affected stations information
+    const stationsCount = suspension.affectedStations ? suspension.affectedStations.length : 0;
+    
+    // Generate HTML for affected stations list
+    let stationsHtml = '';
+    if (stationsCount > 0) {
+        stationsHtml = `
+            <div class="affected-stations-list mt-2">
+                <div class="suspension-alert-label mb-1">Affected Stations:</div>
+                <ul class="list-unstyled ps-2 mb-0">
+                    ${suspension.affectedStations.map(station => 
+                        `<li><i class="fas fa-map-marker-alt text-danger me-2"></i>${station.name}</li>`
+                    ).join('')}
+                </ul>
+            </div>
+        `;
+    }
+    
+    // Use the displayLineName that was set during processing
+    const lineNameDisplay = suspension.displayLineName || 'Metro Line';
+    
+    alertDiv.innerHTML = `
+        <i class="fas fa-exclamation-triangle suspension-alert-icon"></i>
         <div class="suspension-alert-content">
-            <h4>${suspension.lineName || 'Metro Line'} Service Disruption</h4>
-            <p>${suspension.reason || 'Service disruption due to maintenance.'}</p>
+            <h4>${lineNameDisplay} Service Disruption</h4>
+            <p>${suspension.reason || 'Service Disruption'}</p>
             
             <div class="suspension-alert-details">
                 <div class="suspension-alert-detail">
                     <div class="suspension-alert-label">Affected Line:</div>
-                    <div class="suspension-alert-value">${suspension.lineName || 'Unknown'}</div>
+                    <div class="suspension-alert-value">${lineNameDisplay}</div>
                 </div>
-                
                 <div class="suspension-alert-detail">
-                    <div class="suspension-alert-label">Affected Stations:</div>
-                    <div class="suspension-alert-value">${suspension.affectedStationIds ? suspension.affectedStationIds.length : 0} stations affected</div>
+                    <div class="suspension-alert-label">Status:</div>
+                    <div class="suspension-alert-value">
+                        <span class="status-badge status-suspended">
+                            ${stationsCount} station${stationsCount !== 1 ? 's' : ''} affected
+                        </span>
+                    </div>
                 </div>
-                
                 <div class="suspension-alert-detail">
                     <div class="suspension-alert-label">Started:</div>
-                    <div class="suspension-alert-value">${startTime}</div>
+                    <div class="suspension-alert-value">${formattedStart}</div>
                 </div>
-                
                 <div class="suspension-alert-detail">
                     <div class="suspension-alert-label">Expected Resolution:</div>
-                    <div class="suspension-alert-value">${endTime}</div>
+                    <div class="suspension-alert-value">${formattedEnd}</div>
                 </div>
+                ${stationsHtml}
             </div>
         </div>
-        
-        <button type="button" class="btn-close btn-close-white suspension-alert-dismiss" aria-label="Close"></button>
+        <button type="button" class="btn-close btn-close-white" aria-label="Close"></button>
     `;
     
-    // Add dismiss functionality
-    const dismissButton = alertElement.querySelector('.suspension-alert-dismiss');
-    if (dismissButton) {
-        dismissButton.addEventListener('click', function() {
-            alertElement.style.opacity = '0';
-            setTimeout(() => {
-                alertElement.remove();
-            }, 300);
+    // Add event listener to close button
+    const closeButton = alertDiv.querySelector('.btn-close');
+    if (closeButton) {
+        closeButton.addEventListener('click', function() {
+            alertDiv.remove();
+            
+            // If no more alerts, hide the header
+            if (document.querySelectorAll('.suspension-alert').length === 0) {
+                const alertHeader = document.getElementById('current-service-disruptions');
+                if (alertHeader) {
+                    alertHeader.style.display = 'none';
+                }
+            }
         });
     }
     
-    // Add to container
-    container.appendChild(alertElement);
-}
-
-/**
- * Formats a date string for display
- * @param {string} dateString - ISO date string
- * @returns {string} - Formatted date string
- */
-function formatDateTime(dateString) {
-    if (!dateString) return 'Unknown';
-    
-    try {
-        const date = new Date(dateString);
-        
-        // Format for display: Mon, May 19, 7:42 PM
-        return date.toLocaleDateString('en-US', {
-            weekday: 'short',
-            month: 'short', 
-            day: 'numeric',
-            hour: 'numeric',
-            minute: '2-digit',
-            hour12: true
-        });
-    } catch (e) {
-        return 'Invalid date';
-    }
+    return alertDiv;
 }

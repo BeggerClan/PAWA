@@ -8,14 +8,118 @@ let selectedCartQty = 1;
 // metro-lines.js - Simple implementation focusing on I.PA.3 requirements
 
 document.addEventListener("DOMContentLoaded", function () {
-  // Check if user is logged in
-  const isAuthenticated = localStorage.getItem("jwtToken") !== null;
+    // ─── Stripe.js setup ───────────────────────────────────────────────────────
+    const stripe   = Stripe('pk_test_51JH5tPGf0p0OT9IpPNHREFmHvGymO5yEaSrCNNCgsSdyiv7RRpPdRCx1doM4HzH1c83GuXJV7aTqJkq1DRYqR2jl00FVUzlo6z');  // ← your publishable key
+    const elements = stripe.elements();
+    let card;      // will hold our mounted Card element
 
-  // Update navigation based on authentication status
-  updateNavigation(isAuthenticated);
+    // When the purchase modal opens, mount Stripe’s Card UI once:
+    const ticketModalEl = document.getElementById('ticketPurchaseModal');
+    ticketModalEl.addEventListener('shown.bs.modal', () => {
+        if (card) return;  // only mount once
 
-  // Fetch metro lines from OPWA API
-  fetchMetroLines();
+        const style = {
+        base: {
+            fontSize: '16px',
+            color: '#495057',
+            '::placeholder': { color: '#6c757d' }
+        }
+        };
+
+        card = elements.create('card', { style });
+        card.mount('#card-element');
+
+        // show real-time validation errors
+        card.on('change', e => {
+        document.getElementById('card-errors').textContent = e.error?.message || '';
+        });
+    });
+    const purchaseBtn = document.getElementById('stripePurchaseBtn');
+    purchaseBtn.addEventListener('click', async () => {
+    purchaseBtn.disabled = true;
+    document.getElementById('purchaseFeedback').textContent = '';
+    document.getElementById('card-errors').textContent = '';
+
+    // 1) Tokenize
+    const { token, error } = await stripe.createToken(card);
+    if (error) {
+        document.getElementById('card-errors').textContent = error.message;
+        purchaseBtn.disabled = false;
+        return;
+    }
+
+    // 2) Compute amount & build payload
+    const amount = selectedPurchaseQty * selectedTicketPrice;
+    const payload = {
+        amount,
+        paymentToken: token.id,
+        ticketTypeCode: selectedTicketCode,
+        fromStation: isOneWay ? document.getElementById('modalFromStation').value : null,
+        toStation:   isOneWay ? document.getElementById('modalToStation').value   : null
+    };
+
+    // 3) Build headers (include JWT if logged in)
+    const headers = {
+        'Content-Type': 'application/json',
+        ...(localStorage.getItem('jwtToken') && {
+        'Authorization': 'Bearer ' + localStorage.getItem('jwtToken')
+        })
+    };
+
+    try {
+        // 4) Fetch as text
+        const res  = await fetch('http://localhost:8080/api/payments/tickets/direct', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(payload),
+        credentials: 'include'
+        });
+        const text = await res.text();
+
+        // 5) Handle non-2xx
+        if (!res.ok) {
+        let msg;
+        try {
+            msg = JSON.parse(text).reason || text;
+        } catch {
+            msg = text || res.statusText;
+        }
+        throw new Error(msg);
+        }
+
+        // 6) Safe JSON parse
+        const body = text ? JSON.parse(text) : {};
+
+        // ─── APPROACH 2: replace modal content instead of redirect ────────────────
+        const modalContent = ticketModalEl.querySelector('.modal-content');
+        modalContent.innerHTML = `
+        <div class="modal-header">
+            <h5 class="modal-title">Purchase Confirmed</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body text-center">
+            <p>🎉 Thank you for your purchase!</p>
+            <p>Your ticket ID is <strong>${body.ticketId}</strong>.</p>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
+        </div>
+        `;
+        // ───────────────────────────────────────────────────────────────────────────
+
+    } catch (err) {
+        document.getElementById('purchaseFeedback').textContent = err.message;
+        purchaseBtn.disabled = false;
+    }
+    });
+    // Check if user is logged in
+    const isAuthenticated = localStorage.getItem("jwtToken") !== null;
+
+    // Update navigation based on authentication status
+    updateNavigation(isAuthenticated);
+
+    // Fetch metro lines from OPWA API
+    fetchMetroLines();
 });
 
 /**
@@ -313,14 +417,29 @@ async function fetchAndRenderTicketTypes() {
                 document.getElementById('fromToFields').style.display = isOneWay ? 'block' : 'none';
 
                 if (isOneWay) {
-                    const options = `
-                        <option value="ben-thanh">Ben Thanh</option>
-                        <option value="opera-house">Opera House</option>
-                        <option value="ba-son">Ba Son</option>
-                        <option value="suoi-tien">Suoi Tien Terminal</option>
-                    `;
-                    document.getElementById('modalFromStation').innerHTML = options;
-                    document.getElementById('modalToStation').innerHTML = options;
+                    const fromTripSelect = document.getElementById('from-station');
+                    const toTripSelect = document.getElementById('to-station');
+
+                    const modalFromSelect = document.getElementById('modalFromStation');
+                    const modalToSelect = document.getElementById('modalToStation');
+
+                    // Copy options from trip select to modal select
+                    modalFromSelect.innerHTML = [...fromTripSelect.options]
+                    .map(opt => `<option value="${opt.value}">${opt.textContent}</option>`)
+                    .join('');
+
+                    modalToSelect.innerHTML = [...toTripSelect.options]
+                    .map(opt => `<option value="${opt.value}">${opt.textContent}</option>`)
+                    .join('');
+
+
+                    // Apply selected values from trip search
+                    if (fromTripSelect.value) {
+                        modalFromSelect.value = fromTripSelect.value;
+                    }
+                    if (toTripSelect.value) {
+                        modalToSelect.value = toTripSelect.value;
+                    }
                 }
 
                 const modal = new bootstrap.Modal(document.getElementById('ticketPurchaseModal'));
@@ -430,7 +549,6 @@ async function submitPurchase(paymentMode) {
       `⚠️ ${failureCount} ticket(s) failed to purchase. Check console for details.`;
   }
 }
-
 
 document.getElementById('increaseQty').addEventListener('click', () => {
     selectedCartQty++;
